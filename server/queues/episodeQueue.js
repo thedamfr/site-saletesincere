@@ -8,7 +8,7 @@ import {
   searchSpotifyEpisode, 
   searchAppleEpisode, 
   searchDeezerEpisode,
-  searchYouTubeEpisode,
+  searchYouTubeEpisodeMedia,
   isYouTubeEpisodeResolutionConfigured
 } from '../services/platformAPIs.js'
 import {
@@ -18,6 +18,7 @@ import {
 import { generateOGImage } from '../services/ogImageGenerator.js'
 import { uploadToS3, deleteFromS3 } from '../services/s3Service.js'
 import { registerOp3StatsQueue } from './op3StatsQueue.js'
+import { inspectSpotifyEpisodeVideo } from '../services/podcastVideoAvailability.js'
 
 let boss = null
 let queueShuttingDown = false
@@ -50,9 +51,13 @@ export function isEpisodeCacheComplete(cached, {
 
   return Boolean(
     cached?.spotify_url
+    && typeof cached?.spotify_video_available === 'boolean'
     && cached?.apple_url
     && cached?.deezer_url
-    && (!youtubeResolutionEnabled || cached?.youtube_url)
+    && (
+      !youtubeResolutionEnabled
+      || (cached?.youtube_url && cached?.youtube_thumbnail_checked === true)
+    )
     && cached?.og_image_url
     && imageIsFresh
     && feedIsFresh
@@ -201,9 +206,13 @@ export async function startWorker(fastify, options = {}, queue = boss) {
     throw new Error('Cannot start episode worker before pg-boss is ready')
   }
 
+  const {
+    spotifyVideoInspector = inspectSpotifyEpisodeVideo,
+    ...pgBossWorkerOptions
+  } = options
   const workerOptions = {
-    teamSize: options.teamSize || 1, // Nombre de jobs en parallèle (2+ pour tests)
-    ...options
+    teamSize: pgBossWorkerOptions.teamSize || 1, // Nombre de jobs en parallèle (2+ pour tests)
+    ...pgBossWorkerOptions
   }
   const youtubeResolutionEnabled = isYouTubeEpisodeResolutionConfigured()
   
@@ -225,17 +234,20 @@ export async function startWorker(fastify, options = {}, queue = boss) {
       imageUrl,
       feedLastBuildDate
     })
+    let cachedEpisodeLinks = null
     const cacheClient = await fastify.pg.connect()
     try {
       const cacheResult = await cacheClient.query(
-        `SELECT spotify_url, apple_url, deezer_url, youtube_url, og_image_url,
+        `SELECT spotify_url, spotify_video_available, apple_url, deezer_url,
+                youtube_url, youtube_thumbnail_url, youtube_thumbnail_checked,
+                og_image_url,
                 feed_last_build, generated_at
          FROM episode_links
          WHERE season = $1 AND episode = $2`,
         [season, episode]
       )
-      const cached = cacheResult.rows[0]
-      const cacheIsComplete = isEpisodeCacheComplete(cached, {
+      cachedEpisodeLinks = cacheResult.rows[0] || null
+      const cacheIsComplete = isEpisodeCacheComplete(cachedEpisodeLinks, {
         expectedOgImageS3Key,
         feedLastBuildDate,
         youtubeResolutionEnabled
@@ -279,7 +291,7 @@ export async function startWorker(fastify, options = {}, queue = boss) {
       searchSpotifyEpisode(episodeDate),
       searchAppleEpisode(episodeDate),
       searchDeezerEpisode(episodeDate),
-      youtubeResolutionEnabled ? searchYouTubeEpisode(season, episode) : Promise.resolve(null)
+      youtubeResolutionEnabled ? searchYouTubeEpisodeMedia(season, episode) : Promise.resolve(null)
     ])
     
     // Podcast Addict: Pas d'API publique connue
@@ -295,9 +307,35 @@ export async function startWorker(fastify, options = {}, queue = boss) {
       spotify: spotifyResult.status === 'fulfilled' ? spotifyResult.value : null,
       apple: appleResult.status === 'fulfilled' ? appleResult.value : null,
       deezer: deezerResult.status === 'fulfilled' ? deezerResult.value : null,
-      youtube: youtubeResult.status === 'fulfilled' ? youtubeResult.value : null,
+      youtube: youtubeResult.status === 'fulfilled' ? youtubeResult.value?.url || null : null,
+      youtubeThumbnail: youtubeResult.status === 'fulfilled'
+        ? youtubeResult.value?.thumbnailUrl || null
+        : null,
+      youtubeThumbnailChecked: youtubeResolutionEnabled
+        && youtubeResult.status === 'fulfilled'
+        && youtubeResult.value
+        ? true
+        : null,
       podcastAddict: podcastAddictLink
     }
+
+    const resolvedSpotifyUrl = links.spotify || cachedEpisodeLinks?.spotify_url || null
+    let spotifyVideoAvailable = (
+      resolvedSpotifyUrl === cachedEpisodeLinks?.spotify_url
+      && typeof cachedEpisodeLinks?.spotify_video_available === 'boolean'
+    )
+      ? cachedEpisodeLinks.spotify_video_available
+      : null
+
+    if (resolvedSpotifyUrl && spotifyVideoAvailable == null) {
+      try {
+        spotifyVideoAvailable = await spotifyVideoInspector(resolvedSpotifyUrl)
+      } catch {
+        spotifyVideoAvailable = null
+      }
+    }
+
+    links.spotifyVideoAvailable = spotifyVideoAvailable
     
     console.log(`[Worker ${job.id}] Resolved:`, links)
     
@@ -327,18 +365,23 @@ export async function startWorker(fastify, options = {}, queue = boss) {
         await client.query(`
           INSERT INTO episode_links (
             season, episode, 
-            spotify_url, apple_url, deezer_url, podcast_addict_url, youtube_url,
+            spotify_url, spotify_video_available, apple_url, deezer_url,
+            podcast_addict_url, youtube_url, youtube_thumbnail_url,
+            youtube_thumbnail_checked,
             og_image_url, og_image_s3_key, feed_last_build, generated_at,
             resolved_at
           )
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
           ON CONFLICT (season, episode) 
           DO UPDATE SET
             spotify_url = COALESCE(EXCLUDED.spotify_url, episode_links.spotify_url),
+            spotify_video_available = COALESCE(EXCLUDED.spotify_video_available, episode_links.spotify_video_available),
             apple_url = COALESCE(EXCLUDED.apple_url, episode_links.apple_url),
             deezer_url = COALESCE(EXCLUDED.deezer_url, episode_links.deezer_url),
             podcast_addict_url = COALESCE(EXCLUDED.podcast_addict_url, episode_links.podcast_addict_url),
             youtube_url = COALESCE(EXCLUDED.youtube_url, episode_links.youtube_url),
+            youtube_thumbnail_url = COALESCE(EXCLUDED.youtube_thumbnail_url, episode_links.youtube_thumbnail_url),
+            youtube_thumbnail_checked = COALESCE(EXCLUDED.youtube_thumbnail_checked, episode_links.youtube_thumbnail_checked),
             og_image_url = COALESCE(EXCLUDED.og_image_url, episode_links.og_image_url),
             og_image_s3_key = COALESCE(EXCLUDED.og_image_s3_key, episode_links.og_image_s3_key),
             feed_last_build = COALESCE(EXCLUDED.feed_last_build, episode_links.feed_last_build),
@@ -351,10 +394,13 @@ export async function startWorker(fastify, options = {}, queue = boss) {
           season, 
           episode, 
           links.spotify, 
+          links.spotifyVideoAvailable,
           links.apple, 
           links.deezer,
           links.podcastAddict,
           links.youtube,
+          links.youtubeThumbnail,
+          links.youtubeThumbnailChecked,
           ogImageUrl,
           ogImageS3Key,
           feedLastBuildDate

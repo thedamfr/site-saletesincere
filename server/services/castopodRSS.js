@@ -2,6 +2,11 @@ import { XMLParser } from 'fast-xml-parser'
 
 const RSS_URL = 'https://podcasts.saletesincere.fr/@charbonwafer/feed.xml'
 const MAX_DESCRIPTION_LENGTH = 400
+const HLS_MEDIA_TYPES = new Set([
+  'application/mpegurl',
+  'application/vnd.apple.mpegurl',
+  'application/x-mpegurl'
+])
 
 function decodeAndNormalizeText(value = '') {
   return String(value)
@@ -19,6 +24,42 @@ function decodeAndNormalizeText(value = '') {
 function extractItemGuid(guid) {
   if (typeof guid === 'string' || typeof guid === 'number') return String(guid)
   return guid?.['#text'] ? String(guid['#text']) : null
+}
+
+function asArray(value) {
+  if (!value) return []
+  return Array.isArray(value) ? value : [value]
+}
+
+function hasHttpSource(alternateEnclosure) {
+  return asArray(alternateEnclosure?.['podcast:source']).some((source) => {
+    const uri = source?.['@_uri']
+    if (typeof uri !== 'string') return false
+
+    try {
+      const url = new URL(uri)
+      return url.protocol === 'https:' || url.protocol === 'http:'
+    } catch {
+      return false
+    }
+  })
+}
+
+function extractVideoFormats(item) {
+  const videoFormats = { mp4: false, hls: false }
+
+  for (const alternateEnclosure of asArray(item?.['podcast:alternateEnclosure'])) {
+    if (!hasHttpSource(alternateEnclosure)) continue
+
+    const mediaType = String(alternateEnclosure?.['@_type'] || '')
+      .split(';', 1)[0]
+      .trim()
+      .toLowerCase()
+    if (mediaType === 'video/mp4') videoFormats.mp4 = true
+    if (HLS_MEDIA_TYPES.has(mediaType)) videoFormats.hls = true
+  }
+
+  return videoFormats
 }
 
 function mapEpisodeItem(item, feedLastBuildDate) {
@@ -39,6 +80,7 @@ function mapEpisodeItem(item, feedLastBuildDate) {
   const description = isTruncated
     ? `${descriptionRaw.substring(0, MAX_DESCRIPTION_LENGTH).trim()}...`
     : descriptionRaw
+  const videoFormats = extractVideoFormats(item)
 
   return {
     season,
@@ -54,7 +96,9 @@ function mapEpisodeItem(item, feedLastBuildDate) {
     audioUrl: item.enclosure?.['@_url'] || '',
     episodeLink: item.link || '',
     itemGuid: extractItemGuid(item.guid),
-    feedLastBuildDate
+    feedLastBuildDate,
+    hasVideo: videoFormats.mp4 || videoFormats.hls,
+    videoFormats
   }
 }
 
@@ -136,4 +180,6 @@ function formatDateFrench(date) {
  * @property {string} episodeLink
  * @property {string|null} itemGuid
  * @property {string|null} feedLastBuildDate
+ * @property {boolean} hasVideo
+ * @property {{mp4: boolean, hls: boolean}} videoFormats
  */

@@ -6,7 +6,7 @@ import {
 } from '../../server/services/castopodRSS.js';
 
 const RSS_LIST_FIXTURE = `<?xml version="1.0"?>
-<rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
+<rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:podcast="https://podcastindex.org/namespace/1.0" version="2.0">
   <channel>
     <lastBuildDate>Thu, 20 Aug 2026 10:00:00 GMT</lastBuildDate>
     <item>
@@ -15,6 +15,12 @@ const RSS_LIST_FIXTURE = `<?xml version="1.0"?>
       <itunes:season>2</itunes:season><itunes:episode>3</itunes:episode>
       <itunes:duration>3600</itunes:duration><itunes:image href="https://media.example/3.jpg" />
       <enclosure url="https://media.example/3.mp3"/><link>https://podcasts.example/3</link><guid>guid-3</guid>
+      <podcast:alternateEnclosure type="video/mp4" length="123456">
+        <podcast:source uri="https://media.example/3.mp4" />
+      </podcast:alternateEnclosure>
+      <podcast:alternateEnclosure type="application/x-mpegURL">
+        <podcast:source uri="https://media.example/3.m3u8" />
+      </podcast:alternateEnclosure>
     </item>
     <item>
       <title>Épisode deux</title><description>Deuxième description.</description>
@@ -57,6 +63,10 @@ describe('Castopod RSS Parser', () => {
       assert.deepEqual(episodes.slice(0, 2).map(({ itemGuid }) => itemGuid), ['guid-3', 'guid-2']);
       assert.equal(episodes[0].duration, '1:00:00');
       assert.equal(episodes[0].feedLastBuildDate, 'Thu, 20 Aug 2026 10:00:00 GMT');
+      assert.equal(episodes[0].hasVideo, true);
+      assert.deepEqual(episodes[0].videoFormats, { mp4: true, hls: true });
+      assert.equal(episodes[1].hasVideo, false);
+      assert.deepEqual(episodes[1].videoFormats, { mp4: false, hls: false });
     });
   });
 
@@ -108,6 +118,33 @@ describe('Castopod RSS Parser', () => {
       assert.ok(episode.feedLastBuildDate, 'feedLastBuildDate should exist');
       assert.ok(episode.feedLastBuildDate instanceof Date || typeof episode.feedLastBuildDate === 'string', 
         'feedLastBuildDate should be a Date or ISO string');
+    });
+
+    it('ignores alternate enclosures without a valid HTTP video source', async () => {
+      const invalidVideoFixture = `<?xml version="1.0"?>
+        <rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:podcast="https://podcastindex.org/namespace/1.0" version="2.0">
+          <channel><item>
+            <title>Audio seulement</title><description>Test.</description>
+            <pubDate>Thu, 20 Aug 2026 08:00:00 GMT</pubDate>
+            <itunes:season>4</itunes:season><itunes:episode>1</itunes:episode>
+            <itunes:duration>60</itunes:duration><guid>guid-4-1</guid>
+            <podcast:alternateEnclosure type="audio/flac">
+              <podcast:source uri="https://media.example/episode.flac" />
+            </podcast:alternateEnclosure>
+            <podcast:alternateEnclosure type="video/mp4">
+              <podcast:source uri="file:///private/episode.mp4" />
+            </podcast:alternateEnclosure>
+          </item></channel>
+        </rss>`;
+      const episode = await fetchEpisodeFromRSS(
+        4,
+        1,
+        5000,
+        async () => new Response(invalidVideoFixture, { status: 200 })
+      );
+
+      assert.equal(episode.hasVideo, false);
+      assert.deepEqual(episode.videoFormats, { mp4: false, hls: false });
     });
   });
 });

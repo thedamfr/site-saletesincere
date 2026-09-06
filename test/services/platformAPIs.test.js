@@ -36,6 +36,7 @@ import {
   searchAppleEpisode,
   searchDeezerEpisode,
   searchYouTubeEpisode,
+  searchYouTubeEpisodeMedia,
   isYouTubeEpisodeResolutionConfigured,
   buildPodcastAddictLink,
   buildFallbackLinks
@@ -192,6 +193,38 @@ describe('platformAPIs', () => {
   })
 
   describe('searchYouTubeEpisode', () => {
+    test('returns the resolved video with its API-provided 16:9 maxres thumbnail', async () => {
+      const result = await searchYouTubeEpisodeMedia(3, 2, {
+        apiKey: 'test-api-key',
+        uploadsPlaylistId: 'UU-test-uploads',
+        fetchImpl: async () => ({
+          ok: true,
+          async json() {
+            return {
+              items: [{
+                snippet: {
+                  description: 'https://saletesincere.fr/podcast/3/2',
+                  resourceId: { videoId: 'Bbbbbbbbb-1' },
+                  thumbnails: {
+                    maxres: {
+                      url: 'https://i.ytimg.com/vi/Bbbbbbbbb-1/maxresdefault.jpg',
+                      width: 1280,
+                      height: 720
+                    }
+                  }
+                }
+              }]
+            }
+          }
+        })
+      })
+
+      assert.deepEqual(result, {
+        url: 'https://www.youtube.com/watch?v=Bbbbbbbbb-1',
+        thumbnailUrl: 'https://i.ytimg.com/vi/Bbbbbbbbb-1/maxresdefault.jpg'
+      })
+    })
+
     test('finds the video whose description contains the exact canonical episode URL', async () => {
       const requests = []
       const fetchImpl = async (url) => {

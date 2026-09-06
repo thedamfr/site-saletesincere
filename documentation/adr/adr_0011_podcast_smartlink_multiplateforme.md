@@ -24,17 +24,34 @@ fail-hard plus bas sont conservés uniquement comme historique de la décision d
 autrefois copiée dans cet ADR doit être considérée comme compromise et remplacée
 avant la prochaine activation concernée.
 
-**Amendement 2026-09-04 — ajout des épisodes vidéo YouTube.** `/podcast`
-référence la chaîne vidéo et `/podcast/:season/:episode` utilise le lien direct
-mis en cache lorsqu'il existe. Le worker `resolve-episode` existant parcourt la
+**Amendement 2026-09-04 — ajout des épisodes vidéo YouTube.**
+`/podcast/:season/:episode` utilise le lien direct mis en cache lorsqu'il existe.
+Le worker `resolve-episode` existant parcourt la
 playlist d'uploads avec `playlistItems.list`; il ne fait pas de recherche par
 titre ou par date. Le contrat d'association est la présence de l'URL canonique
 exacte `https://saletesincere.fr/podcast/:season/:episode` dans la description
 YouTube. Cette méthode évite un second worker et les ambiguïtés de titres. La
 colonne additive `episode_links.youtube_url` est introduite par la migration 009.
 Si la clé API ou la playlist manque, YouTube n'entre pas dans le critère de cache
-complet et la page conserve le lien de chaîne. La spécification d'activation est
+complet et aucune carte YouTube n'est rendue sur la page épisode. `/podcast`
+conserve son lien de navigation vers la chaîne. La spécification d'activation est
 dans [`../prd_youtube_podcast.md`](../prd_youtube_podcast.md).
+
+**Amendement 2026-09-04 — preuves vidéo indépendantes et image YouTube.** La
+présence d'un `podcast:alternateEnclosure` MP4 ou HLS doté d'une source HTTP(S)
+valide est uniquement la source de vérité de la vidéo hébergée. Elle ne prouve
+ni Spotify ni YouTube. Apple exige en plus le lien direct du même épisode,
+Spotify exige un lien direct et un verdict vidéo de son oEmbed officiel mis en
+cache, et YouTube exige un lien vidéo direct résolu. `/podcast` ne rend aucune
+métadonnée vidéo agrégée mais conserve YouTube parmi ses plateformes de diffusion.
+Une page épisode sans lien direct ne rend aucune carte YouTube ; il n'existe pas
+de redirection de secours vers la chaîne. Les qualités HD/4K sont des
+métadonnées éditoriales explicites, car les API publiques utilisées ne les
+exposent pas de façon fiable. La migration 010 ajoute le verdict Spotify et le
+cache de miniature YouTube. Lorsqu'une vidéo possède une miniature `maxres`
+16/9 valide fournie par l'API YouTube, celle-ci devient l'image de partage de la
+page épisode ; l'image OG générée reste le fallback. Les détails et critères de
+validation sont dans [`../prd_youtube_podcast.md`](../prd_youtube_podcast.md).
 
 ---
 

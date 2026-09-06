@@ -7,7 +7,7 @@ import {
 } from '../../server/resilience/databaseAvailability.js'
 
 const apps = []
-const channelUrl = 'https://www.youtube.com/@charbonwafer'
+const legacyChannelUrl = 'https://www.youtube.com/@charbonwafer'
 
 afterEach(async () => {
   await Promise.all(apps.splice(0).map((app) => app.close()))
@@ -65,7 +65,7 @@ async function createApp({ youtubeUrl = null } = {}) {
     }),
     episodeFetcher: async () => episodeData(),
     podcastEpisodesFetcher: async () => [],
-    youtubeChannelUrl: channelUrl,
+    youtubeChannelUrl: legacyChannelUrl,
     youtubeEpisodeResolutionEnabled: true
   })
   apps.push(app)
@@ -73,13 +73,13 @@ async function createApp({ youtubeUrl = null } = {}) {
 }
 
 describe('podcast YouTube links', () => {
-  test('references the video channel from the main podcast page', async () => {
+  test('renders the generic YouTube channel among platforms on the main podcast page', async () => {
     const app = await createApp()
 
     const response = await app.inject({ method: 'GET', url: '/podcast' })
 
     assert.equal(response.statusCode, 200)
-    assert.match(response.body, new RegExp(`href="${channelUrl}"`))
+    assert.match(response.body, new RegExp(`href="${legacyChannelUrl}"`))
     assert.match(response.body, /Voir les épisodes vidéo/)
     assert.match(response.body, /src="\/images\/youtube-logo\.svg" alt=""/)
   })
@@ -95,14 +95,15 @@ describe('podcast YouTube links', () => {
     assert.match(response.body, /Voir Mais l’IA consomme de l’eau/)
   })
 
-  test('keeps the channel as the episode fallback while resolution is pending', async () => {
+  test('removes the YouTube card when the episode has no resolved video', async () => {
     const app = await createApp()
 
     const response = await app.inject({ method: 'GET', url: '/podcast/3/1' })
 
     assert.equal(response.statusCode, 200)
-    assert.match(response.body, new RegExp(`href="${channelUrl}"`))
-    assert.match(response.body, /Vidéo en cours de référencement/)
+    assert.doesNotMatch(response.body, new RegExp(`href="${legacyChannelUrl}"`))
+    assert.doesNotMatch(response.body, /Voir la chaîne du podcast/)
+    assert.doesNotMatch(response.body, /src="\/images\/youtube-logo\.svg"/)
     assert.equal(response.headers['cache-control'], 'public, max-age=60')
   })
 })

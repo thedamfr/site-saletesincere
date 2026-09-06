@@ -17,8 +17,12 @@
     <meta property="og:url" content="https://saletesincere.fr/podcast/{{episodeData.season}}/{{episodeData.episode}}">
     <meta property="og:title" content="S{{episodeData.season}}E{{episodeData.episode}} - {{episodeData.title}} | Charbon & Wafer">
     <meta property="og:description" content="{{episodeData.description}}">
-    {{!-- Phase 5: OG Image custom (ADR-0012) avec fallback RSS thumbnail --}}
-    {{#if platformLinks.og_image_url}}
+    {{!-- A resolved YouTube maxres thumbnail takes precedence for video episodes. --}}
+    {{#if platformLinks.youtube_thumbnail_url}}
+    <meta property="og:image" content="{{platformLinks.youtube_thumbnail_url}}">
+    <meta property="og:image:width" content="1280">
+    <meta property="og:image:height" content="720">
+    {{else if platformLinks.og_image_url}}
     <meta property="og:image" content="https://saletesincere.fr/cdn-cgi/image/width=1200,height=630,fit=cover,quality=85,format=png/{{platformLinks.og_image_url}}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -34,8 +38,10 @@
     <meta name="twitter:creator" content="@thedamfr">
     <meta name="twitter:title" content="S{{episodeData.season}}E{{episodeData.episode}} - {{episodeData.title}} | Charbon & Wafer">
     <meta name="twitter:description" content="{{episodeData.description}}">
-    {{!-- Phase 5: Twitter Card custom OG Image avec fallback --}}
-    {{#if platformLinks.og_image_url}}
+    {{!-- Twitter Card follows the same episode image precedence. --}}
+    {{#if platformLinks.youtube_thumbnail_url}}
+    <meta name="twitter:image" content="{{platformLinks.youtube_thumbnail_url}}">
+    {{else if platformLinks.og_image_url}}
     <meta name="twitter:image" content="https://saletesincere.fr/cdn-cgi/image/width=1200,height=630,fit=cover,quality=85,format=png/{{platformLinks.og_image_url}}">
     {{else if episodeData.image}}
     <meta name="twitter:image" content="{{episodeData.image}}">
@@ -103,7 +109,7 @@
                 {{#unless episodeData}}
                 {{#unless popularEpisode}}
                 <p class="text-xl font-semibold text-yellow-400 mb-1">🎉 Le Podcast est sorti !</p>
-                <p class="text-gray-400 text-sm">Va l'écouter sur ta plateforme préférée</p>
+                <p class="text-gray-400 text-sm">Choisis ton format et ta plateforme</p>
                 {{/unless}}
                 {{/unless}}
             </div>
@@ -294,6 +300,12 @@
                     <span>📅 {{episodeData.pubDate}}</span>
                     <span>⏱️ {{episodeData.duration}}</span>
                 </div>
+                {{#if episodeVideoAvailability}}
+                <div id="episode-video-availability" class="mt-3 flex flex-wrap items-center gap-2 text-xs text-gray-400">
+                    <span class="rounded-full border border-purple-600/30 bg-gray-800 px-2 py-1 font-semibold text-purple-300">Vidéo</span>
+                    <span>{{episodeVideoAvailability.platformsText}}</span>
+                </div>
+                {{/if}}
             </div>
             {{/if}}
             
@@ -319,16 +331,21 @@
                     </div>
                 </a>
 
-                {{#if youtubeChannelUrl}}
+                {{#if youtubeUrl}}
                 <!-- YouTube -->
-                <a href="{{#if platformLinks.youtube_url}}{{platformLinks.youtube_url}}{{else}}{{youtubeChannelUrl}}{{/if}}" target="_blank" rel="noopener noreferrer"
+                <a href="{{youtubeUrl}}" target="_blank" rel="noopener noreferrer"
                    class="block w-full bg-white bg-opacity-10 hover:bg-opacity-20 backdrop-blur-sm rounded-2xl px-6 py-4 transition-all duration-200 transform hover:scale-105 hover:shadow-lg border border-white border-opacity-20 text-black">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <img src="/images/youtube-logo.svg" alt="" class="w-10 h-10 flex-shrink-0">
                             <div class="text-left">
-                                <div class="font-semibold text-black">YouTube</div>
-                                <div class="text-xs text-gray-500">{{#if platformLinks.youtube_url}}Voir {{episodeData.title}}{{else}}{{#if youtubeResolutionPending}}Vidéo en cours de référencement{{else}}Voir les épisodes vidéo{{/if}}{{/if}}</div>
+                                <div class="flex flex-wrap items-center gap-2 font-semibold text-black">
+                                    <span>YouTube</span>
+                                    {{#if episodeVideoAvailability.youtubeBadgeText}}
+                                    <span class="rounded-full bg-red-600 px-2 py-1 text-xs font-semibold text-white">{{episodeVideoAvailability.youtubeBadgeText}}</span>
+                                    {{/if}}
+                                </div>
+                                <div class="text-xs text-gray-500">{{#if episodeData}}Voir {{episodeData.title}}{{else}}Voir les épisodes vidéo{{/if}}</div>
                             </div>
                         </div>
                         <svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -366,7 +383,12 @@
                                 <img src="/images/spotify-logo.svg" alt="Spotify" class="w-full h-full">
                             </div>
                             <div class="text-left">
-                                <div class="font-semibold text-black">Spotify</div>
+                                <div class="flex flex-wrap items-center gap-2 font-semibold text-black">
+                                    <span>Spotify</span>
+                                    {{#if episodeVideoAvailability.spotifyBadgeText}}
+                                    <span class="rounded-full bg-gray-800 px-2 py-1 text-xs font-semibold text-green-500">{{episodeVideoAvailability.spotifyBadgeText}}</span>
+                                    {{/if}}
+                                </div>
                                 <div class="text-xs text-gray-500">{{#if platformLinks.spotify_url}}Écouter {{episodeData.title}}{{else}}Écouter le podcast{{/if}}</div>
                             </div>
                         </div>

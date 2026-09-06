@@ -29,6 +29,7 @@ import {
   selectPopularEpisode
 } from "./server/services/op3Service.js";
 import { isYouTubeEpisodeResolutionConfigured } from "./server/services/platformAPIs.js";
+import { getEpisodeVideoQuality } from "./server/services/podcastVideoAvailability.js";
 import {
   EpisodeQueueReason,
   initializeEpisodeWorker,
@@ -92,6 +93,45 @@ export function getHealthPayload(
       pending: episodeIntentBuffer?.size() || 0
     }
   };
+}
+
+function getEpisodeVideoAvailability(episodeData, platformLinks) {
+  const hostedVideo = Boolean(episodeData?.hasVideo);
+  const platforms = [];
+  const spotifyVideoAvailable = Boolean(
+    platformLinks?.spotify_url
+    && platformLinks.spotify_video_available === true
+  );
+  const youtubeVideoAvailable = Boolean(platformLinks?.youtube_url);
+  const spotifyQuality = spotifyVideoAvailable
+    ? getEpisodeVideoQuality(episodeData?.season, episodeData?.episode, 'spotify')
+    : null;
+  const youtubeQuality = youtubeVideoAvailable
+    ? getEpisodeVideoQuality(episodeData?.season, episodeData?.episode, 'youtube')
+    : null;
+
+  if (hostedVideo && episodeData.episodeLink) platforms.push('Site officiel');
+  if (hostedVideo && episodeData.videoFormats?.hls && platformLinks?.apple_url) {
+    platforms.push('Apple Podcasts');
+  }
+  if (spotifyVideoAvailable) {
+    platforms.push(spotifyQuality ? `Spotify (${spotifyQuality})` : 'Spotify');
+  }
+  if (youtubeVideoAvailable) {
+    platforms.push(youtubeQuality ? `YouTube (${youtubeQuality})` : 'YouTube');
+  }
+
+  return platforms.length > 0
+    ? {
+        platformsText: platforms.join(' · '),
+        spotifyBadgeText: spotifyVideoAvailable
+          ? `Vidéo${spotifyQuality ? ` ${spotifyQuality}` : ''}`
+          : null,
+        youtubeBadgeText: youtubeVideoAvailable
+          ? `Vidéo${youtubeQuality ? ` ${youtubeQuality}` : ''}`
+          : null
+      }
+    : null;
 }
 
 /**
@@ -1071,7 +1111,7 @@ app.get("/podcast", {
     episodeData: null,
     popularEpisode,
     podcastSocialImage,
-    youtubeChannelUrl
+    youtubeUrl: youtubeChannelUrl
   });
 });
 
@@ -1114,6 +1154,23 @@ function checkOGImageNeeds(ogImageUrl, cachedFeedLastBuild, generatedAt, rssFeed
   return false;
 }
 
+app.get('/podcast/:season/:episode/', {
+  config: {
+    rateLimit: pageLimiter
+  }
+}, async (req, reply) => {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(req.query)) {
+    for (const item of Array.isArray(value) ? value : [value]) {
+      if (item !== undefined && item !== null) query.append(key, String(item));
+    }
+  }
+  const suffix = query.size > 0 ? `?${query}` : '';
+  return reply.code(301).redirect(
+    `/podcast/${encodeURIComponent(req.params.season)}/${encodeURIComponent(req.params.episode)}${suffix}`
+  );
+});
+
 // Route smartlink multiplateforme /podcast/:season/:episode (ADR-0011)
 app.get("/podcast/:season/:episode", {
   config: {
@@ -1146,7 +1203,9 @@ app.get("/podcast/:season/:episode", {
     try {
       client = await database.connect();
       const cacheResult = await client.query(
-        `SELECT spotify_url, apple_url, deezer_url, podcast_addict_url, youtube_url,
+        `SELECT spotify_url, spotify_video_available, apple_url, deezer_url,
+                podcast_addict_url, youtube_url, youtube_thumbnail_url,
+                youtube_thumbnail_checked,
                 og_image_url, feed_last_build, generated_at
          FROM episode_links WHERE season = $1 AND episode = $2`,
         [season, episode]
@@ -1168,7 +1227,11 @@ app.get("/podcast/:season/:episode", {
           expectedOgImageS3Key
         );
         shouldQueueJob = !platformLinks.spotify_url
-          || (youtubeEpisodeResolutionEnabled && !platformLinks.youtube_url)
+          || platformLinks.spotify_video_available == null
+          || (
+            youtubeEpisodeResolutionEnabled
+            && (!platformLinks.youtube_url || platformLinks.youtube_thumbnail_checked !== true)
+          )
           || needsOGRegeneration;
       }
     } catch (error) {
@@ -1221,9 +1284,13 @@ app.get("/podcast/:season/:episode", {
   }
 
   const episodeContentPartial = !platformLinks?.spotify_url
+    || platformLinks?.spotify_video_available == null
     || !platformLinks?.apple_url
     || !platformLinks?.deezer_url
-    || (youtubeEpisodeResolutionEnabled && !platformLinks?.youtube_url)
+    || (
+      youtubeEpisodeResolutionEnabled
+      && (!platformLinks?.youtube_url || platformLinks?.youtube_thumbnail_checked !== true)
+    )
     || databaseState === DatabaseState.UNAVAILABLE
     || databaseState === DatabaseState.UNKNOWN;
 
@@ -1239,12 +1306,8 @@ app.get("/podcast/:season/:episode", {
       episode
     },
     platformLinks,
-    youtubeChannelUrl,
-    youtubeResolutionPending: Boolean(
-      youtubeChannelUrl
-      && youtubeEpisodeResolutionEnabled
-      && !platformLinks?.youtube_url
-    ),
+    episodeVideoAvailability: getEpisodeVideoAvailability(episodeData, platformLinks),
+    youtubeUrl: platformLinks?.youtube_url || null,
     ogImageUrl: platformLinks?.og_image_url || null, // Pass OG image for player cover
     episodeStats, // OP3 badge data (ADR-0015)
   });

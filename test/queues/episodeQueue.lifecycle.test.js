@@ -64,6 +64,7 @@ describe('episodeQueue lifecycle', () => {
       spotify_url: 'https://open.spotify.com/episode/direct',
       apple_url: 'https://podcasts.apple.com/episode/direct',
       deezer_url: 'https://deezer.com/episode/direct',
+      spotify_video_available: true,
       youtube_url: null,
       og_image_url: `https://media.example/${expectedOgImageS3Key}`,
       feed_last_build: '2026-09-04T08:00:00.000Z',
@@ -76,13 +77,18 @@ describe('episodeQueue lifecycle', () => {
     }
 
     assert.equal(isEpisodeCacheComplete(cached, options), true)
+    assert.equal(isEpisodeCacheComplete({
+      ...cached,
+      spotify_video_available: null
+    }, options), false)
     assert.equal(isEpisodeCacheComplete(cached, {
       ...options,
       youtubeResolutionEnabled: true
     }), false)
     assert.equal(isEpisodeCacheComplete({
       ...cached,
-      youtube_url: 'https://www.youtube.com/watch?v=Bbbbbbbbb-1'
+      youtube_url: 'https://www.youtube.com/watch?v=Bbbbbbbbb-1',
+      youtube_thumbnail_checked: true
     }, {
       ...options,
       youtubeResolutionEnabled: true
@@ -243,6 +249,7 @@ describe('episodeQueue lifecycle', () => {
                   spotify_url: 'https://open.spotify.com/episode/direct',
                   apple_url: 'https://podcasts.apple.com/episode/direct',
                   deezer_url: 'https://deezer.com/episode/direct',
+                  spotify_video_available: false,
                   og_image_url: `https://media.example/${expectedOgImageS3Key}`,
                   feed_last_build: '2026-08-19T12:00:00.000Z',
                   generated_at: new Date().toISOString()

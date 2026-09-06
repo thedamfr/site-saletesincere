@@ -623,8 +623,9 @@ ayant remplacé ceux exposés dans l'historique Git, puis contrôler le cache en
 
 #### Variables YouTube (épisodes vidéo)
 
-- `YOUTUBE_CHANNEL_URL` : URL publique de la chaîne affichée sur `/podcast` et
-  utilisée comme secours sur une page épisode ;
+- `YOUTUBE_CHANNEL_URL` : URL publique de la chaîne affichée parmi les plateformes
+  de diffusion de `/podcast` ; elle n'est jamais utilisée comme secours sur une
+  page épisode ;
 - `YOUTUBE_UPLOADS_PLAYLIST_ID` : identifiant de la playlist d'uploads de la
   chaîne, généralement préfixé par `UU` ;
 - `YOUTUBE_API_KEY` : clé YouTube Data API v3, utilisée uniquement par le worker.
@@ -632,9 +633,11 @@ ayant remplacé ceux exposés dans l'historique Git, puis contrôler le cache en
 La description d'une vidéo doit contenir l'URL canonique exacte de son épisode,
 par exemple `https://saletesincere.fr/podcast/3/1`. Le worker `resolve-episode`
 parcourt la playlist, met le lien direct en cache dans `episode_links.youtube_url`
-et le rend à la visite suivante. Sans configuration API complète, la résolution
-est silencieusement désactivée et le lien de chaîne reste disponible. Appliquer la
-migration `009` avant d'activer les deux variables API. Voir le
+et le rend à la visite suivante. Une page épisode n'affiche pas YouTube tant
+qu'aucun lien direct n'a été réconcilié. Sans configuration API complète, la
+résolution est silencieusement désactivée sans affecter le lien de chaîne sur la
+page principale. Appliquer la migration `009` avant d'activer les deux variables
+API. Voir le
 [PRD YouTube du podcast](documentation/prd_youtube_podcast.md).
 
 ### 3. Déploiement

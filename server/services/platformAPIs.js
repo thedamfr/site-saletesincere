@@ -102,7 +102,28 @@ function descriptionReferencesEpisode(description, season, episode) {
  * canonical smartlink URL in the YouTube description, for example:
  * https://saletesincere.fr/podcast/3/1
  */
-export async function searchYouTubeEpisode(season, episode, {
+function getYouTubeMaxResThumbnailUrl(snippet, videoId) {
+  const thumbnail = snippet?.thumbnails?.maxres
+  if (!thumbnail?.url || thumbnail.width < 1200 || thumbnail.height < 675) return null
+
+  try {
+    const url = new URL(thumbnail.url)
+    const isSixteenByNine = Math.abs((thumbnail.width / thumbnail.height) - (16 / 9)) < 0.01
+    if (
+      url.protocol !== 'https:'
+      || url.hostname !== 'i.ytimg.com'
+      || url.pathname !== `/vi/${videoId}/maxresdefault.jpg`
+      || !isSixteenByNine
+    ) {
+      return null
+    }
+    return url.toString()
+  } catch {
+    return null
+  }
+}
+
+export async function searchYouTubeEpisodeMedia(season, episode, {
   apiKey = process.env.YOUTUBE_API_KEY,
   uploadsPlaylistId = process.env.YOUTUBE_UPLOADS_PLAYLIST_ID,
   fetchImpl = fetch,
@@ -147,7 +168,11 @@ export async function searchYouTubeEpisode(season, episode, {
       : null
 
     if (matchingItem) {
-      return `https://www.youtube.com/watch?v=${matchingItem.snippet.resourceId.videoId}`
+      const videoId = matchingItem.snippet.resourceId.videoId
+      return {
+        url: `https://www.youtube.com/watch?v=${videoId}`,
+        thumbnailUrl: getYouTubeMaxResThumbnailUrl(matchingItem.snippet, videoId)
+      }
     }
 
     const nextPageToken = data?.nextPageToken
@@ -157,6 +182,11 @@ export async function searchYouTubeEpisode(season, episode, {
   }
 
   return null
+}
+
+export async function searchYouTubeEpisode(season, episode, options = {}) {
+  const media = await searchYouTubeEpisodeMedia(season, episode, options)
+  return media?.url || null
 }
 
 export function buildPodcastAddictLink(audioUrl) {

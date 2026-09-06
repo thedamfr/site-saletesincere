@@ -101,6 +101,18 @@ async function createApp(options = {}) {
 }
 
 describe('podcast canonical URL', () => {
+  test('redirects an episode trailing slash to its canonical URL', async () => {
+    const app = await createApp()
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/podcast/3/2/?source=preview'
+    })
+
+    assert.equal(response.statusCode, 301)
+    assert.equal(response.headers.location, '/podcast/3/2?source=preview')
+  })
+
   test('redirects /podcast/ permanently while preserving ordinary query parameters', async () => {
     const app = await createApp()
 
