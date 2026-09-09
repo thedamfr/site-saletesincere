@@ -93,6 +93,15 @@ describe('episodeQueue lifecycle', () => {
       ...options,
       youtubeResolutionEnabled: true
     }), true)
+
+    assert.equal(isEpisodeCacheComplete({
+      ...cached,
+      og_image_url: null,
+      generated_at: null
+    }, {
+      ...options,
+      storageEnabled: false
+    }), true)
   })
 
   test('returns an explicit contract when the worker is unavailable', async () => {

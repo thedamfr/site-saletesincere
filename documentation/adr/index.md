@@ -4,7 +4,7 @@ description: Index complet de toutes les Architecture Decision Records du projet
 owner: @thedamfr
 status: active
 review_after: 2026-01-01
-canonical_url: https://github.com/thedamfr/sale-wall/blob/main/documentation/adr/index.md
+canonical_url: https://github.com/thedamfr/site-saletesincere/blob/main/documentation/adr/index.md
 tags: [adr, index, architecture, decisions]
 ---
 
@@ -33,12 +33,13 @@ tags: [adr, index, architecture, decisions]
 | [ADR-0015](./adr_0015_op3_stats_integration.md) | Preuve sociale podcast via cache OP3 | ✅ **Implémenté** | 2026-08 | Podcast, OP3, pg-boss | Feature |
 | [ADR-0016](./adr_0016_homepage_landing_restructuration.md) | Restructuration routing homepage/landing | ✅ **Accepté** | 2025-12 | Frontend, Routing | Architecture |
 | [ADR-0017](./adr_0017_identite_claire_et_territoire_charbon_wafer.md) | Identité claire et territoire Charbon & Wafer | ✅ **Accepté** | 2026-09 | Frontend, Identité | Architecture |
+| [ADR-0018](./adr_0018_migration_ovh_et_retrait_sale_wall.md) | Migration OVH et retrait du Sale-wall | 🚀 **Implémenté** | 2026-09 | Infrastructure, Podcast | Critique |
 
 ## 📊 Statistiques
 
-- **Total ADRs** : 17
+- **Total ADRs** : 18
 - **Actifs** : 2 (infrastructure/sécurité)
-- **Implémentés** : 9 (audio + podcasting + templates)
+- **Implémentés** : 10 (audio + podcasting + templates + migration OVH)
 - **Acceptés** : 4 (newsletter DOI + frontend)
 - **En cours** : 1 (newsletter intégration)
 - **Attente** : 1 (podcasting DNS)
@@ -55,6 +56,7 @@ tags: [adr, index, architecture, decisions]
 
 ### 🏗️ Infrastructure & Déploiement  
 - [ADR-0003](./adr_0003_deployment_production_clevercloud.md) - Production CleverCloud
+- [ADR-0018](./adr_0018_migration_ovh_et_retrait_sale_wall.md) - Migration OVH et retrait du Sale-wall
 
 ### 🔒 Sécurité
 - [ADR-0004](./adr_0004_rate_limiting_security.md) - Rate Limiting & Security

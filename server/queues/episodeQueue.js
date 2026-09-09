@@ -35,6 +35,7 @@ export function isEpisodeCacheComplete(cached, {
   expectedOgImageS3Key,
   feedLastBuildDate,
   youtubeResolutionEnabled = false,
+  storageEnabled = true,
   now = Date.now()
 }) {
   const cachedFeedDate = cached?.feed_last_build
@@ -58,10 +59,15 @@ export function isEpisodeCacheComplete(cached, {
       !youtubeResolutionEnabled
       || (cached?.youtube_url && cached?.youtube_thumbnail_checked === true)
     )
-    && cached?.og_image_url
-    && imageIsFresh
     && feedIsFresh
-    && isExpectedOGImageUrl(cached?.og_image_url, expectedOgImageS3Key)
+    && (
+      !storageEnabled
+      || (
+        cached?.og_image_url
+        && imageIsFresh
+        && isExpectedOGImageUrl(cached?.og_image_url, expectedOgImageS3Key)
+      )
+    )
   )
 }
 
@@ -208,6 +214,7 @@ export async function startWorker(fastify, options = {}, queue = boss) {
 
   const {
     spotifyVideoInspector = inspectSpotifyEpisodeVideo,
+    storageEnabled = process.env.DISABLE_STORAGE !== 'true',
     ...pgBossWorkerOptions
   } = options
   const workerOptions = {
@@ -250,7 +257,8 @@ export async function startWorker(fastify, options = {}, queue = boss) {
       const cacheIsComplete = isEpisodeCacheComplete(cachedEpisodeLinks, {
         expectedOgImageS3Key,
         feedLastBuildDate,
-        youtubeResolutionEnabled
+        youtubeResolutionEnabled,
+        storageEnabled
       })
 
       if (cacheIsComplete) {
@@ -267,23 +275,25 @@ export async function startWorker(fastify, options = {}, queue = boss) {
     let ogImageUrl = null;
     let ogImageS3Key = null;
     
-    try {
-      console.log(`[Worker ${job.id}] Generating OG Image from ${imageUrl}`)
+    if (storageEnabled) {
+      try {
+        console.log(`[Worker ${job.id}] Generating OG Image from ${imageUrl}`)
       
-      // 1. Générer PNG buffer avec blur effect
-      const ogImageBuffer = await generateOGImage(imageUrl);
+        // 1. Générer PNG buffer avec blur effect
+        const ogImageBuffer = await generateOGImage(imageUrl);
       
-      // 2. Deterministic key derived from episode data and the layout version
-      ogImageS3Key = expectedOgImageS3Key;
+        // 2. Deterministic key derived from episode data and the layout version
+        ogImageS3Key = expectedOgImageS3Key;
       
-      // 3. Upload PNG vers S3 (cleanup de l'ancienne sera fait dans le bloc DB)
-      ogImageUrl = await uploadToS3(ogImageBuffer, ogImageS3Key, 'image/png');
-      console.log(`[Worker ${job.id}] ✅ OG Image uploaded: ${ogImageUrl}`);
+        // 3. Upload PNG vers S3 (cleanup de l'ancienne sera fait dans le bloc DB)
+        ogImageUrl = await uploadToS3(ogImageBuffer, ogImageS3Key, 'image/png');
+        console.log(`[Worker ${job.id}] ✅ OG Image uploaded: ${ogImageUrl}`);
       
-    } catch (ogError) {
-      console.error(`[Worker ${job.id}] ⚠️ OG Image generation failed:`, ogError.message);
-      console.error(`[Worker ${job.id}] Full error:`, ogError);
-      // Continue sans bloquer la résolution des liens plateformes
+      } catch (ogError) {
+        console.error(`[Worker ${job.id}] ⚠️ OG Image generation failed:`, ogError.message);
+        console.error(`[Worker ${job.id}] Full error:`, ogError);
+        // Continue sans bloquer la résolution des liens plateformes
+      }
     }
     
     // Appeler les APIs en parallèle

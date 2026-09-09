@@ -100,7 +100,7 @@ description: Liste des tâches et roadmap
 owner: @thedamfr
 status: active
 review_after: 2025-12-01
-canonical_url: https://github.com/thedamfr/sale-wall/blob/main/todolist.md
+canonical_url: https://github.com/thedamfr/site-saletesincere/blob/main/todolist.md
 tags: [todolist, mvp, roadmap, tasks]
 ---
 

@@ -1,0 +1,12 @@
+.git
+.github
+.env
+.env.*
+node_modules
+coverage
+documentation
+k8s
+security
+test
+uploads
+npm-debug.log*

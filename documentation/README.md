@@ -4,7 +4,7 @@ description: Navigation vers toute la documentation technique du projet Saleté 
 owner: @thedamfr
 status: active
 review_after: 2026-01-01
-canonical_url: https://github.com/thedamfr/sale-wall/blob/main/documentation/README.md
+canonical_url: https://github.com/thedamfr/site-saletesincere/blob/main/documentation/README.md
 tags: [documentation, navigation, adr, security, tdd]
 ---
 
@@ -18,6 +18,7 @@ Documentation technique et décisions architecturales du projet Saleté Sincère
 |----------|--------|---------|
 | [Voice Posting MVP](./adr/adr_0001_voice_posting_mvp.md) | ✅ Implémenté | Fonctionnalité cœur |
 | [Production CleverCloud](./adr/adr_0003_deployment_production_clevercloud.md) | ✅ Actif | Infrastructure |
+| [Migration OVH et retrait du Sale-wall](./adr/adr_0018_migration_ovh_et_retrait_sale_wall.md) | 🚀 Implémenté | Infrastructure |
 | [Rate Limiting & Security](./adr/adr_0004_rate_limiting_security.md) | ✅ Actif | Sécurité |
 
 **� Tous les ADRs** : [`./adr/index.md`](./adr/index.md)

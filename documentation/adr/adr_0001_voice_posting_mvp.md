@@ -4,7 +4,7 @@ description: Architecture décision pour implémenter l'enregistrement vocal ave
 owner: @thedamfr
 status: implemented
 review_after: 2025-12-01
-canonical_url: https://github.com/thedamfr/sale-wall/blob/main/documentation/adr/adr_0001_voice_posting_mvp.md
+canonical_url: https://github.com/thedamfr/site-saletesincere/blob/main/documentation/adr/adr_0001_voice_posting_mvp.md
 tags: [adr, audio, mvp, frontend, ui]
 adr_number: 0001
 date_created: 2025-07
@@ -102,4 +102,3 @@ La transcription ASR sera déplacée en phase 2, côté serveur, pour alimenter
 - Implémenter transcription streaming/chunking pour long formats.  
 - Extraire en Web Component ou framework léger (Alpine.js) après stabilisation du flow.  
 - Proposer résumé auto + enrichment GPT (ponctuation, chapitrage).
-

@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: site-saletesincere-production
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: site-saletesincere-https-redirect@kubernetescrd
+spec:
+  ingressClassName: public
+  rules:
+    - host: saletesincere.fr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: site-saletesincere
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - saletesincere.fr
+      secretName: site-saletesincere-production-tls

@@ -16,7 +16,7 @@ La migration de Pug vers Handlebars a été complétée en octobre 2025. Toutes 
 ## 🛡️ Sécuritér: @thedamfr
 status: active
 review_after: 2026-01-01
-canonical_url: https://github.com/thedamfr/sale-wall
+canonical_url: https://github.com/thedamfr/site-saletesincere
 tags: [audio, platform, fastify, postgresql, tdd]
 production_url: https://app-cb755f4a-25da-4a25-b40c-c395f5086569.cleverapps.io/
 ---
@@ -50,6 +50,11 @@ Une plateforme « mur vocal » pour partager vos petites victoires "Wafer" et "C
 - **Stockage** : S3 (MinIO en dev) pour les fichiers audio
 - **Déploiement** : CleverCloud avec Docker
 - **Dev** : Nodemon + Docker Compose
+
+La cible de migration est désormais le MicroK8s partagé du serveur dédié OVH.
+Le premier environnement est `staging.saletesincere.fr`; Clever Cloud reste le
+rollback canonique jusqu'à la bascule explicite de `saletesincere.fr`. Voir
+[l'ADR 0018](documentation/adr/adr_0018_migration_ovh_et_retrait_sale_wall.md).
 
 ### Mode dégradé PostgreSQL
 
