@@ -92,6 +92,41 @@ describe('GET / landing redesign', () => {
     assert.ok(experiencePosition > podcastPosition)
   })
 
+  test('exposes the supplied Saleté Sincère image in complete social metadata', async () => {
+    const app = await createApp()
+
+    const response = await app.inject({ method: 'GET', url: '/' })
+
+    assert.equal(response.statusCode, 200)
+    assertContains(response.body, /<link rel="canonical" href="https:\/\/saletesincere\.fr\/">/)
+    assertContains(response.body, /<meta property="og:type" content="website">/)
+    assertContains(response.body, /<meta property="og:locale" content="fr_FR">/)
+    assertContains(response.body, /<meta property="og:site_name" content="Saleté Sincère">/)
+    assertContains(response.body, /<meta property="og:url" content="https:\/\/saletesincere\.fr\/">/)
+    assertContains(response.body, /<meta property="og:title" content="Saleté Sincère">/)
+    assertContains(response.body, /<meta property="og:description" content="Journalisme, production éditoriale et prise de parole dans la tech\.">/)
+    assertContains(response.body, /<meta property="og:image" content="https:\/\/saletesincere\.fr\/images\/shareimg\.jpg">/)
+    assertContains(response.body, /<meta property="og:image:type" content="image\/jpeg">/)
+    assertContains(response.body, /<meta property="og:image:width" content="1920">/)
+    assertContains(response.body, /<meta property="og:image:height" content="1080">/)
+    assertContains(response.body, /<meta property="og:image:alt" content="Damien Cavaillès au micro avec le logo Saleté Sincère">/)
+    assertContains(response.body, /<meta name="twitter:card" content="summary_large_image">/)
+    assertContains(response.body, /<meta name="twitter:title" content="Saleté Sincère">/)
+    assertContains(response.body, /<meta name="twitter:description" content="Journalisme, production éditoriale et prise de parole dans la tech\.">/)
+    assertContains(response.body, /<meta name="twitter:image" content="https:\/\/saletesincere\.fr\/images\/shareimg\.jpg">/)
+    assertContains(response.body, /<meta name="twitter:image:alt" content="Damien Cavaillès au micro avec le logo Saleté Sincère">/)
+  })
+
+  test('serves the supplied social image as a JPEG asset', async () => {
+    const app = await createApp()
+
+    const response = await app.inject({ method: 'GET', url: '/images/shareimg.jpg' })
+
+    assert.equal(response.statusCode, 200)
+    assert.match(response.headers['content-type'], /^image\/jpeg/)
+    assert.ok(response.rawPayload.byteLength > 100_000)
+  })
+
   test('renders at most three real RSS episodes with format, duration and links', async () => {
     const app = await createApp(async () => publishedEpisodes())
 
