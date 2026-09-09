@@ -5,11 +5,35 @@
       .logo-trace {
         fill: none;
         stroke: #fff;
-        stroke-width: 100;
         stroke-linecap: round;
         stroke-linejoin: round;
-        stroke-dasharray: 1400;
         stroke-dashoffset: 0;
+      }
+
+      .logo-trace-upper {
+        stroke-width: 72;
+        stroke-linecap: butt;
+        stroke-dasharray: 446;
+      }
+
+      .logo-trace-upper-fill {
+        stroke-width: 132;
+        stroke-dasharray: 342;
+      }
+
+      .logo-trace-upper-mid {
+        stroke-width: 100;
+        stroke-dasharray: 361;
+      }
+
+      .logo-trace-loop {
+        stroke-width: 82;
+        stroke-dasharray: 356;
+      }
+
+      .logo-trace-return {
+        stroke-width: 116;
+        stroke-dasharray: 403;
       }
 
       .logo-dot {
@@ -21,36 +45,71 @@
         opacity: 1;
       }
 
-      @keyframes logo-draw {
-        from { stroke-dashoffset: 1400; }
-        to { stroke-dashoffset: 0; }
+      @keyframes logo-draw-upper {
+        0% { stroke-dashoffset: 446; }
+        40%, 100% { stroke-dashoffset: 0; }
+      }
+
+      @keyframes logo-draw-upper-fill {
+        0% { stroke-dashoffset: 342; }
+        28%, 100% { stroke-dashoffset: 0; }
+      }
+
+      @keyframes logo-draw-upper-mid {
+        0% { stroke-dashoffset: 361; }
+        34%, 100% { stroke-dashoffset: 0; }
+      }
+
+      @keyframes logo-draw-loop {
+        0%, 38% { stroke-dashoffset: 356; }
+        64%, 100% { stroke-dashoffset: 0; }
+      }
+
+      @keyframes logo-draw-return {
+        0%, 62% { stroke-dashoffset: 403; }
+        96%, 100% { stroke-dashoffset: 0; }
       }
 
       @keyframes logo-dot {
-        0% { opacity: 0; transform: translate(-12px, 10px) scale(.35); }
-        65% { opacity: 1; transform: translate(0, 0) scale(1.12); }
+        0%, 92% { opacity: 0; transform: translate(-12px, 10px) scale(.35); }
+        97% { opacity: 1; transform: translate(0, 0) scale(1.12); }
         100% { opacity: 1; transform: translate(0, 0) scale(1); }
       }
 
       @keyframes logo-finish {
-        from { opacity: 0; }
-        to { opacity: 1; }
+        0%, 96% { opacity: 0; }
+        100% { opacity: 1; }
       }
 
       @media (prefers-reduced-motion: no-preference) {
-        .logo-trace {
-          stroke-dashoffset: 1400;
-          animation: logo-draw 3.2s cubic-bezier(.45, 0, .2, 1) both;
+        .logo-trace-upper {
+          animation: logo-draw-upper 3.6s cubic-bezier(.45, 0, .2, 1) both;
+        }
+
+        .logo-trace-upper-fill {
+          animation: logo-draw-upper-fill 3.6s cubic-bezier(.45, 0, .2, 1) both;
+        }
+
+        .logo-trace-upper-mid {
+          animation: logo-draw-upper-mid 3.6s cubic-bezier(.45, 0, .2, 1) both;
+        }
+
+        .logo-trace-loop {
+          animation: logo-draw-loop 3.6s cubic-bezier(.45, 0, .2, 1) both;
+        }
+
+        .logo-trace-return {
+          animation: logo-draw-return 3.6s cubic-bezier(.45, 0, .2, 1) both;
         }
 
         .logo-dot {
           opacity: 0;
-          animation: logo-dot .48s cubic-bezier(.18, .89, .32, 1.28) 3.15s both;
+          animation: logo-dot 3.6s cubic-bezier(.18, .89, .32, 1.28) both;
         }
 
         .logo-reveal-finish {
           opacity: 0;
-          animation: logo-finish .18s ease-out 3.02s both;
+          animation: logo-finish 3.6s cubic-bezier(0, 0, .2, 1) both;
         }
       }
 
@@ -70,12 +129,17 @@
           animation: none;
           opacity: 1;
         }
+
       }
     </style>
 
     <mask id="logo-reveal" maskUnits="userSpaceOnUse" x="-10" y="-10" width="520" height="440">
       <rect x="-10" y="-10" width="520" height="440" fill="#000"/>
-      <path id="logo-gesture" class="logo-trace" d="M384,83 C373,41 338,19 298,39 C259,58 247,117 232,197 C216,271 188,316 145,326 C100,310 52,298 18,318 C6,326 17,350 39,370 C62,392 97,400 124,384 C145,371 157,350 145,326 C184,346 224,356 267,339 C286,332 304,321 318,306 C369,252 404,161 384,83"/>
+      <path class="logo-trace logo-trace-upper-fill" d="M384,83 C373,41 338,19 298,39 C259,58 247,117 232,197 C228,215.5 223.25,232.188 217.703,246.969"/>
+      <path class="logo-trace logo-trace-upper-mid" d="M384,83 C373,41 338,19 298,39 C259,58 247,117 232,197 C226.4,222.9 219.33,245.248 210.661,263.785"/>
+      <path id="logo-gesture-upper" class="logo-trace logo-trace-upper" d="M384,83 C373,41 338,19 298,39 C259,58 247,117 232,197 C220,252 179,315 170.5,340"/>
+      <path id="logo-gesture-loop" class="logo-trace logo-trace-loop" d="M170.5,340 C160,347 153,352 147,356 C132,372 110,383 82.5,383 C54,383 25,358 20,330 C18,306 51,303 87.5,316.5 C118,326 146,330 170.5,340"/>
+      <path id="logo-gesture-return" class="logo-trace logo-trace-return" d="M170.5,340 C198,351 233,354 267,339 C286,332 304,321 318,306 C369,252 404,161 384,83"/>
       <rect class="logo-reveal-finish" x="-10" y="-10" width="520" height="440" fill="#fff"/>
     </mask>
   </defs>
