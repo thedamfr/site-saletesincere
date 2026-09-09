@@ -1,0 +1,14 @@
+.git
+.github
+.env
+.env.*
+**/.env*
+castopod
+node_modules
+coverage
+documentation
+k8s
+security
+test
+uploads
+npm-debug.log*

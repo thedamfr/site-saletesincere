@@ -11,7 +11,8 @@ RUN npm run build
 FROM node:24-slim
 WORKDIR /app
 ENV NODE_ENV=production PORT=3000
-COPY --from=builder /app ./
+COPY --chown=node:node --from=builder /app ./
 RUN npm ci --omit=dev
+USER node
 EXPOSE 3000
 CMD ["node", "server.js"]

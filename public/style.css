@@ -1919,7 +1919,9 @@ body.landing-page {
   display: grid;
   grid-template-columns: 210px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 28px;
+  -moz-column-gap: 28px;
+       column-gap: 28px;
+  row-gap: 14px;
   border-top: 1px solid var(--landing-line);
   padding: 28px 0 36px;
   color: var(--landing-muted);
@@ -1929,8 +1931,12 @@ body.landing-page {
   width: 130px;
   height: auto;
 }
-.landing-footer-brand p {
-  margin-top: 6px;
+.landing-credits {
+  margin-top: 6px !important;
+}
+.landing-credits a {
+  color: inherit;
+  text-underline-offset: 2px;
 }
 .landing-legal {
   grid-column: 1 / -1;

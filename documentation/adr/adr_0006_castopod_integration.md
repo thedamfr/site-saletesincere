@@ -4,7 +4,7 @@ description: Héberger Castopod aux côtés de l'application Fastify et l'expose
 owner: @thedamfr
 status: implemented
 review_after: 2026-01-01
-canonical_url: https://github.com/thedamfr/sale-wall/blob/main/documentation/adr/adr_0006_castopod_integration.md
+canonical_url: https://github.com/thedamfr/site-saletesincere/blob/main/documentation/adr/adr_0006_castopod_integration.md
 tags: [adr, podcast, castopod, clevercloud, minio, reverse-proxy]
 adr_number: 0006
 date_created: 2025-10-15

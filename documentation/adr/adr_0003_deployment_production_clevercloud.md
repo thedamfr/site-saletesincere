@@ -4,7 +4,7 @@ description: Configuration et déploiement de l'application sur CleverCloud avec
 owner: @thedamfr
 status: active
 review_after: 2026-01-01
-canonical_url: https://github.com/thedamfr/sale-wall/blob/main/documentation/adr/adr_0003_deployment_production_clevercloud.md
+canonical_url: https://github.com/thedamfr/site-saletesincere/blob/main/documentation/adr/adr_0003_deployment_production_clevercloud.md
 tags: [adr, infrastructure, clevercloud, postgresql, s3]
 adr_number: 0003
 date_created: 2025-07

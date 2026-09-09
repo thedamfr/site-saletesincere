@@ -144,7 +144,9 @@ function getEpisodeVideoAvailability(episodeData, platformLinks) {
  * @returns {Promise<FastifyInstance>} Configured Fastify app ready to listen
  */
 export async function buildApp({
-  initializeStorage = true,
+  storageEnabled = process.env.DISABLE_STORAGE !== 'true',
+  initializeStorage = storageEnabled,
+  wallEnabled = process.env.DISABLE_WALL !== 'true',
   databaseAdapterFactory = createPostgresAdapter,
   databaseUrl: databaseUrlOverride,
   databaseConfigured: databaseConfiguredOverride,
@@ -420,6 +422,15 @@ function sendDatabaseUnavailable(reply) {
   });
 }
 
+function sendWallRetired(reply) {
+  return reply.code(410).send({
+    success: false,
+    code: 'SALE_WALL_RETIRED',
+    retryable: false,
+    message: 'Le Sale-wall est fermé.'
+  });
+}
+
 async function ensureWritableDatabase(route) {
   const state = await getFreshDatabaseState();
   if (state === DatabaseState.READ_WRITE) return true;
@@ -457,6 +468,8 @@ app.post("/api/posts", {
     rateLimit: uploadLimiter
   }
 }, async (req, reply) => {
+  if (!wallEnabled) return sendWallRetired(reply);
+
   if (!await ensureWritableDatabase('create_post')) {
     return sendDatabaseUnavailable(reply);
   }
@@ -788,6 +801,8 @@ app.post("/api/posts/:id/vote", {
     rateLimit: voteLimiter
   }
 }, async (req, reply) => {
+  if (!wallEnabled) return sendWallRetired(reply);
+
   if (!await ensureWritableDatabase('vote')) {
     return sendDatabaseUnavailable(reply);
   }
@@ -901,6 +916,8 @@ app.get("/wall", {
     rateLimit: pageLimiter
   }
 }, async (req, reply) => {
+  if (!wallEnabled) return reply.code(301).redirect('/');
+
   const databaseState = await getFreshDatabaseState();
   if (databaseState !== DatabaseState.READ_WRITE) {
     return reply.view("index.hbs", {
@@ -1087,7 +1104,8 @@ app.get("/podcast", {
         imageUrl: latestEpisode.image,
         feedLastBuildDate: latestEpisode.feedLastBuildDate
       });
-      latestImageNeedsRegeneration = !isExpectedOGImageUrl(generatedImageUrl, expectedOgImageS3Key);
+      latestImageNeedsRegeneration = storageEnabled
+        && !isExpectedOGImageUrl(generatedImageUrl, expectedOgImageS3Key);
       if (generatedImageUrl) {
         podcastSocialImage = {
           url: generatedImageUrl,
@@ -1261,7 +1279,7 @@ app.get("/podcast/:season/:episode", {
           feedLastBuildDate: episodeData.feedLastBuildDate
         });
         platformLinks = cacheResult.rows[0];
-        const needsOGRegeneration = checkOGImageNeeds(
+        const needsOGRegeneration = storageEnabled && checkOGImageNeeds(
           platformLinks.og_image_url,
           platformLinks.feed_last_build,
           platformLinks.generated_at,
@@ -1487,7 +1505,9 @@ const WORKER_ENABLED = process.env.DISABLE_WORKER !== 'true'
 
 if (WORKER_ENABLED) {
   const startEpisodeWorker = episodeWorkerStarter
-    || (() => initializeEpisodeWorker(app));
+    || (() => initializeEpisodeWorker(app, {
+      workerOptions: { storageEnabled }
+    }));
   const stopEpisodeWorker = episodeWorkerStopper
     || ((instance) => stopQueue(instance));
   const {

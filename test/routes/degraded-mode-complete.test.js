@@ -290,4 +290,57 @@ describe('complete degraded mode routes', () => {
       await compensationApp.close()
     }
   })
+
+  test('retires the wall without touching storage or the database', async () => {
+    let databaseCalls = 0
+    let storageCalls = 0
+    const retiredWallApp = await buildApp({
+      initializeStorage: false,
+      wallEnabled: false,
+      databaseConfigured: false,
+      databaseAdapter: {
+        async query() {
+          databaseCalls += 1
+          throw new Error('database must not be called')
+        },
+        pool: {},
+        async connect() {
+          databaseCalls += 1
+          throw new Error('database must not be called')
+        }
+      },
+      storageClient: {
+        async send() {
+          storageCalls += 1
+        }
+      }
+    })
+
+    try {
+      const [wall, create, vote] = await Promise.all([
+        retiredWallApp.inject({ method: 'GET', url: '/wall' }),
+        retiredWallApp.inject({ method: 'POST', url: '/api/posts' }),
+        retiredWallApp.inject({
+          method: 'POST',
+          url: '/api/posts/00000000-0000-0000-0000-000000000001/vote'
+        })
+      ])
+
+      assert.equal(wall.statusCode, 301)
+      assert.equal(wall.headers.location, '/')
+      for (const response of [create, vote]) {
+        assert.equal(response.statusCode, 410)
+        assert.deepEqual(response.json(), {
+          success: false,
+          code: 'SALE_WALL_RETIRED',
+          retryable: false,
+          message: 'Le Sale-wall est fermé.'
+        })
+      }
+      assert.equal(databaseCalls, 0)
+      assert.equal(storageCalls, 0)
+    } finally {
+      await retiredWallApp.close()
+    }
+  })
 })

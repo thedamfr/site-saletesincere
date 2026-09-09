@@ -4,7 +4,7 @@ description: Protection contre spam/DDoS avec rate limiting et headers s√©curis√
 owner: @thedamfr
 status: active
 review_after: 2025-12-01
-canonical_url: https://github.com/thedamfr/sale-wall/blob/main/documentation/adr/adr_0004_rate_limiting_security.md
+canonical_url: https://github.com/thedamfr/site-saletesincere/blob/main/documentation/adr/adr_0004_rate_limiting_security.md
 tags: [adr, security, rate-limiting, ddos, owasp]
 adr_number: 0004
 date_created: 2025-07-14

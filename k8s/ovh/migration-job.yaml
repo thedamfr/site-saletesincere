@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: site-saletesincere-migrate-20260909-3
+  namespace: site-saletesincere
+  labels:
+    app.kubernetes.io/name: site-saletesincere
+    app.kubernetes.io/component: migrate
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: site-saletesincere
+        app.kubernetes.io/component: migrate
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      restartPolicy: Never
+      securityContext:
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: migrate
+          image: ghcr.io/thedamfr/site-saletesincere:c5715dbf0ca1cea25d41db5a42a774be13a15fe5
+          imagePullPolicy: Never
+          command:
+            - node
+            - scripts/migrate.js
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: site-saletesincere-database
+                  key: DATABASE_URL
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 32Mi
