@@ -83,8 +83,9 @@ l'enregistrement staging suffit ; le trafic canonique reste sur Clever Cloud.
 
 ## Résultat vérifié le 9 septembre 2026
 
-Le staging OVH est opérationnel avec l'image
-`site-saletesincere:staging-20260909-2`. Le certificat DNS-01 est prêt, le pod
+Le staging OVH est opérationnel avec l'image expurgée
+`ghcr.io/thedamfr/site-saletesincere:c5715dbf0ca1cea25d41db5a42a774be13a15fe5`.
+Le certificat DNS-01 est prêt, le pod
 applicatif et PostgreSQL sont `Ready`, `/health` expose le mode `normal`, une
 base `read_write` et un worker `ready`.
 
@@ -110,3 +111,11 @@ Le certificat de production et l'Ingress ont été créés puis vérifiés direc
 sur l'IP OVH. Ils servent une réponse HTTPS valide, sans en-tête `noindex`. La
 prochaine opération de production est exclusivement la bascule DNS de
 `saletesincere.fr` vers `141.94.98.109`.
+
+Lors de la première publication privée dans GHCR, un contrôle avant passage en
+public a détecté qu'un fichier `.env` local du sous-projet Castopod avait été
+inclus par le contexte Docker. Cette version n'a jamais été rendue publique.
+Le contexte exclut désormais tous les fichiers `.env` imbriqués ainsi que le
+dossier Castopod. L'image corrigée a été contrôlée avant publication et le pod
+OVH a été remplacé par cette version ; il ne contient ni fichier `.env` ni
+dossier Castopod.
