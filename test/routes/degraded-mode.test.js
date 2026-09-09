@@ -53,7 +53,8 @@ describe('degraded startup', () => {
           })
         },
         databaseConfigured: true,
-        episodeFetcher: async () => RSS_EPISODE
+        episodeFetcher: async () => RSS_EPISODE,
+        podcastEpisodesFetcher: async () => [RSS_EPISODE]
       })
 
       const [home, episode, wall] = await Promise.all([

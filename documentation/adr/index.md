@@ -31,15 +31,16 @@ tags: [adr, index, architecture, decisions]
 | [ADR-0013](./adr_0013_audio_player_smartlink.md) | Audio Player on Smartlink | ✅ **Implémenté** | 2025-11 | Audio, UX | Feature |
 | [ADR-0014](./adr_0014_audio_proxy_waveform.md) | Audio Proxy for Waveform | ✅ **Implémenté** | 2025-11 | Audio, CORS | Feature |
 | [ADR-0015](./adr_0015_op3_stats_integration.md) | Preuve sociale podcast via cache OP3 | ✅ **Implémenté** | 2026-08 | Podcast, OP3, pg-boss | Feature |
+| [ADR-0016](./adr_0016_homepage_landing_restructuration.md) | Restructuration routing homepage/landing | ✅ **Accepté** | 2025-12 | Frontend, Routing | Architecture |
+| [ADR-0017](./adr_0017_identite_claire_et_territoire_charbon_wafer.md) | Identité claire et territoire Charbon & Wafer | ✅ **Accepté** | 2026-09 | Frontend, Identité | Architecture |
 
 ## 📊 Statistiques
 
-- **Total ADRs** : 15
+- **Total ADRs** : 17
 - **Actifs** : 2 (infrastructure/sécurité)
-- **Implémentés** : 11 (audio + newsletter + podcasting + templates)
-- **Acceptés** : 1 (newsletter DOI)
+- **Implémentés** : 9 (audio + podcasting + templates)
+- **Acceptés** : 4 (newsletter DOI + frontend)
 - **En cours** : 1 (newsletter intégration)
-- **Exploration** : 1 (OP3 stats)
 - **Attente** : 1 (podcasting DNS)
 - **Draft** : 0
 - **Obsolètes** : 0
@@ -61,6 +62,8 @@ tags: [adr, index, architecture, decisions]
 ### 🎨 Frontend & Templates
 - [ADR-0008](./adr_0008_migration_pug_vers_html.md) - Migration Pug vers HTML (accepté)
 - [ADR-0009](./adr_0009_migration_handlebars.md) - Migration Handlebars (implémenté)
+- [ADR-0016](./adr_0016_homepage_landing_restructuration.md) - Restructuration routing homepage/landing (accepté)
+- [ADR-0017](./adr_0017_identite_claire_et_territoire_charbon_wafer.md) - Identité claire et territoire Charbon & Wafer (accepté)
 
 ### 📧 Newsletter & API Integration  
 - [ADR-0005](./adr_0005_newsletter_brevo_integration.md) - Newsletter Brevo Integration (en cours)
