@@ -17,6 +17,8 @@ test('the hero logo is revealed like a hand-drawn mark', async () => {
   assert.match(svg, /class="logo-dot"/)
   assert.match(svg, /@keyframes logo-draw/)
   assert.match(svg, /@keyframes logo-dot/)
+  assert.match(svg, /@keyframes logo-finish/)
+  assert.match(svg, /class="logo-reveal-finish"/)
   assert.match(svg, /prefers-reduced-motion: reduce/)
 })
 
