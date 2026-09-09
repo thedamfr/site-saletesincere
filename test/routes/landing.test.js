@@ -65,7 +65,7 @@ describe('GET / landing redesign', () => {
     assertContains(response.body, /class="landing-page"/)
     assertContains(response.body, /logo-salete-sincere-horizontal\.png/)
     assertContains(response.body, /class="landing-hero-mark"[^>]*data-logo-replay[^>]*aria-label="Rejouer l’animation du logo"/)
-    assertContains(response.body, /data-logo-animation[^>]*src="\/images\/logo-noname-web\.svg\?v=s-gesture-5"[^>]*alt=""[^>]*aria-hidden="true"/)
+    assertContains(response.body, /data-logo-animation[^>]*src="\/images\/logo-noname-web\.svg\?v=s-gesture-6"[^>]*alt=""[^>]*aria-hidden="true"/)
     assertContains(response.body, /<script src="\/js\/landing\.js" defer><\/script>/)
     assertContains(response.body, /On gratte la surface pour retrouver la saleté sincère\./i)
     assertContains(response.body, /250 à 400 € par séance/)
