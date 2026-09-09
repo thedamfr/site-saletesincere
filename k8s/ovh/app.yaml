@@ -56,7 +56,7 @@ spec:
       enableServiceLinks: false
       containers:
         - name: web
-          image: site-saletesincere:staging-20260909-2
+          image: ghcr.io/thedamfr/site-saletesincere:bdc84129b5e5ece16358b7b5ab1ed7140278cdf9
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:

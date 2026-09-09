@@ -52,7 +52,7 @@ Une plateforme « mur vocal » pour partager vos petites victoires "Wafer" et "C
 - **Dev** : Nodemon + Docker Compose
 
 La cible de migration est désormais le MicroK8s partagé du serveur dédié OVH.
-Le premier environnement est `staging.saletesincere.fr`; Clever Cloud reste le
+Le premier environnement est `staging.saletesincere.fr` et il est opérationnel ; Clever Cloud reste le
 rollback canonique jusqu'à la bascule explicite de `saletesincere.fr`. Voir
 [l'ADR 0018](documentation/adr/adr_0018_migration_ovh_et_retrait_sale_wall.md).
 

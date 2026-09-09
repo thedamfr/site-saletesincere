@@ -95,13 +95,18 @@ référence OG Cellar. Les routes `/`, `/podcast` et `/podcast/3/1` répondent e
 410. La recette HTTPS forcée vers `141.94.98.109` confirme également la
 redirection HTTP vers HTTPS et l'en-tête `X-Robots-Tag`.
 
-La seule action restante pour exposer le staging publiquement est la création
-de l'enregistrement DNS `A` de `staging.saletesincere.fr` vers
-`141.94.98.109`. Clever Cloud reste disponible pour le domaine canonique et le
-rollback jusqu'à une décision de bascule distincte.
+L'enregistrement DNS `A` proxifié de `staging.saletesincere.fr` vers
+`141.94.98.109` est propagé. La recette publique confirme le HTTPS, les routes
+applicatives et le mode normal. Clever Cloud reste disponible pour le domaine
+canonique et le rollback jusqu'à une décision de bascule distincte.
 
 Après la recette staging, l'image applicative est publiée dans GHCR sous un tag
 de commit immuable. Un workflow GitHub Actions reproduit cette publication lors
 des mises à jour de `main`. Le certificat et l'Ingress de
 `saletesincere.fr` peuvent être préparés sur OVH sans modifier son DNS ; ils ne
 reçoivent donc aucun trafic canonique avant la bascule explicite.
+
+Le certificat de production et l'Ingress ont été créés puis vérifiés directement
+sur l'IP OVH. Ils servent une réponse HTTPS valide, sans en-tête `noindex`. La
+prochaine opération de production est exclusivement la bascule DNS de
+`saletesincere.fr` vers `141.94.98.109`.
