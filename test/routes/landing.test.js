@@ -64,6 +64,7 @@ describe('GET / landing redesign', () => {
     assert.equal(response.statusCode, 200)
     assertContains(response.body, /class="landing-page"/)
     assertContains(response.body, /logo-salete-sincere-horizontal\.png/)
+    assertContains(response.body, /class="landing-hero-mark"[^>]*src="\/images\/logo-noname-web\.svg"[^>]*alt=""[^>]*aria-hidden="true"/)
     assertContains(response.body, /On gratte la surface pour retrouver la saleté sincère\./i)
     assertContains(response.body, /250 à 400 € par séance/)
     assertContains(response.body, /en fonction des projets/)
