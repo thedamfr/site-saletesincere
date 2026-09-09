@@ -147,6 +147,7 @@ export async function buildApp({
   storageEnabled = process.env.DISABLE_STORAGE !== 'true',
   initializeStorage = storageEnabled,
   wallEnabled = process.env.DISABLE_WALL !== 'true',
+  logoLabEnabled = process.env.NODE_ENV !== 'production',
   databaseAdapterFactory = createPostgresAdapter,
   databaseUrl: databaseUrlOverride,
   databaseConfigured: databaseConfiguredOverride,
@@ -909,6 +910,20 @@ app.get("/", {
     latestEpisode: landingEpisodes[0] || null
   });
 });
+
+if (logoLabEnabled) {
+  app.get("/__logo-lab", {
+    config: {
+      rateLimit: pageLimiter
+    }
+  }, async (req, reply) => {
+    return reply
+      .header('X-Robots-Tag', 'noindex, nofollow, noarchive')
+      .view("logo-lab.hbs", {
+        title: "Laboratoire du geste"
+      });
+  });
+}
 
 // Route Sale-wall (ancien home)
 app.get("/wall", {

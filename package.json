@@ -8,6 +8,7 @@
     "build": "npm run build:css && npm run build:views",
     "build:css": "postcss ./style.css -o ./public/style.css",
     "build:views": "echo 'No-op for Pug views'",
+    "check:logo-animation": "node scripts/check-logo-animation.mjs",
     "start": "node server.js",
     "migrate": "node scripts/migrate.js",
     "test": "node --test --test-concurrency=1 test/**/*.test.js",

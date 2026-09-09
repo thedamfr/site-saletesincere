@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>{{title}} · Saleté Sincère</title>
+  <link rel="stylesheet" href="/logo-lab.css">
+</head>
+<body>
+  <header class="lab-header">
+    <img src="/images/logo-salete-sincere-horizontal.png" width="420" height="120" alt="Saleté Sincère">
+    <p>Laboratoire du geste</p>
+  </header>
+
+  <main class="lab-shell">
+    <section class="lab-workspace" aria-labelledby="lab-title">
+      <div class="lab-copy">
+        <p class="lab-kicker">Animation SVG · 3 segments</p>
+        <h1 id="lab-title">Suivre la main, image par image.</h1>
+        <p>Le logo final reste intact. Les couleurs montrent les trois gestes indépendants et le point jaune suit la position de la main.</p>
+      </div>
+
+      <div class="lab-stage" data-logo-lab-stage aria-label="Prévisualisation contrôlée du logo animé">
+        <p>Chargement du logo…</p>
+      </div>
+
+      <div class="lab-controls">
+        <div class="lab-actions">
+          <button type="button" data-logo-play>Lire</button>
+          <button type="button" data-logo-restart>Recommencer</button>
+          <label>
+            Vitesse
+            <select data-logo-speed>
+              <option value="0.25">× 0,25</option>
+              <option value="0.5" selected>× 0,5</option>
+              <option value="1">× 1</option>
+            </select>
+          </label>
+          <label class="lab-toggle">
+            <input type="checkbox" data-logo-guides checked>
+            Afficher les trajectoires
+          </label>
+        </div>
+
+        <label class="lab-scrubber">
+          <span>Progression <output data-logo-time>0,00 s / 3,60 s</output></span>
+          <input type="range" min="0" max="1000" value="0" step="1" data-logo-progress>
+        </label>
+      </div>
+
+      <ol class="lab-legend" aria-label="Ordre des gestes">
+        <li><span class="lab-swatch lab-swatch-upper"></span><strong>1</strong> Boucle supérieure et descente</li>
+        <li><span class="lab-swatch lab-swatch-loop"></span><strong>2</strong> Croisement et petite boucle</li>
+        <li><span class="lab-swatch lab-swatch-return"></span><strong>3</strong> Retour et fermeture</li>
+      </ol>
+    </section>
+  </main>
+
+  <script type="module" src="/js/logo-lab.js"></script>
+</body>
+</html>
