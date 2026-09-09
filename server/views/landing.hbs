@@ -4,641 +4,169 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Saleté Sincère</title>
-  <meta name="description" content="Se rapprocher du feu de la prise de parole. Une parole vivante, ancrée, excitante.">
+  <meta name="description" content="Journalisme, production éditoriale et prise de parole dans la tech.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      background: #0B0B0B;
-      color: #E8E8E6;
-      font-family: 'Inter', sans-serif;
-      font-size: 17px;
-      line-height: 1.7;
-      -webkit-font-smoothing: antialiased;
-      position: relative;
-    }
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image: url('/images/bg-kintsugi.png');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-      opacity: 0.85;
-      pointer-events: none;
-      z-index: 0;
-    }
-    body::after {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(180deg, rgba(11, 11, 11, 0.3) 0%, rgba(11, 11, 11, 0.1) 50%, rgba(11, 11, 11, 0.3) 100%);
-      pointer-events: none;
-      z-index: 0;
-    }
-    .content-wrapper {
-      position: relative;
-      z-index: 1;
-    }
-    h1, h2, h3 {
-      font-family: 'Playfair Display', serif;
-      font-weight: 600;
-      line-height: 1.3;
-      color: #F2F2EF;
-    }
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-    .page-wrapper {
-      width: 100%;
-      padding: 0 32px;
-    }
-    @media (min-width: 1200px) {
-      .page-wrapper {
-        padding: 0 80px;
-      }
-    }
-    nav {
-      padding: 32px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(232, 232, 230, 0.1);
-    }
-    nav .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    nav .logo-icon {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, #D6B977 0%, #B99E5A 100%);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-    }
-    nav h1 {
-      font-size: 18px;
-      font-weight: 600;
-    }
-    nav .links {
-      display: flex;
-      gap: 24px;
-      font-size: 14px;
-    }
-    nav a {
-      color: #999;
-      transition: color 0.2s;
-    }
-    nav a:hover {
-      color: #D6B977;
-    }
-    .hero {
-      padding: 120px 0;
-      text-align: center;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    .hero h2 {
-      font-size: 42px;
-      margin-bottom: 24px;
-      letter-spacing: -0.02em;
-      line-height: 1.2;
-    }
-    .hero h2 .brand {
-      color: #D6B977;
-      font-weight: 600;
-    }
-    .hero p {
-      font-size: 19px;
-      color: #999;
-      max-width: 540px;
-      margin: 0 auto 48px;
-    }
-    .hero-ctas {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    .about {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 48px;
-      align-items: start;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    @media (min-width: 768px) {
-      .about {
-        grid-template-columns: 320px 1fr;
-        gap: 64px;
-      }
-    }
-    .about-image-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(232, 232, 230, 0.08);
-      border-radius: 8px;
-      padding: 24px;
-      width: 100%;
-      max-width: 400px;
-      margin: 0 auto;
-    }
-    @media (min-width: 768px) {
-      .about-image-card {
-        margin: 0;
-        max-width: none;
-      }
-    }
-    .about-image-card img {
-      width: 100%;
-      height: auto;
-      border-radius: 6px;
-      display: block;
-    }
-    .about-image-credit {
-      font-size: 12px;
-      color: #666;
-      margin-top: 16px;
-      text-align: center;
-    }
-    @media (min-width: 768px) {
-      .about-image-credit {
-        text-align: left;
-      }
-    }
-    .about-content p {
-      color: #AAA;
-      line-height: 1.8;
-      font-size: 17px;
-      margin: 0;
-    }
-    .btn {
-      display: inline-block;
-      padding: 14px 32px;
-      font-size: 15px;
-      font-weight: 500;
-      border-radius: 6px;
-      transition: all 0.2s;
-      cursor: pointer;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, #D6B977 0%, #B99E5A 100%);
-      color: #0B0B0B;
-    }
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(214, 185, 119, 0.3);
-    }
-    .btn-secondary {
-      background: transparent;
-      color: #E8E8E6;
-      border: 1px solid rgba(232, 232, 230, 0.2);
-    }
-    .btn-secondary:hover {
-      border-color: rgba(232, 232, 230, 0.4);
-    }
-    .section {
-      padding: 80px 0;
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-    .section-label {
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #D6B977;
-      margin-bottom: 48px;
-      text-align: center;
-    }
-    .situations {
-      display: grid !important;
-      grid-template-columns: repeat(3, 1fr) !important;
-      gap: 24px !important;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    @media (max-width: 767px) {
-      .situations {
-        grid-template-columns: 1fr !important;
-        gap: 32px !important;
-      }
-    }
-    .situation {
-      padding: 32px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(232, 232, 230, 0.08);
-      border-radius: 8px;
-      transition: all 0.3s;
-      position: relative;
-    }
-    .situation:hover {
-      background: rgba(255, 255, 255, 0.03);
-      border-color: rgba(214, 185, 119, 0.2);
-    }
-    .situation h3 {
-      font-size: 24px;
-      margin-bottom: 16px;
-      color: #F2F2EF;
-    }
-    .situation .price {
-      font-size: 15px;
-      font-weight: 600;
-      color: #D6B977;
-      background: rgba(214, 185, 119, 0.1);
-      padding: 6px 12px;
-      border-radius: 4px;
-      border: 1px solid rgba(214, 185, 119, 0.2);
-      margin-top: 16px;
-      display: inline-block;
-    }
-    .situation p {
-      color: #AAA;
-      margin-bottom: 16px;
-      line-height: 1.7;
-    }
-    .situation .meta {
-      font-size: 14px;
-      color: #666;
-    }
-    .dual-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 48px;
-      margin-top: 48px;
-    }
-    @media (min-width: 640px) {
-      .dual-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-    .dual-grid h3 {
-      font-size: 20px;
-      margin-bottom: 24px;
-      color: #D6B977;
-    }
-    .dual-grid ul {
-      list-style: none;
-    }
-    .dual-grid li {
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(232, 232, 230, 0.05);
-      color: #AAA;
-      font-size: 16px;
-    }
-    .dual-grid li:last-child {
-      border-bottom: none;
-    }
-    .arguments {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 64px;
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-    .argument {
-      padding: 0;
-    }
-    .argument h3 {
-      font-size: 24px;
-      margin-bottom: 16px;
-      color: #F2F2EF;
-      font-weight: 600;
-    }
-    .argument p {
-      color: #AAA;
-      line-height: 1.8;
-      margin-bottom: 16px;
-      font-size: 17px;
-    }
-    .argument-content {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 24px;
-      align-items: start;
-    }
-    @media (min-width: 768px) {
-      .argument-content {
-        grid-template-columns: 1fr 1fr;
-        gap: 40px;
-      }
-    }
-    .argument-image {
-      width: 100%;
-      border-radius: 8px;
-      border: 1px solid rgba(232, 232, 230, 0.1);
-    }
-    .argument .proof {
-      color: #999;
-      font-size: 15px;
-      line-height: 1.6;
-    }
-    .argument .proof-list {
-      color: #666;
-      font-size: 15px;
-      margin-top: 8px;
-    }    .podcast-note {
-      max-width: 700px;
-      margin: 0 auto;
-      padding: 32px;
-      background: rgba(214, 185, 119, 0.03);
-      border-left: 3px solid rgba(214, 185, 119, 0.3);
-      border-radius: 4px;
-    }
-    .podcast-note p {
-      color: #AAA;
-      font-size: 16px;
-      line-height: 1.7;
-      margin: 0;
-    }    .podcast-note {
-      max-width: 700px;
-      margin: 0 auto;
-      padding: 32px;
-      background: rgba(214, 185, 119, 0.03);
-      border-left: 3px solid rgba(214, 185, 119, 0.3);
-      border-radius: 4px;
-    }
-    .podcast-note p {
-      color: #AAA;
-      font-size: 16px;
-      line-height: 1.7;
-      margin: 0;
-    }
-    .artifact {
-      text-align: center;
-      padding: 64px 32px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(232, 232, 230, 0.08);
-      border-radius: 8px;
-    }
-    .artifact h3 {
-      font-size: 28px;
-      margin-bottom: 16px;
-    }
-    .artifact p {
-      color: #999;
-      margin-bottom: 32px;
-      max-width: 480px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .cta-section {
-      padding: 80px 0 80px;
-    }
-    .cta-box {
-      background: linear-gradient(135deg, rgba(214, 185, 119, 0.08) 0%, rgba(214, 185, 119, 0.03) 100%);
-      border: 1px solid rgba(214, 185, 119, 0.2);
-      padding: 64px 32px;
-      text-align: center;
-      border-radius: 12px;
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-    .cta-box h3 {
-      font-size: 32px;
-      margin-bottom: 16px;
-    }
-    .cta-box p {
-      color: #AAA;
-      margin-bottom: 32px;
-      max-width: 520px;
-      margin-left: auto;
-      margin-right: auto;
-      font-size: 18px;
-    }
-    .contact-section {
-      padding: 60px 0 40px;
-    }
-    .contact-box {
-      max-width: 600px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .contact-photo {
-      width: 160px;
-      height: 160px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid rgba(214, 185, 119, 0.3);
-      margin: 0 auto 24px;
-      display: block;
-    }
-    .contact-info h3 {
-      font-size: 24px;
-      margin-bottom: 16px;
-      color: #F2F2EF;
-    }
-    .contact-info a {
-      display: block;
-      color: #D6B977;
-      margin: 8px 0;
-      font-size: 16px;
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .contact-info a:hover {
-      color: #E8D098;
-    }
-    footer {
-      padding: 80px 0 48px;
-      text-align: center;
-      border-top: 1px solid rgba(232, 232, 230, 0.1);
-      margin-top: 40px;
-    }
-    footer p {
-      font-size: 15px;
-      color: #666;
-      line-height: 1.8;
-    }
-    footer p:first-child {
-      color: #999;
-      margin-bottom: 8px;
-    }
-    @media (min-width: 640px) {
-      .hero h2 {
-        font-size: 56px;
-      }
-      nav .links {
-        display: flex;
-      }
-    }
-    @media (max-width: 639px) {
-      nav .links {
-        display: none;
-      }
-      .hero h2 {
-        font-size: 36px;
-      }
-      .hero-ctas {
-        flex-direction: column;
-      }
-      .btn {
-        width: 100%;
-      }
-    }
-  </style>
 </head>
-<body>
-  <div class="content-wrapper">
-    <div class="page-wrapper">
-      <nav>
-        <div class="logo">
-          <div class="logo-icon">✺</div>
-          <h1>Saleté Sincère</h1>
+<body class="landing-page">
+  <a class="landing-skip-link" href="#contenu">Aller au contenu</a>
+
+  <header class="landing-header landing-shell">
+    <a class="landing-logo" href="/" aria-label="Saleté Sincère — accueil">
+      <img src="/images/logo-salete-sincere-horizontal.png" width="744" height="213" alt="Saleté Sincère">
+    </a>
+    <nav class="landing-navigation" aria-label="Navigation principale">
+      <a href="#podcast">Podcast</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="contenu" class="landing-shell">
+    <section class="landing-hero" aria-labelledby="landing-title">
+      <h1 id="landing-title">On gratte la surface pour retrouver la saleté sincère.</h1>
+      <p>Ça commence avec une histoire vraie. Sans quelques détails qu’on n’a pas osé ajouter. Avant de publier on aura enlevé quelques aspérités. Et au final, il reste une histoire lisse, désincarnée, comme imaginée par ChatGPT.</p>
+      <div class="landing-actions">
+        <a class="landing-button landing-button-primary" href="#contact">Travaillons ensemble</a>
+        <a class="landing-button landing-button-secondary" href="#preuve">Voir la preuve</a>
+      </div>
+    </section>
+
+    <section class="landing-about" aria-label="À propos de Damien">
+      <figure class="landing-framed-image">
+        <img src="/images/damien-podcast.jpg" width="2304" height="1536" alt="Damien Cavaillès pendant l’enregistrement d’un podcast">
+        <figcaption>Je m’appelle Damien / Cette alchimie agence.</figcaption>
+      </figure>
+      <div class="landing-about-copy">
+        <p>Je m’appelle Damien. Je fais du journalisme dans la tech. Pendant 10 ans, j’ai été patron d’un média WeLoveDevs.com. J’y ai interviewé des centaines de professionnels. J’ai écouté, creusé, cherché cette saleté sincère. Aujourd’hui je suis indépendant et j’explore d’autres territoires, avec la même vibration.</p>
+      </div>
+    </section>
+
+    <section class="landing-section landing-offers" aria-labelledby="offers-title">
+      <div class="landing-section-heading">
+        <h2 id="offers-title">Tu fais quoi avec Saleté Sincère&nbsp;?</h2>
+        <p>Un journaliste, ça ne fait pas juste des articles ou des interviews.</p>
+      </div>
+
+      <div class="landing-card-grid">
+        <article class="landing-card">
+          <h3>Coaching en prise de parole pour Tech</h3>
+          <p>Comment prendre la parole sur LinkedIn ou sur des blogs corporate. Formaliser son ton, respecter les guidelines. Ne plus avoir l’impression de prendre des risques en étant soi-même. Quoi raconter ou ne pas raconter.</p>
+          <p class="landing-card-meta">Leaders tech · Managers · Experts · Freelances</p>
+          <p class="landing-price"><strong>250 à 400 € par séance</strong><span>en fonction des projets</span></p>
+        </article>
+
+        <article class="landing-card">
+          <h3>Partenariat éditorial</h3>
+          <p>Sur un site de contenu, on peut vite se retrouver en panne d’engagement. Contenus sans opinions, auteurs non-identifiés, propos sans prise de risque. J’interviens en nom propre et crée du parasocial crédible, tout en respectant votre ligne éditoriale et votre plateforme de marque.</p>
+          <p class="landing-card-meta">Médias · Communautés tech · Plateformes éditoriales</p>
+          <p class="landing-price"><strong>20K€ / an · Micro-forfaits</strong></p>
+        </article>
+
+        <article class="landing-card">
+          <h3>Rédacteur en chef à temps partagé</h3>
+          <p>Pour scale-ups, équipes produit, départements engineering. Structurer et piloter votre production de contenu tech. Donner de la cohérence à la parole de vos équipes. Un rédac chef qui comprend la tech et sait la raconter sans folklore marketing.</p>
+          <p class="landing-card-meta">Scale-ups · Équipes produit · Départements engineering</p>
+          <p class="landing-price"><strong>TJM</strong></p>
+        </article>
+      </div>
+    </section>
+
+    <section class="landing-section landing-split" aria-labelledby="corporate-title">
+      <div class="landing-copy">
+        <h2 id="corporate-title">Épouser le cadre corporate et relations publiques</h2>
+        <p>Le problème ce n’est pas le cadre. C’est de ne pas savoir le pratiquer. Chaque ligne rouge accumulée donne l’impression d’être Ethan Pierse dans une chambre de lasers.</p>
+        <p>On déchiffre, on épouse les contours. Le cadre est structurant et donne une occasion de développer du discours. J’ai travaillé avec des marques dont la communication publique est contrainte.</p>
+        <p class="landing-meta">BNP Paribas · SNCF Connect · MAIF · Adeo</p>
+      </div>
+      <figure class="landing-framed-image landing-media-proof">
+        <img src="/images/live-accenture.png" width="1710" height="1204" loading="lazy" decoding="async" alt="Échange vidéo produit pour Accenture">
+      </figure>
+    </section>
+
+    <section id="preuve" class="landing-section landing-proof" aria-labelledby="proof-title">
+      <h2 id="proof-title">Les personnes se sentent à l’aise pour s’exprimer</h2>
+      <div class="landing-split landing-split-flush">
+        <figure class="landing-framed-image landing-testimonials">
+          <img src="/images/REF.jpg" width="400" height="150" loading="lazy" decoding="async" alt="Messages de participants remerciant Damien pour la qualité de ses échanges">
+        </figure>
+        <div class="landing-copy">
+          <p>Elles parlent sans performance ni posture. Le cadre est calme, non jugeant, tenu.</p>
+          <p>Dans les entretiens comme dans les accompagnements, les gens disent explicitement qu’ils se sentent à l’aise. Ce n’est pas une promesse marketing, c’est un retour constant.</p>
+          <p class="landing-meta">Podcast Charbon &amp; Wafer, messages de participants.</p>
         </div>
-        <div class="links">
-          <a href="/podcast">Podcast</a>
-          <a href="/wall">Sale-wall</a>
+      </div>
+    </section>
+
+    <section id="podcast" class="landing-podcast" aria-labelledby="podcast-title">
+      <img class="landing-podcast-cover" src="/images/charbon-wafer-cover.png" width="1400" height="1400" loading="lazy" decoding="async" alt="Jaquette du podcast Charbon &amp; Wafer">
+
+      <div class="landing-podcast-copy">
+        <p class="landing-podcast-label">Le podcast</p>
+        <h2 id="podcast-title">Charbon &amp; Wafer</h2>
+        <p><strong>Charbon &amp; Wafer est le laboratoire éditorial de Saleté Sincère.</strong> On y ouvre de nouveaux territoires de parole avec des personnes qui n’ont pas forcément l’habitude de s’exprimer devant une caméra de cinq kilos et un setup de qualité professionnelle. Ces récits, ces angles inattendus et ces sujets nourrissent ensuite les accompagnements clients et les aident à occuper de nouveaux territoires de prise de parole.</p>
+        {{#if latestEpisode}}
+          <a class="landing-podcast-button" href="{{latestEpisode.url}}"><span aria-hidden="true">▶</span> Écouter le dernier épisode</a>
+        {{else}}
+          <a class="landing-podcast-button" href="/podcast"><span aria-hidden="true">▶</span> Écouter le podcast</a>
+        {{/if}}
+      </div>
+
+      {{#if landingEpisodes}}
+        <div class="landing-episode-list" aria-label="Derniers épisodes">
+          {{#each landingEpisodes}}
+            <a class="landing-episode" href="{{url}}">
+              <span class="landing-episode-play" aria-hidden="true">▶</span>
+              <span class="landing-episode-copy">
+                {{#if format}}<span class="landing-episode-format">{{format}}</span>{{/if}}
+                <span class="landing-episode-title">{{title}}</span>
+              </span>
+              {{#if duration}}<span class="landing-episode-duration">{{duration}}</span>{{/if}}
+            </a>
+          {{/each}}
+          <a class="landing-all-episodes" href="/podcast">Voir tous les épisodes →</a>
         </div>
-      </nav>
+      {{/if}}
+    </section>
 
-      <section class="hero">
-        <h2>On gratte la surface pour<br>retrouver la <span class="brand">saleté sincère</span>.</h2>
-        <p>Ça commence avec une histoire vraie. Sans quelques détails qu'on a pas osé ajouter. Avant de publier on aura enlevé quelques aspérités. Et au final, il reste une histoire lisse, désincarnée, comme imaginée par ChatGPT.</p>
-        <div class="hero-ctas">
-          <a href="#contact" class="btn btn-primary">Travailler ensemble</a>
-          <a href="/podcast" class="btn btn-secondary">Voir la preuve</a>
+    <section id="experience" class="landing-section landing-split landing-experience" aria-labelledby="experience-title">
+      <div class="landing-copy">
+        <h2 id="experience-title">Des milliers d’heures de prise de parole réelle</h2>
+        <p>J’ai passé plusieurs milliers d’heures en live ou en interview. En podcast, sur LinkedIn, Twitch et YouTube.</p>
+        <p>J’ai animé, interviewé, produit. J’ai coordonné l’écriture, la direction artistique, la régie.</p>
+        <p>Je connais les codes, les contraintes et les angles morts de chaque format.</p>
+        <p>Cette expérience change la façon dont on parle. Et surtout, la façon dont on écoute.</p>
+      </div>
+      <figure class="landing-framed-image">
+        <img src="/images/interview-plateau.jpg" width="6432" height="4288" loading="lazy" decoding="async" alt="Damien Cavaillès et un invité en entretien devant leurs micros">
+      </figure>
+    </section>
+
+    <section id="contact" class="landing-section landing-contact" aria-labelledby="contact-title">
+      <img src="/images/damien-welcome.jpg" width="7008" height="4672" loading="lazy" decoding="async" alt="Portrait de Damien Cavaillès">
+      <div>
+        <h2 id="contact-title">Comment me contacter</h2>
+        <p>Pour un accompagnement, un partenariat éditorial ou une production, écrivez-moi directement.</p>
+        <div class="landing-contact-links">
+          <a href="mailto:damien@saletesincere.fr">damien@saletesincere.fr</a>
+          <a href="https://www.linkedin.com/in/damiencavailles/" target="_blank" rel="noopener noreferrer">Suivez-moi sur LinkedIn</a>
         </div>
-      </section>
+      </div>
+    </section>
+  </main>
 
-      <section class="section">
-        <div class="about">
-          <div class="about-image-card">
-            <img src="/images/damien-podcast.jpg" alt="Damien Cavaillès en enregistrement podcast">
-            <div class="about-image-credit">Photo : Nicolas Detrez (<a href="https://ncls.tv" target="_blank" rel="noopener">ncls.tv</a>) et Charlotte Coppens</div>
-          </div>
-          <div class="about-content">
-            <p>Je m'appelle Damien. Je fais du journalisme dans la tech. Pendant 10 ans, j'ai été patron d'un média WeLoveDevs.com. J'y ai interviewé des centaines de professionnels. J'ai écouté, creusé, cherché cette saleté sincère. Aujourd'hui je suis indépendant et j'explore d'autres territoires, avec la même vibration.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="section-label">Tu fais quoi avec Saleté Sincère ?</div>
-        <p style="text-align: center; color: #AAA; font-size: 19px; margin-bottom: 48px; max-width: 700px; margin-left: auto; margin-right: auto;">Un journaliste, ça ne fait pas juste des articles ou des interviews.</p>
-        <div class="situations">
-          <div class="situation">
-            <h3>Coaching en prise de parole pour Tech</h3>
-            <p>Comment prendre la parole sur LinkedIn ou sur des blogs corporate. Formaliser son ton, respecter les guidelines. Ne plus avoir l'impression de prendre des risques en étant soi-même. Quoi raconter ou ne pas raconter.</p>
-            <p class="meta">Leaders tech · Managers · Experts · Freelances</p>
-            <div class="price">À partir de 6000€</div>
-          </div>
-
-          <div class="situation">
-            <h3>Partenariat éditorial</h3>
-            <p>Sur un site de contenu, on peut vite se retrouver en panne d'engagement. Contenus sans opinions, auteurs non-identifiés, propos sans prise de risque. J'interviens en nom propre et créée du parasocial crédible. Tout en respectant votre ligne éditorial et votre plateforme de marque.</p>
-            <p class="meta">Médias · Communautés tech · Plateformes éditoriales</p>
-            <div class="price">20K€/an · Micro-forfaits</div>
-          </div>
-
-          <div class="situation">
-            <h3>Rédacteur en chef à temps partagé</h3>
-            <p>Pour scale-ups, équipes produit, départements engineering. Structurer et piloter votre production de contenu tech. Donner de la cohérence à la parole de vos équipes. Un rédac chef qui comprend la tech et sait la raconter sans folklore marketing.</p>
-            <p class="meta">Scale-ups · Équipes produit · Départements engineering</p>
-            <div class="price">TJM</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="arguments">
-          <div class="argument">
-            <h3>Épouser le cadre corporate et relations publiques</h3>
-            <div class="argument-content">
-              <div>
-                <p>Le problème ce n'est pas le cadre. C'est de ne pas savoir le pratiquer. Chaque ligne rouge accumulée donne l'impression d'être Ethan Pierse dans une chambre de lasers.</p>
-                <p>On déchiffre, on épouse les contours. Le cadre est structurant et donne une occasion de développer du discours. J'ai travaillé avec des marques dont la communication publique est contrainte.</p>
-                <p class="proof-list">BNP Paribas · SNCF Connect · MAIF · Adeo</p>
-              </div>
-              <div>
-                <img src="/images/live-accenture.png" alt="Live Accenture" class="argument-image">
-              </div>
-            </div>
-          </div>
-
-          <div class="argument">
-            <h3>Les personnes se sentent à l'aise pour s'exprimer</h3>
-            <div class="argument-content">
-              <div>
-                <img src="/images/REF.jpg" alt="Témoignages participants" class="argument-image">
-              </div>
-              <div>
-                <p>Elles parlent sans performance ni posture. Le cadre est calme, non jugeant, tenu.</p>
-                <p>Dans les entretiens comme dans les accompagnements, les gens disent explicitement qu'ils se sentent à l'aise. Ce n'est pas une promesse marketing, c'est un retour constant.</p>
-                <p class="proof">Podcast Charbon & Wafer, messages de participants.</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="artifact">
-            <h3>Charbon & Wafer</h3>
-            <p>Malgré l'anonymat, chaque invité prend vraiment des risques dans chaque épisode. C'est cette prise de risque qui rend les conversations vivantes et crédibles.</p>
-            <a href="/podcast" class="btn btn-secondary">Écouter le podcast</a>
-          </div>
-
-          <div class="argument">
-            <h3>Des milliers d'heures de prise de parole réelle</h3>
-            <div class="argument-content">
-              <div>
-                <p>J'ai passé plusieurs milliers d'heures en live ou en interview. En podcast, sur LinkedIn, Twitch et YouTube.</p>
-                <p>J'ai animé, interviewé, produit. J'ai coordonné l'écriture, la direction artistique, la régie.</p>
-                <p>Je connais les codes, les contraintes et les angles morts de chaque format.</p>
-                <p>Cette expérience change la façon dont on parle. Et surtout, la façon dont on écoute.</p>
-              </div>
-              <div>
-                <img src="/images/interview-plateau.jpg" alt="Interview plateau" class="argument-image">
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="cta-section">
-        <div class="cta-box">
-          <h3>Prend la parole sur le sale-wall</h3>
-          <p>Un espace anonyme pour raconter ton histoire. Vient déposer ta saleté sincère.</p>
-          <a href="/wall" class="btn btn-primary">Rejoindre le Sale-wall</a>
-        </div>
-      </section>
-
-      <section class="contact-section" id="contact">
-        <div class="contact-box">
-          <img src="/images/damien-welcome.jpg" alt="Damien Cavaillès" class="contact-photo">
-          <div class="contact-info">
-            <h3>Comment me contacter</h3>
-            <a href="https://www.linkedin.com/in/damiencavailles/" target="_blank" rel="noopener">Suivez-moi sur LinkedIn</a>
-            <a href="mailto:damien@saletesincere.fr">damien@saletesincere.fr</a>
-          </div>
-        </div>
-      </section>
-
-      <footer>
-        <p>Damien Cavaillès - Saleté Sincère 2025</p>
-        <p style="margin-top: 32px; font-size: 13px; color: #555; line-height: 1.8;">
-          Activités au forfait (webinar, écriture d'article, etc.) prestées par la Micro entreprise Damien Cavaillès.<br>
-          Prestations agence de communication (plateaux) et régie prestées par Saleté Sincère SAS · SIRET 99504236300011 · Capital 1000€ · 60 rue François Ier, 75008 Paris.
-        </p>
-      </footer>
+  <footer class="landing-footer landing-shell">
+    <div class="landing-footer-brand">
+      <img src="/images/logo-salete-sincere-horizontal.png" width="744" height="213" loading="lazy" alt="Saleté Sincère">
+      <p>Une marque éditoriale pour un meilleur réel.</p>
     </div>
-  </div>
+    <p>Damien Cavaillès — Saleté Sincère 2025</p>
+    <div class="landing-footer-links">
+      <a href="#podcast">Podcast</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <p class="landing-legal">Activités au forfait (webinar, écriture d’article, etc.) prestées par la Micro entreprise Damien Cavaillès.<br>Prestations agence de communication (plateaux) et régie prestées par Saleté Sincère SAS · SIRET 99504236300011 · Capital 1000€ · 60 rue François Ier, 75008 Paris.</p>
+  </footer>
 </body>
 </html>

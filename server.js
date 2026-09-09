@@ -842,14 +842,56 @@ app.post("/api/posts/:id/vote", {
   }
 });
 
-// Route landing homepage (PRD v3.1)
+function getLandingEpisode(episode) {
+  const season = Number.parseInt(episode?.season, 10);
+  const episodeNumber = Number.parseInt(episode?.episode, 10);
+  const title = typeof episode?.title === 'string' ? episode.title.trim() : '';
+  const duration = typeof episode?.duration === 'string' ? episode.duration.trim() : '';
+
+  if (
+    !Number.isInteger(season)
+    || season < 1
+    || !Number.isInteger(episodeNumber)
+    || episodeNumber < 1
+    || !title
+  ) return null;
+
+  const formatMatch = title.match(/^(CHARBON|WAFER|FISSURE)\s*(?:[-–—:|]\s*)?/i);
+  const displayTitle = formatMatch ? title.slice(formatMatch[0].length).trim() : title;
+
+  return {
+    format: formatMatch?.[1].toUpperCase() || null,
+    title: displayTitle || title,
+    duration,
+    url: `/podcast/${season}/${episodeNumber}`
+  };
+}
+
+// Route landing homepage (PRD refonte v3)
 app.get("/", {
   config: {
     rateLimit: pageLimiter
   }
 }, async (req, reply) => {
+  let landingEpisodes = [];
+
+  try {
+    const publishedEpisodes = await podcastEpisodesFetcher(2000);
+    landingEpisodes = (Array.isArray(publishedEpisodes) ? publishedEpisodes : [])
+      .map(getLandingEpisode)
+      .filter(Boolean)
+      .slice(0, 3);
+  } catch (error) {
+    app.log.warn({
+      event: 'landing_podcast_episodes_unavailable',
+      errorCode: error?.code || error?.name || 'UNKNOWN'
+    }, 'landing_podcast_episodes_unavailable');
+  }
+
   return reply.view("landing.hbs", { 
-    title: "Saleté Sincère"
+    title: "Saleté Sincère",
+    landingEpisodes,
+    latestEpisode: landingEpisodes[0] || null
   });
 });
 
