@@ -1595,11 +1595,30 @@ body.landing-page {
   width: clamp(390px, 38vw, 500px);
   max-width: none !important;
   height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
   opacity: 0.075;
-  pointer-events: none;
+  cursor: pointer;
+  touch-action: manipulation;
   -webkit-user-select: none;
      -moz-user-select: none;
           user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 160ms ease;
+}
+.landing-hero-mark img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.landing-hero-mark:hover,
+.landing-hero-mark:focus-visible {
+  opacity: 0.12;
+}
+.landing-hero-mark:focus-visible {
+  outline: 2px solid rgba(17, 18, 19, 0.45);
+  outline-offset: 4px;
 }
 .landing-hero h1 {
   font-size: clamp(2.65rem, 6vw, 4.8rem);
