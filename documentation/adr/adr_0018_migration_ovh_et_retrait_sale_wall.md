@@ -13,6 +13,11 @@ impact: critical
 
 # ADR 0018 — Migration OVH et retrait du Sale-wall
 
+> **État vérifié le 10 septembre 2026 : OVH sert maintenant le domaine public.**
+> La phase staging décrite ci-dessous est conservée comme historique. Le
+> [guide d’hébergement et de déploiement](../hebergement-deploiement.md) décrit
+> la procédure courante et les contrôles de publication.
+
 ## Contexte
 
 Le produit public conservé est le site `saletesincere.fr`, avec la landing, la
@@ -119,3 +124,37 @@ Le contexte exclut désormais tous les fichiers `.env` imbriqués ainsi que le
 dossier Castopod. L'image corrigée a été contrôlée avant publication et le pod
 OVH a été remplacé par cette version ; il ne contient ni fichier `.env` ni
 dossier Castopod.
+
+## Production publique vérifiée le 10 septembre 2026
+
+Le domaine `saletesincere.fr`, derrière Cloudflare, est servi par le Deployment
+`site-saletesincere` du namespace de même nom sur OVH. Le domaine staging utilise
+le même Service, le même Deployment et la même base ; seul son Ingress ajoute
+`X-Robots-Tag: noindex, nofollow, noarchive`. Il ne constitue pas une recette isolée
+avant production. La date exacte de la bascule DNS n’est pas établie ici ; aucun
+changement DNS n’a été effectué lors de cette vérification.
+
+La publication du laboratoire (PR 29, commit fusionné
+`d6ed6ff9c0438b05cc8df74a4e3b2f60b79b4d15`) a confirmé deux chaînes distinctes :
+
+- GitHub Actions construit et publie l’image GHCR, sans mise à jour Kubernetes ;
+- l’intégration GitHub de Clever Cloud déploie toujours l’installation historique.
+
+Un statut Clever `running` au nouveau commit ne prouve donc pas que le domaine
+public a changé. L’image OVH a été mise à jour explicitement depuis
+`484da98f5e9a5e2a949a04e821ee95188e7d0c6b` vers le tag du commit fusionné. Le
+rollout progressif a réussi ; le pod applicatif est prêt, sans redémarrage, et
+PostgreSQL est prêt. `/health` expose `normal`, `read_write` et `ready`.
+
+Les routes `/`, `/laboratoire-du-geste`, `/podcast`, `/podcast/3/1` et
+`/newsletter/` répondent en 200. `/__logo-lab` redirige en 301 vers l’adresse
+publique du laboratoire ; `/wall` redirige toujours vers `/`. Le logo, le script
+et le CSS du laboratoire, les favicons et l’image de partage servis publiquement
+correspondent aux fichiers validés. Le CSS global correspond au build du
+conteneur ; les classes utilitaires issues de fichiers exclus du contexte Docker
+peuvent différer du build local.
+
+Aucun Secret, réglage de base, volume ni ressource des autres applications n’a
+été modifié. Clever reste disponible séparément ; sa base ne doit pas être
+supposée synchronisée avec OVH. Un retour de trafic vers Clever nécessite une
+décision distincte sur le routage et les données.

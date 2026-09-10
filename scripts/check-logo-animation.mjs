@@ -4,6 +4,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { Jimp } from 'jimp'
 import { chromium } from 'playwright'
+import Handlebars from 'handlebars'
 
 // Uses the browser's real CSS timeline, also scrubbed by the laboratory.
 const browser = await chromium.launch({ headless: true, channel: process.env.LOGO_BROWSER_CHANNEL || undefined })
@@ -119,12 +120,17 @@ try {
 
   // Exercise the actual lab script and controls without requiring a running server.
   const assets = new Map(await Promise.all([
+    ['/', '../server/views/landing.hbs', 'text/html'],
+    ['/js/landing.js', '../public/js/landing.js', 'text/javascript'],
+    ['/style.css', '../public/style.css', 'text/css'],
     ['/laboratoire-du-geste', '../server/views/logo-lab.hbs', 'text/html'],
     ['/js/logo-lab.js', '../public/js/logo-lab.js', 'text/javascript'],
     ['/logo-lab.css', '../public/logo-lab.css', 'text/css'],
     ['/images/logo-noname-web.svg', '../public/images/logo-noname-web.svg', 'image/svg+xml']
   ].map(async ([url, file, contentType]) => [url, { body: await readFile(new URL(file, import.meta.url), 'utf8'), contentType }])) )
-  await page.route('http://logo.test/**', route => {
+  assets.get('/').body = Handlebars.compile(assets.get('/').body)({ landingEpisodes: [] })
+  await page.context().route('**/*', route => {
+    if (new URL(route.request().url()).origin !== 'http://logo.test') return route.abort()
     const asset = assets.get(new URL(route.request().url()).pathname)
     return route.fulfill(asset || { status: 404, body: '' })
   })
@@ -160,7 +166,47 @@ try {
     const fitsViewport = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
     assert.ok(fitsViewport, `The public lab must not overflow horizontally at ${width}px`)
   }
-  console.log(JSON.stringify({ checkedFrames: 101, missingInteriorPixels, spillPixels, detachedFragments: 0, prematureBluePixels: 0, reducedMotion: 'passed', labControls: 'passed', responsiveLayout: 'passed', outputDirectory }, null, 2))
+
+  // Native mouse/keyboard activations must open a real, isolated tab on click five.
+  for (const input of ['mouse', 'keyboard']) {
+    await page.goto('http://logo.test/')
+    const control = page.getByRole('button', { name: 'Rejouer l’animation du logo' })
+    await control.focus()
+    const bounds = await control.boundingBox()
+    const activate = () => input === 'mouse'
+      ? control.click({ position: { x: bounds.width - 10, y: 10 } })
+      : control.press('Enter')
+    for (let click = 1; click <= 4; click++) {
+      await activate()
+      await page.waitForFunction(count => {
+        const image = document.querySelector('[data-logo-animation]')
+        return image.complete && image.naturalWidth > 0
+          && new URL(image.src, window.location.href).searchParams.get('replay') === String(count)
+      }, click, { timeout: 2000 })
+      assert.equal(page.context().pages().length, 1, 'The first four replays must stay on the home page')
+    }
+    const opened = page.context().waitForEvent('page', { timeout: 2000 })
+    await activate()
+    const laboratory = await opened
+    await laboratory.waitForURL('http://logo.test/laboratoire-du-geste')
+    await laboratory.waitForSelector('.logo-lab-guides circle')
+    assert.equal(await laboratory.evaluate(() => window.opener), null, 'The new tab must not control its opener')
+    assert.equal(page.url(), 'http://logo.test/', 'The home must remain open')
+    for (let click = 6; click <= 10; click++) await activate()
+    assert.equal(page.context().pages().length, 2, 'The easter egg must only open once per page load')
+    await laboratory.close()
+  }
+  await page.goto('http://logo.test/')
+  await page.evaluate(() => {
+    const control = document.querySelector('[data-logo-replay]')
+    for (let click = 0; click < 4; click++) control.click()
+    return new Promise(requestAnimationFrame)
+  })
+  const rapidReplay = new URL(await page.locator('[data-logo-animation]').getAttribute('src'), page.url())
+  assert.equal(rapidReplay.pathname, '/images/logo-noname-web.svg', 'Rapid clicks must keep the SVG source between animation frames')
+  assert.equal(rapidReplay.searchParams.get('replay'), '4')
+  assert.equal(page.context().pages().length, 1)
+  console.log(JSON.stringify({ checkedFrames: 101, missingInteriorPixels, spillPixels, detachedFragments: 0, prematureBluePixels: 0, reducedMotion: 'passed', labControls: 'passed', responsiveLayout: 'passed', easterEgg: 'mouse, keyboard and rapid replay passed', outputDirectory }, null, 2))
 } finally {
   await browser.close()
 }

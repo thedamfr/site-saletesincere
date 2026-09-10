@@ -20,6 +20,20 @@ ralentir ou parcourir l’animation et d’afficher ou masquer les trajectoires.
 Voir la décision complémentaire dans
 [l’ADR 0017](adr/adr_0017_identite_claire_et_territoire_charbon_wafer.md).
 
+## Easter egg sur la home
+
+Le cinquième clic sur le logo animé ouvre `/laboratoire-du-geste` dans un nouvel
+onglet, sans remplacer la home. Chaque clic continue de rejouer l’animation,
+même lorsque plusieurs clics arrivent avant la prochaine image du navigateur.
+Les activations clavier du même bouton comptent aussi ; les clics sur les liens
+ou hors de la zone de relance ne comptent pas.
+
+Le compteur est propre au chargement de la page, sans délai imposé entre les
+clics ni stockage persistant. Une seule ouverture est déclenchée par chargement :
+les clics suivants rejouent simplement le logo. L’ouverture reste synchrone avec
+le cinquième clic, pour conserver l’activation utilisateur du navigateur, et
+utilise `noopener,noreferrer`. Le lien normal en pied de page reste disponible.
+
 ## Surfaces et ordre de dessin
 
 La silhouette originale du logo est le contour de découpe extérieur. Deux masques
@@ -84,7 +98,10 @@ bleue, de fragments détachés et d'effacement du trait. À 96 %, il compare les
 pixels intérieurs à la silhouette originale et recherche les débordements. Il
 vérifie également le rendu sans animation, les commandes du laboratoire et la
 synchronisation de son curseur, ainsi que l’absence de débordement horizontal de
-320 à 1 400 pixels. Aucun serveur ni accès externe n'est nécessaire.
+320 à 1 400 pixels. Il vérifie également l’ouverture réelle de l’easter egg au
+cinquième clic, à la souris et au clavier, l’absence d’ouvertures répétées et
+la conservation de la source SVG lors de clics rapides.
+Aucun serveur ni accès externe n'est nécessaire.
 
 Les PNG et la planche de contrôle sont écrits dans le répertoire temporaire
 `salete-logo-browser-check`, dont le chemin est affiché par la commande.
