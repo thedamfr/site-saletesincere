@@ -39,8 +39,9 @@ subsiste, mais le mur vocal et ses uploads sont désactivés sur la production O
 - **Dev** : Nodemon + Docker Compose
 
 La production **`saletesincere.fr` est servie par OVH**, derrière Cloudflare.
-`staging.saletesincere.fr` pointe sur le même Deployment et la même base : ce
-n’est pas un environnement isolé. Son en-tête `noindex` est ajouté par l’Ingress.
+`staging.saletesincere.fr` sert une prévisualisation isolée du design podcast,
+avec lecture des caches PostgreSQL de production et sans worker. Son en-tête `noindex` est ajouté par l’Ingress. Voir
+[l’ADR 0019](documentation/adr/adr_0019_preview_podcast_isolee.md).
 Clever Cloud reste actif séparément et reçoit encore les mises à jour de `main`.
 
 **Une fusion sur `main` publie l’image GHCR, mais ne déploie pas automatiquement
@@ -609,8 +610,9 @@ La procédure de référence est le
   publiées par [GitHub Actions](.github/workflows/publish-image.yml).
 - Activation : mise à jour explicite du conteneur `web` sur OVH, puis contrôle du
   rollout, de l’image active et du domaine public.
-- Staging : même application et même base que la production, avec un Ingress
-  `noindex` ; ce n’est pas un environnement indépendant.
+- Staging : prévisualisation podcast sur un Deployment distinct, sessions PostgreSQL en
+  lecture seule et worker arrêté, avec un Ingress `noindex`. Les caches OP3 et
+  les liens résolus de production sont consultables.
 - Clever Cloud : installation historique toujours reliée à GitHub. Un déploiement
   réussi sur Clever ne suffit pas à publier sur le domaine public.
 

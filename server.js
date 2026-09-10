@@ -16,7 +16,8 @@ import { setupSecurityHeaders, setupErrorHandler } from "./server/middleware/sec
 import newsletterRoutes from "./server/newsletter/routes.js";
 import {
   fetchEpisodeFromRSS,
-  fetchPublishedEpisodesFromRSS
+  fetchPublishedEpisodesFromRSS,
+  fetchPodcastFromRSS
 } from "./server/services/castopodRSS.js";
 import {
   getOGImageS3Key,
@@ -154,6 +155,9 @@ export async function buildApp({
   databaseAvailability: databaseAvailabilityOverride,
   episodeFetcher = fetchEpisodeFromRSS,
   podcastEpisodesFetcher = fetchPublishedEpisodesFromRSS,
+  podcastFeedFetcher = podcastEpisodesFetcher === fetchPublishedEpisodesFromRSS
+    ? fetchPodcastFromRSS
+    : async (timeout) => ({ episodes: await podcastEpisodesFetcher(timeout), description: '' }),
   op3EpisodeStatsReader = getEpisodeStats,
   op3StatsListReader = getEpisodeStatsForGuids,
   op3PublicStatsEnabled = process.env.OP3_PUBLIC_STATS_ENABLED === 'true',
@@ -1085,14 +1089,16 @@ app.get("/podcast", {
   }
   
   let episodes = [];
+  let podcastDescription = '';
   let latestImageNeedsRegeneration = false;
   let latestEpisode = null;
   let popularEpisode = null;
   let databaseState = databaseAvailability.getState();
 
   try {
-    const publishedEpisodes = await podcastEpisodesFetcher(5000);
-    episodes = Array.isArray(publishedEpisodes) ? publishedEpisodes : [];
+    const feed = await podcastFeedFetcher(5000);
+    episodes = Array.isArray(feed.episodes) ? feed.episodes : [];
+    podcastDescription = feed.description || '';
     latestEpisode = episodes[0] || null;
   } catch (error) {
     app.log.warn({
@@ -1188,6 +1194,9 @@ app.get("/podcast", {
   reply.header('Cache-Control', 'public, max-age=3600');
   return reply.view("podcast.hbs", {
     episodeData: null,
+    podcastDescription,
+    landingEpisodes: episodes.map(getLandingEpisode).filter(Boolean).slice(0, 3),
+    latestEpisode: episodes.map(getLandingEpisode).find(Boolean) || null,
     popularEpisode,
     podcastSocialImage,
     youtubeUrl: youtubeChannelUrl

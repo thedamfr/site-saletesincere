@@ -9,11 +9,13 @@ cluster partagé.
 | Cible | Rôle actuel | Mise à jour |
 | --- | --- | --- |
 | `saletesincere.fr` | Production publique, Cloudflare → OVH/MicroK8s | Image GHCR à activer explicitement sur OVH |
-| `staging.saletesincere.fr` | Même Service, Deployment et base, Ingress avec `noindex` | Change en même temps que la production OVH |
+| `staging.saletesincere.fr` | Preview podcast distincte, caches de production en sessions lecture seule, worker arrêté | Deployment `site-saletesincere-preview` et ConfigMap |
 | Application Clever `sale-wall` | Installation historique distincte, toujours active | Intégration GitHub encore déclenchée par `main` |
 
-**Staging n’est pas isolé de la production.** Ne pas y essayer une image ou une
-mutation de données en supposant que le domaine public restera intact.
+**Staging utilise désormais un Deployment distinct pour la recette du podcast.**
+Il consulte les caches de production en sessions lecture seule, avec accord du
+propriétaire. Voir [la reprise de la recette](reprise-podcast-staging.md) et
+[l’ADR 0019](adr/adr_0019_preview_podcast_isolee.md).
 
 Le namespace, le Service et le Deployment OVH se nomment `site-saletesincere` ;
 le conteneur applicatif est `web`. PostgreSQL et le worker `pg-boss` sont actifs.

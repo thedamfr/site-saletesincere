@@ -112,7 +112,7 @@ describe('podcast format and platform availability', () => {
     const response = await app.inject({ method: 'GET', url: '/podcast' })
 
     assert.equal(response.statusCode, 200)
-    assert.match(response.body, /Choisis ton format et ta plateforme/)
+    assert.match(response.body, /Choisis ta plateforme\./)
     assert.doesNotMatch(response.body, /id="podcast-video-availability"/)
     assert.doesNotMatch(response.body, /id="podcast-availability"/)
   })
@@ -163,7 +163,7 @@ describe('podcast format and platform availability', () => {
     )
     assert.match(
       response.body,
-      /class="rounded-full bg-red-600 px-2 py-1 text-xs font-semibold text-white">Vidéo 4K<\/span>/
+      /class="podcast-video-badge">Vidéo 4K<\/span>/
     )
     assert.doesNotMatch(response.body, /text-red-600">Vidéo 4K<\/span>/)
     assert.match(

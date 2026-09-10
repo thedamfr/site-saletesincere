@@ -227,7 +227,7 @@ describe('GET /podcast traction card', () => {
     assert.match(response.body, /href="\/podcast\/2\/3"/)
     assert.match(
       response.body,
-      /<img[^>]+src="\/cdn-cgi\/image\/width=662,height=662,fit=pad,background=%23000000,quality=85,format=auto\/https:\/\/media\.example\/episode-3\.jpg"[^>]+class="[^"]*h-auto[^"]*w-full[^"]*"/
+      /<img[^>]+src="https:\/\/media\.example\/episode-3\.jpg"[^>]+class="[^"]*podcast-feature-image[^"]*"/
     )
     assert.doesNotMatch(response.body, /rel="preconnect"[^>]+cellar-c2\.services\.clever-cloud\.com/)
     assert.match(
@@ -316,11 +316,11 @@ describe('GET /podcast traction card', () => {
     assert.match(response.body, /Le Podcast est sorti/)
     assert.match(
       response.body,
-      /<meta property="og:image" content="https:\/\/saletesincere\.fr\/images\/preview-podcast-smartlink\.jpg">/
+      /<meta property="og:image" content="https:\/\/saletesincere\.fr\/images\/charbon-wafer-cover\.png">/
     )
     assert.match(
       response.body,
-      /<meta name="twitter:image" content="https:\/\/saletesincere\.fr\/images\/preview-podcast-smartlink\.jpg">/
+      /<meta name="twitter:image" content="https:\/\/saletesincere\.fr\/images\/charbon-wafer-cover\.png">/
     )
     assert.doesNotMatch(response.body, /RSS unavailable/)
   })
@@ -457,4 +457,28 @@ describe('episode OP3 proof', () => {
     assert.equal(response.statusCode, 200)
     assert.doesNotMatch(response.body, /téléchargements mesurés par OP3/)
   })
+})
+
+test('highlights the latest three RSS episodes even without the OP3 cache', async () => {
+  const app = await createApp({
+    podcastEpisodesFetcher: async () => publishedEpisodes(),
+    databaseAvailability: availability(DatabaseState.UNAVAILABLE, async () => DatabaseState.UNAVAILABLE)
+  })
+  const response = await app.inject({ method: 'GET', url: '/podcast' })
+  assert.equal(response.statusCode, 200)
+  assert.match(response.body, /aria-label="Derniers épisodes"/)
+  for (const episode of [3, 2, 1]) {
+    assert.match(response.body, new RegExp(`class="landing-episode" href="/podcast/2/${episode}"`))
+  }
+  assert.match(response.body, /Écouter le dernier épisode/)
+})
+
+test('uses the RSS channel description on the podcast page', async () => {
+  const app = await createApp({
+    podcastFeedFetcher: async () => ({ description: 'Présentation issue du flux RSS.', episodes: publishedEpisodes() })
+  })
+  const response = await app.inject({ method: 'GET', url: '/podcast' })
+  assert.equal(response.statusCode, 200)
+  assert.match(response.body, /Présentation issue du flux RSS\./)
+  assert.doesNotMatch(response.body, /laboratoire éditorial/)
 })
