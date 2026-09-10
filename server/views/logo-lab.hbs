@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Explorez le geste du logo Saleté Sincère : ralentir, rejouer, suivre la main et ses deux boucles, image par image.">
+  <title>{{title}} · Saleté Sincère</title>
+  <link rel="canonical" href="https://saletesincere.fr/laboratoire-du-geste">
+  <link rel="stylesheet" href="/logo-lab.css">
+</head>
+<body>
+  <header class="lab-header">
+    <a href="/" aria-label="Accueil Saleté Sincère">
+      <img src="/images/logo-salete-sincere-horizontal.png" width="420" height="120" alt="Saleté Sincère">
+    </a>
+    <p>Laboratoire du geste</p>
+  </header>
+
+  <main class="lab-shell">
+    <section class="lab-workspace" aria-labelledby="lab-title">
+      <div class="lab-copy">
+        <p class="lab-kicker">L’identité en mouvement</p>
+        <h1 id="lab-title">Suivre la main, image par image.</h1>
+        <p>Une descente, deux boucles, un croisement. Le logo Saleté Sincère se dessine d’un geste. Ralentissez, rejouez, suivez la main — ou cachez les trajectoires pour ne garder que la trace.</p>
+      </div>
+
+      <div class="lab-stage" data-logo-lab-stage aria-label="Prévisualisation contrôlée du logo animé">
+        <p>Chargement du logo…</p>
+        <noscript>Activez JavaScript pour jouer avec le geste du logo.</noscript>
+      </div>
+
+      <div class="lab-controls">
+        <div class="lab-actions">
+          <button type="button" data-logo-play>Lire</button>
+          <button type="button" data-logo-restart>Recommencer</button>
+          <label>
+            Vitesse
+            <select data-logo-speed>
+              <option value="0.25">× 0,25</option>
+              <option value="0.5" selected>× 0,5</option>
+              <option value="1">× 1</option>
+            </select>
+          </label>
+          <label class="lab-toggle">
+            <input type="checkbox" data-logo-guides checked>
+            Afficher les trajectoires
+          </label>
+        </div>
+
+        <label class="lab-scrubber">
+          <span>Progression <output data-logo-time>0,00 s / 3,60 s</output></span>
+          <input type="range" min="0" max="1000" value="0" step="1" data-logo-progress>
+        </label>
+      </div>
+
+      <ol class="lab-legend" aria-label="Trajectoires du geste">
+        <li><span class="lab-swatch lab-swatch-before"></span><strong>1</strong> Descente et bas de la boucle</li>
+        <li><span class="lab-swatch lab-swatch-after"></span><strong>2</strong> Haut de la boucle et retour</li>
+      </ol>
+    </section>
+    <footer class="lab-footer">
+      <p>Logo par <a href="https://www.instagram.com/eva.navaux/" target="_blank" rel="noopener noreferrer">Eva « Blaster » Navaux</a>.</p>
+      <a href="/">Retour à Saleté Sincère</a>
+    </footer>
+  </main>
+
+  <script type="module" src="/js/logo-lab.js"></script>
+</body>
+</html>

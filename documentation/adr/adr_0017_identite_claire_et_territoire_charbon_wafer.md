@@ -66,3 +66,23 @@ la maquette blanche et la palette mise à jour font foi.
 - Contraste lisible sur le fond clair et sur le bloc podcast sombre.
 - Absence de jaune visible hors du bloc Charbon & Wafer.
 - Rendu de `/` en HTTP 200 lorsque le flux RSS échoue.
+
+## Complément du 10 septembre 2026 : laboratoire du geste
+
+Après validation de l’animation du logo, le laboratoire devient une page de marque
+permanente à la demande du propriétaire du site. Il donne à voir la gestuelle de
+Saleté Sincère et permet de jouer avec son rythme.
+
+- La route publique `/laboratoire-du-geste` reste disponible en production et sans
+  base de données. L’ancienne route technique `/__logo-lab` redirige en HTTP 301.
+- Le pied de page de la landing comporte un lien vers le laboratoire ; la page
+  crédite la créatrice du logo et permet de revenir à l’accueil.
+- L’animation validée et ses contrôles sont conservés. Les couleurs des guides et
+  des commandes sont fonctionnelles et ne redéfinissent pas la palette de marque.
+- La lecture est volontaire, initialement en pause ; les contrôles restent
+  accessibles au clavier et l’animation de la home respecte la réduction des
+  mouvements.
+
+La disponibilité en production, la redirection et le lien depuis la home sont
+couverts par les tests de routes. Le contrôle visuel de l’animation est décrit dans
+[la documentation du logo](../logo-animation.md).

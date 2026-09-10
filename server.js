@@ -910,6 +910,25 @@ app.get("/", {
   });
 });
 
+// Public brand experience: independent of database and worker availability.
+app.get("/laboratoire-du-geste", {
+  config: {
+    rateLimit: pageLimiter
+  }
+}, async (req, reply) => {
+  return reply.view("logo-lab.hbs", {
+    title: "Laboratoire du geste"
+  });
+});
+
+app.get("/__logo-lab", {
+  config: {
+    rateLimit: pageLimiter
+  }
+}, async (req, reply) => {
+  return reply.code(301).redirect('/laboratoire-du-geste');
+});
+
 // Route Sale-wall (ancien home)
 app.get("/wall", {
   config: {
