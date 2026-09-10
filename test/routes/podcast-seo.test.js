@@ -4,14 +4,14 @@
  */
 
 import { describe, it, before, after } from 'node:test'
-import assert from 'node:assert'
-import { build } from '../helpers/app.js'
+import assert from 'node:assert/strict'
+import { buildPodcastApp } from '../helpers/podcastApp.js'
 
 describe('US4.1 - OG tags & SEO canonical', () => {
   let app
 
   before(async () => {
-    app = await build()
+    app = await buildPodcastApp()
   })
 
   after(async () => {
@@ -164,4 +164,3 @@ describe('US4.1 - OG tags & SEO canonical', () => {
     )
   })
 })
-

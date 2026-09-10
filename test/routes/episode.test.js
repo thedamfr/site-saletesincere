@@ -1,28 +1,18 @@
-/**
- * Tests pour route /podcast/:season/:episode - Smartlink multiplateforme
- * Phase 4 TDD - Un test à la fois, RED → GREEN → REFACTOR
- * 
- * Note: Route initialement nommée /episode/:season/:episode, renommée en /podcast/:season/:episode
- */
-
-import 'dotenv/config'
 import { describe, test, before, after } from 'node:test'
-import assert from 'node:assert'
-import { build } from '../helpers/serverHelper.js'
+import assert from 'node:assert/strict'
+import { buildPodcastApp } from '../helpers/podcastApp.js'
 
 describe('GET /podcast/:season/:episode', () => {
   let app
 
   before(async () => {
-    // Utiliser le vrai serveur pour tester la vraie route
-    app = await build()
+    app = await buildPodcastApp()
   })
 
   after(async () => {
     await app.close()
   })
 
-  // RED 1: Route doit exister et retourner 200
   test('should return 200 for valid season and episode', async () => {
     const response = await app.inject({
       method: 'GET',
@@ -32,25 +22,23 @@ describe('GET /podcast/:season/:episode', () => {
     assert.strictEqual(response.statusCode, 200, 'Should return 200 OK')
   })
 
-  // RED 2: Route doit valider et parser les params
   test('should parse season and episode from URL params', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/podcast/1/5' // Changer pour épisode existant
+      url: '/podcast/1/5'
     })
 
     assert.strictEqual(response.statusCode, 200)
     
-    // La route retourne du HTML, pas du JSON
     const body = response.body
     assert.match(body, /Saison 1.*Épisode 5/i, 'Should display season and episode')
+    assert.match(body, /Un bouclier collectif/, 'Should render the requested episode')
   })
 
-  // RED 3: Route doit fetch RSS pour obtenir date épisode
-  test('should fetch RSS to get episode publication date', async () => {
+  test('should display the RSS publication date for S2E1', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/podcast/2/1' // S2E1 publié le 2025-10-27
+      url: '/podcast/2/1'
     })
 
     assert.strictEqual(response.statusCode, 200)
@@ -60,20 +48,26 @@ describe('GET /podcast/:season/:episode', () => {
     assert.match(body, /27 octobre 2025/i, 'Should display publication date from RSS')
   })
 
-  // RED 4: Forcer généralisation - S1E5 doit aussi fonctionner
-  test('should parse date for different episode (S1E5)', async () => {
+  test('should display the RSS publication date for a different episode (S1E5)', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/podcast/1/5' // S1E5 publié le 2025-10-16
+      url: '/podcast/1/5'
     })
 
     assert.strictEqual(response.statusCode, 200)
     
     const body = response.body
     assert.match(body, /S1E5/i, 'Should show episode identifier')
-    assert.match(body, /16 octobre 2025/i, 'Should parse date from RSS')
+    assert.match(body, /16 octobre 2025/i, 'Should display publication date from RSS')
   })
 
-  // TODO: Test queue job (skipped car pg-boss worker ne termine jamais)
-  // On testera manuellement dans server.js
+  test('should redirect to the podcast page when the episode is absent from RSS', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/podcast/99/99'
+    })
+
+    assert.equal(response.statusCode, 302)
+    assert.equal(response.headers.location, '/podcast')
+  })
 })

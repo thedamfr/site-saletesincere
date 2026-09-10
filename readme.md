@@ -39,8 +39,9 @@ subsiste, mais le mur vocal et ses uploads sont désactivés sur la production O
 - **Dev** : Nodemon + Docker Compose
 
 La production **`saletesincere.fr` est servie par OVH**, derrière Cloudflare.
-`staging.saletesincere.fr` pointe sur le même Deployment et la même base : ce
-n’est pas un environnement isolé. Son en-tête `noindex` est ajouté par l’Ingress.
+`staging.saletesincere.fr` sert une prévisualisation isolée du design podcast,
+avec lecture des caches PostgreSQL de production et sans worker. Son en-tête `noindex` est ajouté par l’Ingress. Voir
+[l’ADR 0019](documentation/adr/adr_0019_preview_podcast_isolee.md).
 Clever Cloud reste actif séparément et reçoit encore les mises à jour de `main`.
 
 **Une fusion sur `main` publie l’image GHCR, mais ne déploie pas automatiquement
@@ -340,9 +341,9 @@ npm run test:watch
 Pour le logo animé, le [contrôle visuel du laboratoire](documentation/logo-animation.md)
 vérifie les pixels de 101 étapes dans un navigateur avec `npm run check:logo-animation`.
 
-Certains anciens tests de routes podcast utilisent encore le RSS réel via
-`test/helpers/app.js` : la suite par défaut n’est donc pas entièrement hermétique
-au réseau. Les tests d’intégration base et plateformes sont opt-in :
+Les tests de routes épisode et de métadonnées de partage utilisent des fixtures
+RSS via `test/helpers/podcastApp.js`, sans réseau ni connexion PostgreSQL.
+Les tests d’intégration base et plateformes sont opt-in :
 `RUN_DATABASE_INTEGRATION_TESTS=true`
 avec une `DATABASE_URL` de test pour PostgreSQL, ou
 `RUN_EXTERNAL_INTEGRATION_TESTS=true` avec une base de test et les credentials
@@ -609,8 +610,9 @@ La procédure de référence est le
   publiées par [GitHub Actions](.github/workflows/publish-image.yml).
 - Activation : mise à jour explicite du conteneur `web` sur OVH, puis contrôle du
   rollout, de l’image active et du domaine public.
-- Staging : même application et même base que la production, avec un Ingress
-  `noindex` ; ce n’est pas un environnement indépendant.
+- Staging : prévisualisation podcast sur un Deployment distinct, sessions PostgreSQL en
+  lecture seule et worker arrêté, avec un Ingress `noindex`. Les caches OP3 et
+  les liens résolus de production sont consultables.
 - Clever Cloud : installation historique toujours reliée à GitHub. Un déploiement
   réussi sur Clever ne suffit pas à publier sur le domaine public.
 

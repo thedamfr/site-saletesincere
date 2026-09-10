@@ -5,13 +5,13 @@
 
 import { describe, it, before, after } from 'node:test'
 import assert from 'node:assert/strict'
-import { build } from '../helpers/app.js'
+import { buildPodcastApp } from '../helpers/podcastApp.js'
 
 describe('US4.1 - Open Graph tags dynamiques par épisode', () => {
   let app
 
   before(async () => {
-    app = await build()
+    app = await buildPodcastApp()
   })
 
   after(async () => {
@@ -107,7 +107,7 @@ describe('US4.1 - Cache headers et bots (Vary: User-Agent)', () => {
   let app
 
   before(async () => {
-    app = await build()
+    app = await buildPodcastApp()
   })
 
   after(async () => {

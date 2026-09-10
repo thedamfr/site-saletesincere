@@ -21,6 +21,14 @@ function decodeAndNormalizeText(value = '') {
     .trim()
 }
 
+function extractDescriptionParagraphs(value = '') {
+  return String(value)
+    .replace(/<!\[CDATA\[(.*?)\]\]>/gs, '$1')
+    .split(/<\/?(?:p|div|li|br)\b[^>]*>|\r?\n[\t ]*\r?\n/gi)
+    .map((paragraph) => decodeAndNormalizeText(paragraph))
+    .filter(Boolean)
+}
+
 function extractItemGuid(guid) {
   if (typeof guid === 'string' || typeof guid === 'number') return String(guid)
   return guid?.['#text'] ? String(guid['#text']) : null
@@ -88,6 +96,7 @@ function mapEpisodeItem(item, feedLastBuildDate) {
     episodeType: item['itunes:episodeType'] || 'full',
     title: decodeAndNormalizeText(item.title),
     description,
+    descriptionParagraphs: extractDescriptionParagraphs(item.description),
     isTruncated,
     pubDate: formatDateFrench(publicationDate),
     rawPubDate: publicationDate.toISOString().split('T')[0],
@@ -102,7 +111,7 @@ function mapEpisodeItem(item, feedLastBuildDate) {
   }
 }
 
-async function fetchRssEpisodes(timeout, fetchImpl) {
+async function fetchRssFeed(timeout, fetchImpl) {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), timeout)
   try {
@@ -120,19 +129,28 @@ async function fetchRssEpisodes(timeout, fetchImpl) {
     const channel = rss.rss?.channel
     const items = channel?.item || []
     const itemsArray = Array.isArray(items) ? items : [items]
-    return itemsArray
-      .map((item) => mapEpisodeItem(item, channel?.lastBuildDate || null))
-      .filter(Boolean)
+    return {
+      description: decodeAndNormalizeText(channel?.description || ''),
+      descriptionParagraphs: extractDescriptionParagraphs(channel?.description || ''),
+      episodes: itemsArray
+        .map((item) => mapEpisodeItem(item, channel?.lastBuildDate || null))
+        .filter(Boolean)
+    }
   } finally {
     clearTimeout(timeoutId)
   }
 }
 
 export async function fetchPublishedEpisodesFromRSS(timeout = 5000, fetchImpl = fetch) {
-  const episodes = await fetchRssEpisodes(timeout, fetchImpl)
+  const { episodes } = await fetchPodcastFromRSS(timeout, fetchImpl)
   return episodes
+}
+
+export async function fetchPodcastFromRSS(timeout = 5000, fetchImpl = fetch) {
+  const feed = await fetchRssFeed(timeout, fetchImpl)
+  return { ...feed, episodes: feed.episodes
     .filter((item) => item.itemGuid && item.episode >= 1 && item.episodeType === 'full')
-    .sort((left, right) => new Date(right.rawPubDate) - new Date(left.rawPubDate))
+    .sort((left, right) => new Date(right.rawPubDate) - new Date(left.rawPubDate)) }
 }
 
 export async function fetchEpisodeFromRSS(
@@ -141,7 +159,7 @@ export async function fetchEpisodeFromRSS(
   timeout = 5000,
   fetchImpl = fetch
 ) {
-  const episodes = await fetchRssEpisodes(timeout, fetchImpl)
+  const { episodes } = await fetchRssFeed(timeout, fetchImpl)
   return episodes.find((item) => item.season === season && item.episode === episode) || null
 }
 
@@ -171,6 +189,7 @@ function formatDateFrench(date) {
  * @property {string} episodeType
  * @property {string} title
  * @property {string} description
+ * @property {string[]} descriptionParagraphs
  * @property {boolean} isTruncated
  * @property {string} pubDate
  * @property {string} rawPubDate
