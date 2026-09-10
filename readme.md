@@ -341,9 +341,9 @@ npm run test:watch
 Pour le logo animé, le [contrôle visuel du laboratoire](documentation/logo-animation.md)
 vérifie les pixels de 101 étapes dans un navigateur avec `npm run check:logo-animation`.
 
-Certains anciens tests de routes podcast utilisent encore le RSS réel via
-`test/helpers/app.js` : la suite par défaut n’est donc pas entièrement hermétique
-au réseau. Les tests d’intégration base et plateformes sont opt-in :
+Les tests de routes épisode et de métadonnées de partage utilisent des fixtures
+RSS via `test/helpers/podcastApp.js`, sans réseau ni connexion PostgreSQL.
+Les tests d’intégration base et plateformes sont opt-in :
 `RUN_DATABASE_INTEGRATION_TESTS=true`
 avec une `DATABASE_URL` de test pour PostgreSQL, ou
 `RUN_EXTERNAL_INTEGRATION_TESTS=true` avec une base de test et les credentials

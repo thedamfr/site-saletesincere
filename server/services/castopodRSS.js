@@ -21,6 +21,14 @@ function decodeAndNormalizeText(value = '') {
     .trim()
 }
 
+function extractDescriptionParagraphs(value = '') {
+  return String(value)
+    .replace(/<!\[CDATA\[(.*?)\]\]>/gs, '$1')
+    .split(/<\/?(?:p|div|li|br)\b[^>]*>|\r?\n[\t ]*\r?\n/gi)
+    .map((paragraph) => decodeAndNormalizeText(paragraph))
+    .filter(Boolean)
+}
+
 function extractItemGuid(guid) {
   if (typeof guid === 'string' || typeof guid === 'number') return String(guid)
   return guid?.['#text'] ? String(guid['#text']) : null
@@ -88,6 +96,7 @@ function mapEpisodeItem(item, feedLastBuildDate) {
     episodeType: item['itunes:episodeType'] || 'full',
     title: decodeAndNormalizeText(item.title),
     description,
+    descriptionParagraphs: extractDescriptionParagraphs(item.description),
     isTruncated,
     pubDate: formatDateFrench(publicationDate),
     rawPubDate: publicationDate.toISOString().split('T')[0],
@@ -122,6 +131,7 @@ async function fetchRssFeed(timeout, fetchImpl) {
     const itemsArray = Array.isArray(items) ? items : [items]
     return {
       description: decodeAndNormalizeText(channel?.description || ''),
+      descriptionParagraphs: extractDescriptionParagraphs(channel?.description || ''),
       episodes: itemsArray
         .map((item) => mapEpisodeItem(item, channel?.lastBuildDate || null))
         .filter(Boolean)
@@ -179,6 +189,7 @@ function formatDateFrench(date) {
  * @property {string} episodeType
  * @property {string} title
  * @property {string} description
+ * @property {string[]} descriptionParagraphs
  * @property {boolean} isTruncated
  * @property {string} pubDate
  * @property {string} rawPubDate

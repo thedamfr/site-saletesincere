@@ -1,3 +1,25 @@
+{{#*inline "expandableDescription"}}
+    {{#if paragraphs.length}}
+        {{#if expandable}}
+        <details class="podcast-description">
+            <summary>
+                <span class="podcast-description-preview">{{preview}}…</span>
+                <span class="podcast-description-toggle">
+                    <span class="podcast-description-more">Voir plus</span>
+                    <span class="podcast-description-less">Voir moins</span>
+                </span>
+            </summary>
+            <div class="podcast-description-full">
+                {{#each paragraphs}}<p>{{this}}</p>{{/each}}
+            </div>
+        </details>
+        {{else}}
+        <div class="podcast-description">
+            {{#each paragraphs}}<p>{{this}}</p>{{/each}}
+        </div>
+        {{/if}}
+    {{/if}}
+{{/inline}}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -102,7 +124,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/style.css?v=podcast-card-4">
+    <link rel="stylesheet" href="/style.css?v=podcast-covers-6">
 </head>
 <body class="landing-page podcast-page">
     <a class="landing-skip-link" href="#contenu">Aller au contenu</a>
@@ -122,7 +144,7 @@
             <div>
                 <p class="podcast-eyebrow">Le podcast de Saleté Sincère</p>
                 <h1 id="podcast-title">Charbon<br>&amp; Wafer</h1>
-                {{#if podcastDescription}}<p class="podcast-intro">{{podcastDescription}}</p>{{/if}}
+                <div class="podcast-intro">{{> expandableDescription podcastDescription}}</div>
                 {{#if latestEpisode}}
                 <a href="{{latestEpisode.url}}" class="landing-button landing-podcast-button"><span aria-hidden="true">▶</span> Écouter le dernier épisode</a>
                 {{else}}
@@ -158,7 +180,7 @@
                     <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-yellow-400">{{popularEpisode.label}}</p>
                     <p class="mb-2 text-sm uppercase text-[#ffc330]">Saison {{popularEpisode.episode.season}} • Épisode {{popularEpisode.episode.episode}}</p>
                     <h2 class="mb-3 text-2xl font-bold text-white">{{popularEpisode.episode.title}}</h2>
-                    <p class="mb-4 text-gray-300">{{popularEpisode.episode.description}}</p>
+                    {{> expandableDescription popularEpisode.description}}
                     <div class="mb-5 flex flex-wrap gap-4 text-sm text-gray-400">
                         <span>⏱️ {{popularEpisode.episode.duration}}</span>
                         <span>{{popularEpisode.displayText}}</span>
@@ -173,6 +195,10 @@
             {{#if episodeData}}
             <!-- Episode Highlight -->
             <div class="podcast-episode">
+                {{#if episodeData.image}}
+                <img src="{{episodeData.image}}" alt="Jaquette de l'épisode {{episodeData.title}}" width="662" height="662" fetchpriority="high" class="podcast-episode-cover">
+                {{/if}}
+                <div class="podcast-episode-copy">
                 <div class="text-[#ffc330] text-sm uppercase mb-2">
                     Saison {{episodeData.season}} • Épisode {{episodeData.episode}}
                 </div>
@@ -326,13 +352,7 @@
                 </script>
                 {{/if}}
                 
-                {{#if episodeData.isTruncated}}
-                <a href="{{episodeData.episodeLink}}" target="_blank" rel="noopener noreferrer" class="block text-gray-300 hover:text-white transition-colors mb-4">
-                    {{episodeData.description}}
-                </a>
-                {{else}}
-                <p class="text-gray-300 mb-4">{{episodeData.description}}</p>
-                {{/if}}
+                {{> expandableDescription episodeDescription}}
                 <div class="flex gap-4 text-sm text-gray-400">
                     <span>📅 {{episodeData.pubDate}}</span>
                     <span>⏱️ {{episodeData.duration}}</span>
@@ -343,6 +363,7 @@
                     <span>{{episodeVideoAvailability.platformsText}}</span>
                 </div>
                 {{/if}}
+                </div>
             </div>
             {{/if}}
             

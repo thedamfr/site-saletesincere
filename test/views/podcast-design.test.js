@@ -24,8 +24,46 @@ test('episode page leads with its own title without the podcast hero', () => {
   assert.match(html, /<h1[^>]*>Titre de l’épisode<\/h1>/)
 })
 
+test('episode page displays its RSS cover alongside its own title and player', () => {
+  const html = render({
+    episodeData: {
+      season: 3, episode: 2, title: 'Titre de l’épisode',
+      image: 'https://media.example/episode-cover.jpg',
+      audioUrl: 'https://media.example/episode.mp3'
+    }
+  })
+  const content = html.slice(html.indexOf('<main'))
+  assert.match(content, /<img[^>]+src="https:\/\/media\.example\/episode-cover\.jpg"[^>]+alt="Jaquette de l'épisode Titre de l’épisode"[^>]+class="podcast-episode-cover"/)
+  assert.match(content, /<h1[^>]*>Titre de l’épisode<\/h1>/)
+  assert.match(content, /id="playBtn-3-2"/)
+})
+
+test('episode page without an RSS cover does not render a broken image', () => {
+  const html = render({episodeData: {season: 3, episode: 2, title: 'Sans jaquette'}})
+  assert.doesNotMatch(html, /class="podcast-episode-cover"/)
+  assert.match(html, /<h1[^>]*>Sans jaquette<\/h1>/)
+})
+
 test('podcast introduction renders escaped RSS description', () => {
-  const html = render({ podcastDescription: 'Description RSS <script>test</script>' })
+  const html = render({ podcastDescription: { paragraphs: ['Description RSS <script>test</script>'] } })
   assert.match(html, /Description RSS &lt;script&gt;test&lt;\/script&gt;/)
   assert.doesNotMatch(html, /laboratoire éditorial/)
+})
+
+test('long descriptions provide a native disclosure with the full escaped text', () => {
+  const description = {
+    preview: 'Un aperçu court', expandable: true,
+    paragraphs: ['Un aperçu court et sa suite complète.', 'Dernier paragraphe <script>test</script>.']
+  }
+  for (const data of [
+    { podcastDescription: description },
+    { popularEpisode: { description } },
+    { episodeData: { title: 'Épisode' }, episodeDescription: description }
+  ]) {
+    const html = render(data)
+    assert.match(html, /<details class="podcast-description"/)
+    assert.match(html, /<summary>[\s\S]*Un aperçu court…[\s\S]*Voir plus[\s\S]*Voir moins[\s\S]*<\/summary>/)
+    assert.match(html, /<p>Dernier paragraphe &lt;script&gt;test&lt;\/script&gt;\.<\/p>/)
+    assert.doesNotMatch(html, /<details class="podcast-description" open/)
+  }
 })

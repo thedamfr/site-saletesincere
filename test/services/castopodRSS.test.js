@@ -93,6 +93,27 @@ describe('Castopod RSS Parser', () => {
       assert.strictEqual(episode.title, 'BOUCLIER 🛡️');
     });
 
+    it('preserves full episode paragraphs while keeping the truncated metadata description', async () => {
+      const firstParagraph = 'Une longue histoire à partager. '.repeat(16).trim();
+      const secondParagraph = 'La conclusion & ses récits.';
+      const fullDescription = `${firstParagraph} ${secondParagraph}`;
+      const rss = RSS_LIST_FIXTURE.replace(
+        '<description>Dans la tech, une rencontre inattendue.</description>',
+        `<description><![CDATA[<p>${firstParagraph}</p> <p>La conclusion &amp; ses <strong>récits</strong>.</p>]]></description>`
+      );
+      const episode = await fetchEpisodeFromRSS(
+        2,
+        1,
+        5000,
+        async () => new Response(rss, { status: 200 })
+      );
+
+      assert.deepEqual(episode.descriptionParagraphs, [firstParagraph, secondParagraph]);
+      assert.equal(episode.isTruncated, true);
+      assert.equal(episode.description, `${fullDescription.substring(0, 400).trim()}...`);
+      assert.ok(episode.descriptionParagraphs.join(' ').length > 400);
+    });
+
     it('should return null for non-existent episode', async () => {
       const episode = await fetchEpisodeFromRSS(99, 99, 5000, rssFetch);
       
