@@ -19,8 +19,12 @@ Architecture principale :
 - `documentation/` : PRD, ADR et documentation technique ;
 - `security/` : guides et résultats d'audit.
 
-La production est hébergée sur Clever Cloud. PostgreSQL stocke les données métier et
-sert aussi à `pg-boss`. Cellar/S3 stocke les médias et images générées.
+La production publique est hébergée sur le MicroK8s partagé d’OVH, dans le
+namespace `site-saletesincere`. PostgreSQL y stocke les données métier et sert
+aussi à `pg-boss`. Le Sale-wall et le stockage objet sont désactivés sur cette
+cible. Clever Cloud subsiste comme installation historique distincte ; son état
+ne prouve pas celui du domaine public. La procédure opérationnelle est dans
+`documentation/hebergement-deploiement.md`.
 
 ## Avant toute modification
 
@@ -74,7 +78,11 @@ npm run migrate
   couvre pas déjà le besoin.
 - Garder les serveurs locaux dans des sessions de terminal contrôlables. Ne pas
   installer de mécanisme de persistance sans demande explicite.
-- Pour inspecter Clever Cloud, utiliser la CLI `clever` et l'alias `sale-wall`.
+- Pour déployer ou diagnostiquer la production, lire d’abord le guide d’hébergement,
+  vérifier la cible OVH et limiter les opérations au namespace de cette application.
+  Ne pas modifier les autres services du cluster partagé.
+- Pour inspecter l’installation historique Clever Cloud, utiliser la CLI `clever`
+  et l'alias `sale-wall`.
   Ne jamais recopier les secrets retournés par `clever env`.
 
 ## Fastify, templates et API
@@ -174,11 +182,20 @@ proportionné au risque.
 - Pour `gh`, contrôler l'authentification avec l'accès réseau et au trousseau prévu
   par l'environnement. Un échec dans le sandbox ne suffit pas à conclure que le CLI
   est déconnecté.
-- L'application Clever Cloud est liée à GitHub : une mise à jour de `main` déclenche
-  la production. Après un déploiement autorisé, vérifier l'activité Clever, le
-  commit actif, `/health` et les routes touchées.
+- Une mise à jour de `main` publie une image GHCR et déclenche encore le déploiement
+  historique Clever Cloud. Elle ne met pas automatiquement à jour OVH : après
+  publication de l’image, activer explicitement son tag de commit immuable dans le
+  Deployment Kubernetes, puis attendre la fin du rollout.
+- Un déploiement autorisé n’est terminé qu’après contrôle de l’image réellement
+  active sur OVH, des pods, de `/health` et des routes touchées sur le domaine
+  public. Un workflow vert ou un statut Clever `running` ne suffit pas.
+- Ne pas réappliquer aveuglément les manifests d’amorçage Kubernetes : leurs tags
+  d’image peuvent être anciens. Ne pas modifier DNS, secrets ou ressources
+  partagées au titre d’une simple publication applicative.
 - Ne jamais lancer une migration de production, modifier une variable Clever ou
-  supprimer une ressource sans autorisation explicite et cible vérifiée.
+  un Secret Kubernetes, ni supprimer une ressource sans autorisation explicite et
+  cible vérifiée. Un retour vers Clever demande une décision distincte sur le
+  routage et les données ; les bases ne doivent pas être supposées synchronisées.
 
 ## Vérifications et compte rendu
 

@@ -2,7 +2,7 @@
 title: Production Deployment CleverCloud
 description: Configuration et déploiement de l'application sur CleverCloud avec PostgreSQL et Cellar S3
 owner: @thedamfr
-status: active
+status: historical
 review_after: 2026-01-01
 canonical_url: https://github.com/thedamfr/site-saletesincere/blob/main/documentation/adr/adr_0003_deployment_production_clevercloud.md
 tags: [adr, infrastructure, clevercloud, postgresql, s3]
@@ -14,6 +14,14 @@ production_url: https://app-cb755f4a-25da-4a25-b40c-c395f5086569.cleverapps.io/
 ---
 
 # ADR 0003 — Production Deployment CleverCloud ✅
+
+> **Mise à jour du 10 septembre 2026 : document historique.** La production
+> publique est désormais sur OVH (MicroK8s). Clever Cloud reste actif séparément
+> et continue de recevoir les mises à jour GitHub, mais son état ne valide pas
+> celui de `saletesincere.fr`. Voir [l’ADR 0018](adr_0018_migration_ovh_et_retrait_sale_wall.md)
+> et le [guide opérationnel actuel](../hebergement-deploiement.md). Les procédures
+> et résultats de 2025 ci-dessous sont conservés comme historique, pas comme
+> consignes de déploiement courant.
 
 ## Contexte
 

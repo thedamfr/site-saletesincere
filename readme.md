@@ -1,42 +1,29 @@
 ---
 title: Saleté Sincère
-description: Plateforme audio pour partager victoires "Wafer" et "Charbon" du quotidien avec système de v### Migration depuis Pug (terminée)
-
-La migration de Pug vers Handlebars a été complétée en octobre 2025. Toutes les vues utilisent désormais Handlebars.
-
-**Commits de migration** :
-- `f0e9fc8` - Migration homepage + configuration initiale
-- `71dd497` - Migration manifeste + suppression fichiers Pug principaux  
-- `a8846a6` - Migration newsletter + désinstallation complète de Pug
-
-**📚 Documentation** : [`documentation/adr/adr_0009_migration_handlebars.md`](documentation/adr/adr_0009_migration_handlebars.md)
-
----
-
-## 🛡️ Sécuritér: @thedamfr
+description: Site Saleté Sincère, newsletter, laboratoire du geste et smartlinks podcast
+owner: @thedamfr
 status: active
-review_after: 2026-01-01
+review_after: 2026-10-10
 canonical_url: https://github.com/thedamfr/site-saletesincere
 tags: [audio, platform, fastify, postgresql, tdd]
-production_url: https://app-cb755f4a-25da-4a25-b40c-c395f5086569.cleverapps.io/
+production_url: https://saletesincere.fr/
 ---
 
 # Saleté Sincère
 
-Une plateforme « mur vocal » pour partager vos petites victoires "Wafer" et "Charbon" du quotidien, voter pour vos coups de coeur, et faire naître des épisodes longs.
+Le site Saleté Sincère présente les activités éditoriales, la newsletter, les
+smartlinks du podcast et le laboratoire du geste. Le code historique du Sale-wall
+subsiste, mais le mur vocal et ses uploads sont désactivés sur la production OVH.
 
 ## ✨ Fonctionnalités
 
-- **🎙️ Enregistrement vocal** : Formulaire intégré dans le hero avec MediaRecorder API
-- **📝 Transcription manuelle** : Transcription obligatoire pour l'accessibilité  
-- **🏷️ Système de badges** : Classement "Wafer" (léger) et "Charbon" (intense)
-- **👍 Système de votes** : Vote par IP pour les posts préférés
+- **🎙️ Podcast** : Smartlinks multiplateformes, lecture et métadonnées RSS
+- **🎨 Identité** : Landing éditoriale et laboratoire public du geste du logo
 - **📧 Newsletter intégrée** : Inscription double opt-in via API Brevo (backend-only)
 - **🎨 Design responsive** : Interface adaptée mobile/desktop avec Tailwind CSS v4
 - **♿ Accessibilité** : Labels ARIA, navigation au clavier, contraste élevé
 - **🔒 Sécurité renforcée** : Rate limiting, validation stricte, audit OWASP Top 10
-- **☁️ Stockage cloud** : Upload automatique sur S3/Cellar en production
-- **🚀 Production ready** : Déployé sur CleverCloud avec base PostgreSQL
+- **🚀 Hébergement** : MicroK8s sur OVH, PostgreSQL et worker `pg-boss`
 
 ---
 
@@ -44,28 +31,36 @@ Une plateforme « mur vocal » pour partager vos petites victoires "Wafer" et "C
 
 - **Backend** : Fastify 5.x
 - **Templates** : Handlebars (migration depuis Pug terminée ✅)
-- **Frontend** : Vanilla JS + MediaRecorder API
+- **Frontend** : Vanilla JS et SVG animé
 - **Styling** : Tailwind CSS v4 + PostCSS + CSS custom
 - **Base de données** : PostgreSQL avec UUID
-- **Stockage** : S3 (MinIO en dev) pour les fichiers audio
-- **Déploiement** : CleverCloud avec Docker
+- **Stockage** : PostgreSQL sur OVH ; S3/Cellar réservé au code historique
+- **Déploiement** : Image Docker publiée sur GHCR, puis activée sur MicroK8s OVH
 - **Dev** : Nodemon + Docker Compose
 
-La cible de migration est désormais le MicroK8s partagé du serveur dédié OVH.
-Le premier environnement est `staging.saletesincere.fr` et il est opérationnel ; Clever Cloud reste le
-rollback canonique jusqu'à la bascule explicite de `saletesincere.fr`. Voir
-[l'ADR 0018](documentation/adr/adr_0018_migration_ovh_et_retrait_sale_wall.md).
+La production **`saletesincere.fr` est servie par OVH**, derrière Cloudflare.
+`staging.saletesincere.fr` pointe sur le même Deployment et la même base : ce
+n’est pas un environnement isolé. Son en-tête `noindex` est ajouté par l’Ingress.
+Clever Cloud reste actif séparément et reçoit encore les mises à jour de `main`.
+
+**Une fusion sur `main` publie l’image GHCR, mais ne déploie pas automatiquement
+OVH.** Il faut mettre à jour le Deployment avec le tag du commit fusionné puis
+vérifier le domaine public. Voir le
+[guide d’hébergement et de déploiement](documentation/hebergement-deploiement.md)
+et [l’ADR 0018](documentation/adr/adr_0018_migration_ovh_et_retrait_sale_wall.md).
 
 ### Mode dégradé PostgreSQL
 
 Le serveur HTTP démarre sans attendre PostgreSQL ni `pg-boss`. En cas de base
 indisponible ou en lecture seule, la landing et le podcast restent accessibles,
-les pages épisode utilisent leur contenu RSS et le Sale-wall affiche un état
-d'indisponibilité explicite. Le worker se reconnecte automatiquement sans restart.
+les pages épisode utilisent leur contenu RSS. Le worker se reconnecte
+automatiquement sans restart.
 
 `GET /health` reste une liveness HTTP en 200 et expose séparément `mode`,
-`database.state`, `episodeWorker.state` et `episodeIntents.pending`. Les écritures
-du Sale-wall refusées temporairement répondent 503 avec `Retry-After: 60`.
+`database.state`, `episodeWorker.state` et `episodeIntents.pending`. Sur OVH,
+`DISABLE_WALL=true` fait rediriger `/wall` vers `/` et refuse ses anciennes
+écritures en 410, indépendamment de l’état de la base. Les réponses dégradées en
+503 du mur ne concernent que les installations où il reste activé.
 
 Voir le [PRD du mode dégradé](documentation/prd_mode_degrade_sans_bdd.md).
 
@@ -277,7 +272,7 @@ git clone <repo>
 cd salete-sincere
 npm install
 
-# Outils pour la production (optionnel)
+# Outils pour l’installation historique Clever Cloud (optionnel)
 brew install clever-tools postgresql s3cmd
 ```
 
@@ -345,8 +340,10 @@ npm run test:watch
 Pour le logo animé, le [contrôle visuel du laboratoire](documentation/logo-animation.md)
 vérifie les pixels de 101 étapes dans un navigateur avec `npm run check:logo-animation`.
 
-La suite par défaut reste hermétique au réseau et aux bases externes. Les anciens
-tests d'intégration réels sont opt-in : `RUN_DATABASE_INTEGRATION_TESTS=true`
+Certains anciens tests de routes podcast utilisent encore le RSS réel via
+`test/helpers/app.js` : la suite par défaut n’est donc pas entièrement hermétique
+au réseau. Les tests d’intégration base et plateformes sont opt-in :
+`RUN_DATABASE_INTEGRATION_TESTS=true`
 avec une `DATABASE_URL` de test pour PostgreSQL, ou
 `RUN_EXTERNAL_INTEGRATION_TESTS=true` avec une base de test et les credentials
 plateformes requis. Ne jamais pointer ces tests vers la production.
@@ -417,7 +414,11 @@ Cycles courts (≤10 min) avec commits atomiques à chaque phase GREEN.
 
 ---
 
-## 🎙️ Castopod - Plateforme Podcast (Optionnel)
+## 🎙️ Castopod — configuration locale historique (optionnelle)
+
+Cette section décrit l’ancien environnement local inclus dans ce dépôt, pas le
+déploiement courant du Podcast Studio. Ne pas l’appliquer au cluster de production
+pour publier le site Saleté Sincère.
 
 Castopod est une plateforme open-source pour héberger et gérer des podcasts. Elle est intégrée au projet pour publier des épisodes longs à partir des posts audio.
 
@@ -539,9 +540,13 @@ npm run dev
 # Tout dans Docker
 docker-compose --profile production up -d
 ```
-✅ **Avantages** : Environnement identique à la production
+✅ **Avantages** : Tester le conteneur localement ; l’orchestration de production
+reste MicroK8s et non Docker Compose.
 
-## 🎙️ Fonctionnalité d'enregistrement vocal
+## 🎙️ Enregistrement vocal — historique du Sale-wall
+
+Fonctionnalité conservée dans le code, désactivée sur OVH. Les instructions
+ci-dessous ne sont pas une procédure de remise en service en production.
 
 ### Utilisation
 1. Cliquer sur le bouton "**+ Enregistrer votre histoire**" dans le hero
@@ -581,7 +586,7 @@ npm start            # Démarrage production
 
 ---
 
-## 🐳 Production Docker
+## 🐳 Tester le conteneur en local
 
 ```bash
 # Build et lancement complet
@@ -593,142 +598,57 @@ docker compose up -d
 
 ---
 
-## 🚀 Déploiement CleverCloud
+## 🚀 Hébergement et déploiement de production
 
-### 1. Configuration
-L'application est déployée sur CleverCloud avec les addons suivants :
-- **PostgreSQL** : Base de données principale
-- **Cellar S3** : Stockage des fichiers audio
+La procédure de référence est le
+[guide d’hébergement et de déploiement](documentation/hebergement-deploiement.md).
 
-### 2. Variables d'environnement
+- Production : [saletesincere.fr](https://saletesincere.fr), MicroK8s OVH,
+  namespace et Deployment `site-saletesincere`.
+- Images : `ghcr.io/thedamfr/site-saletesincere:<SHA du commit fusionné>`,
+  publiées par [GitHub Actions](.github/workflows/publish-image.yml).
+- Activation : mise à jour explicite du conteneur `web` sur OVH, puis contrôle du
+  rollout, de l’image active et du domaine public.
+- Staging : même application et même base que la production, avec un Ingress
+  `noindex` ; ce n’est pas un environnement indépendant.
+- Clever Cloud : installation historique toujours reliée à GitHub. Un déploiement
+  réussi sur Clever ne suffit pas à publier sur le domaine public.
 
-#### Variables automatiques (Addons CleverCloud)
-- `POSTGRESQL_ADDON_URI` : URL de connexion PostgreSQL
-- `CELLAR_ADDON_HOST` : Endpoint S3 Cellar
-- `CELLAR_ADDON_KEY_ID` : Clé d'accès S3
-- `CELLAR_ADDON_KEY_SECRET` : Clé secrète S3
+### Configuration et données
 
-#### Variables Newsletter (à configurer)
-- `BREVO_BASEURL="https://api.brevo.com/v3"` : URL API Brevo
-- `BREVO_API_KEY="xkeysib-xxx"` : Clé API Brevo (obligatoire)
-- `BREVO_LIST_ID="3"` : ID liste "Saleté Sincère" dans Brevo
-- `BREVO_DOI_TEMPLATE_ID="TBD"` : ID template email double opt-in
-- `SALENEWS_PUBLIC_BASEURL="https://saletesincere.fr"` : URL publique pour redirections
+Sur OVH, PostgreSQL et `pg-boss` restent actifs ; `DISABLE_STORAGE=true` et
+`DISABLE_WALL=true` désactivent Cellar/S3 et le mur vocal. Une publication du site
+ne doit ni recréer de bucket ni réimporter la base Clever.
 
-#### Variables OP3 (activation progressive)
+Les réglages non sensibles sont portés par le ConfigMap
+`site-saletesincere-env`. Les credentials applicatifs et la connexion PostgreSQL
+restent dans des Secrets Kubernetes distincts ; ne pas les afficher ou les
+recopier dans les commandes, documents ou logs de déploiement.
 
-- `OP3_API_TOKEN` : bearer token utilisé uniquement par le worker en arrière-plan ;
-- `OP3_GUID` : `podcast:guid` du flux suivi par OP3 ;
-- `OP3_PUBLIC_STATS_ENABLED` : mettre à `true` seulement après remplissage et
-  contrôle du cache ; absent ou différent de `true`, aucun compteur n'est public.
+Les fonctions newsletter, OP3 et YouTube conservent leurs propres paramètres :
 
-Sans `OP3_API_TOKEN` ou `OP3_GUID`, le refresh est silencieusement désactivé. Les
-routes HTTP n'appellent jamais OP3 et `/podcast` conserve son contenu éditorial
-si PostgreSQL, le cache ou le RSS ne sont pas disponibles. Avant toute activation
-en production, appliquer la migration `008`, utiliser uniquement des secrets
-ayant remplacé ceux exposés dans l'historique Git, puis contrôler le cache en lecture seule. Voir le
-[PRD traction podcast et OP3](documentation/prd_traction_podcast_op3.md).
+- Newsletter : `BREVO_BASEURL`, `BREVO_API_KEY`, identifiants de listes et template
+  DOI, `SALENEWS_PUBLIC_BASEURL`.
+- OP3 : `OP3_API_TOKEN`, `OP3_GUID`, `OP3_PUBLIC_STATS_ENABLED`. L’activation du
+  compteur public exige un cache rempli et vérifié.
+- YouTube : `YOUTUBE_CHANNEL_URL`, `YOUTUBE_UPLOADS_PLAYLIST_ID`,
+  `YOUTUBE_API_KEY`. La résolution des épisodes se fait dans le worker.
 
-#### Variables YouTube (épisodes vidéo)
+Voir les PRD [newsletter](documentation/adr/adr_0005_newsletter_brevo_integration.md),
+[OP3](documentation/prd_traction_podcast_op3.md) et
+[YouTube](documentation/prd_youtube_podcast.md) avant de modifier ces fonctions.
+Toute migration ou modification de secret nécessite une autorisation distincte.
 
-- `YOUTUBE_CHANNEL_URL` : URL publique de la chaîne affichée parmi les plateformes
-  de diffusion de `/podcast` ; elle n'est jamais utilisée comme secours sur une
-  page épisode ;
-- `YOUTUBE_UPLOADS_PLAYLIST_ID` : identifiant de la playlist d'uploads de la
-  chaîne, généralement préfixé par `UU` ;
-- `YOUTUBE_API_KEY` : clé YouTube Data API v3, utilisée uniquement par le worker.
+### Retour arrière
 
-La description d'une vidéo doit contenir l'URL canonique exacte de son épisode,
-par exemple `https://saletesincere.fr/podcast/3/1`. Le worker `resolve-episode`
-parcourt la playlist, met le lien direct en cache dans `episode_links.youtube_url`
-et le rend à la visite suivante. Une page épisode n'affiche pas YouTube tant
-qu'aucun lien direct n'a été réconcilié. Sans configuration API complète, la
-résolution est silencieusement désactivée sans affecter le lien de chaîne sur la
-page principale. Appliquer la migration `009` avant d'activer les deux variables
-API. Voir le
-[PRD YouTube du podcast](documentation/prd_youtube_podcast.md).
+Le retour arrière normal consiste à redéployer l’image OVH précédemment validée,
+sans changer les volumes ni la base. Revenir vers Clever est une opération
+distincte : vérifier d’abord le routage et la compatibilité des données, sans
+supposer les deux bases synchronisées.
 
-### 3. Déploiement
-```bash
-# Lier le repository à l'application CleverCloud
-clever link <app-id>
-
-# Déployer via Git hook
-git push origin main
-```
-
-### 4. Initialisation de la base de données
-```bash
-# Avec Clever CLI et PostgreSQL client
-brew install clever-tools postgresql
-clever addon env <postgresql-addon-id>
-PGPASSWORD="<password>" psql -h <host> -p <port> -U <user> -d <database> -f sql/001_init.sql
-```
-
-### 5. Configuration S3/Cellar
-```bash
-# Avec s3cmd
-brew install s3cmd
-s3cmd --configure
-s3cmd mb s3://salete-media
-s3cmd mb s3://salete-media-podcast
-```
-
-> ℹ️ `salete-media` reste dédié au mur Fastify tandis que `salete-media-podcast` héberge les médias Castopod. Pensez à générer une paire `ACCESS_KEY/SECRET` spécifique pour Castopod et à la restreindre à ce bucket (ou au préfixe `podcast/` si vous mutualisez le bucket).
-
-```bash
-# MinIO (exemple) : créer un utilisateur Castopod et attacher une policy restreinte
-mc alias set local http://localhost:9000 salete salete123
-mc admin user add local castopod castopod-secret
-mc admin policy create local castopod-policy <<'EOF'
-{
-	"Version": "2012-10-17",
-	"Statement": [{
-		"Effect": "Allow",
-		"Action": ["s3:GetObject","s3:PutObject","s3:DeleteObject"],
-		"Resource": ["arn:aws:s3:::salete-media-podcast/*"]
-	}]
-}
-EOF
-mc admin policy attach local castopod-policy --user castopod
-```
-
-> Sur Cellar, créez le bucket équivalent depuis la console CleverCloud et générez un jeu de credentials séparé (menu **Access keys**) pour l'appli Castopod.
-
-### 6. Statut du déploiement
-✅ **Application déployée** : https://app-cb755f4a-25da-4a25-b40c-c395f5086569.cleverapps.io/  
-✅ **Base de données** : PostgreSQL opérationnelle  
-✅ **Stockage S3** : Buckets `salete-media` (mur) & `salete-media-podcast` (Castopod) créés  
-✅ **Upload audio** : Testé et fonctionnel  
-✅ **Accès public** : Fichiers accessibles via navigateur
-
----
-
-## 🧪 Tests en production
-
-### Vérification des fonctionnalités
-✅ **Enregistrement audio** : 3 fichiers testés avec succès  
-✅ **Upload S3/Cellar** : Stockage automatique opérationnel  
-✅ **Base de données** : Connexion PostgreSQL stable  
-✅ **URLs publiques** : Fichiers audio accessibles  
-✅ **Interface utilisateur** : Formulaire et feedback fonctionnels  
-
-### Fichiers de test créés
-- `audio_1752304442181.webm` (3.4 KB) - 12/07/2025 07:14
-- `audio_1752304625905.webm` (1.5 KB) - 12/07/2025 07:17  
-- `audio_1752304733570.webm` (1.1 KB) - 12/07/2025 07:18
-
-### Commandes de vérification
-```bash
-# Vérifier les fichiers S3
-s3cmd ls s3://salete-media/audio/
-
-# Tester l'accessibilité HTTP
-curl -I https://cellar-c2.services.clever-cloud.com/salete-media/audio/audio_[timestamp].webm
-
-# Vérifier la base de données
-psql <connection-string> -c "SELECT COUNT(*) FROM posts;"
-```
+L’[ADR 0003](documentation/adr/adr_0003_deployment_production_clevercloud.md)
+conserve les procédures Clever/Cellar et les tests de 2025 comme historique.
+Ils ne sont plus les consignes de production courante.
 
 ---
 
