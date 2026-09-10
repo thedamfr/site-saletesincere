@@ -24,10 +24,14 @@ Cette concordance ponctuelle ne prouve ni une activation automatique, ni une
 validation fonctionnelle exhaustive de cette version.
 
 Le domaine public cible le Service `site-saletesincere`. Le staging cible
-`site-saletesincere-preview`, qui monte un ConfigMap de design sur la même image
-de base, sans Secret, base métier ou worker. Cette
-[prévisualisation temporaire](hebergement-deploiement.md#prévisualisation-observée-sur-staging) ne constitue
-pas une recette complète de la production.
+`site-saletesincere-preview`. Au relevé initial vers 15:54 UTC, cette
+[prévisualisation partielle](hebergement-deploiement.md#prévisualisation-observée-sur-staging)
+montait un ConfigMap de design, sans secrets métier ni base configurée, avec
+le worker arrêté. Au contrôle actualisé vers 17:10 UTC, `/health` signale
+`degraded/read_only/stopped` : la base n'est plus à décrire comme absente, mais
+le fonctionnement normal et l'isolation d'une base staging dédiée ne sont
+pas démontrés. Ce staging reste incomplet au regard de la demande explicite du
+propriétaire ; cette observation ne constitue pas la cible à pérenniser.
 
 Les [manifests Kustomize](../k8s/ovh/kustomization.yaml) restent un amorçage :
 [app.yaml](../k8s/ovh/app.yaml) contient une ancienne image et
@@ -61,6 +65,26 @@ l'outillage d'infrastructure et recevoir le digest exact de l'image. Les
 workflows et scripts correspondants restent à écrire. Helm n'est pas nécessaire
 pour ce Deployment ; l'automatisation doit d'abord séparer la publication
 applicative de l'amorçage et des opérations sur les données.
+
+## Staging complet pour présenter et tester le travail
+
+Le propriétaire exige un [staging complet et isolé](hebergement-deploiement.md#staging-complet-exigé),
+avec application, PostgreSQL, worker, stockage nécessaire et configuration propres.
+Le pipeline staging doit livrer le commit candidat avec ses dépendances actives,
+faire la recette métier et exposer son URL, son digest et ses résultats. Il ne
+reçoit pas de droits d'écriture sur les données, queues ou services de production.
+Les jeux de test ou clones contrôlés, éventuellement anonymisés, et les comptes
+externes de test doivent permettre les parcours complets sans effets réels en
+production. Cette documentation ne réalise aucune copie ni aucun déploiement.
+
+Le staging et la production gardent chacun leur version souhaitée, leur verrou
+de déploiement et leur preuve de recette ; une branche candidate peut donc être
+montrée sans remplacer la production. Les vérifications de capacité tiennent
+compte de leur hôte partagé. Réutiliser un digest déjà construit et validé lorsque
+les sources et entrées correspondent évite un build inutile ; le SHA candidat
+et celui finalement fusionné ne doivent pas être confondus. Après merge, la
+production reste automatiquement réconciliée vers `main` validé, puis vérifiée
+sur son domaine. La recette staging ne remplace pas ce dernier contrôle.
 
 ## Sélection des builds
 
@@ -110,7 +134,7 @@ sur `*.md` serait prématuré avec le Dockerfile actuel.
 2. Construire exactement les sources validées. Publier le SHA source dans les
    métadonnées de l'image, résoudre le digest GHCR et activer ce digest. Conserver
    le tag de commit pour la navigation et le diagnostic.
-3. Autoriser le déploiement automatique depuis `main` seulement. Les tags et
+3. Autoriser le déploiement automatique en production depuis `main` seulement. Les tags et
    lancements manuels ne doivent pas publier une ancienne branche en production
    par simple héritage du workflow actuel.
 4. Annuler les builds dépassés si utile, mais sérialiser l'activation et sa recette.
@@ -139,7 +163,7 @@ motif visible. Les migrations irréversibles et restaurations de données resten
 soumises à une instruction spécifique. Revenir à l'image précédente n'annule pas
 un changement de schéma.
 
-## Prérequis de capacité production et preview
+## Prérequis de capacité production et staging complet
 
 Au contrôle du 10 septembre 2026 vers 16:04 UTC, le quota du namespace du site
 utilise la totalité de `limits.cpu` (2/2 CPU) et `limits.memory` (2/2 GiB).
@@ -147,13 +171,14 @@ La preview consomme la marge nécessaire au pod supplémentaire du rollout de
 production. Les ressources libres sur le serveur ne suffisent donc pas à
 garantir que Kubernetes admettra ce pod.
 
-Avant chaque activation, vérifier le quota et les ressources nécessaires à la
-stratégie de rollout, sous le même verrou de déploiement. Si la marge manque,
-bloquer avant mutation avec une explication exploitable. Définir et valider la
-coexistence production/preview avant d'activer la CD. La mise à zéro temporaire
-de la preview évoquée par le runbook manuel doit être coordonnée et autorisée ;
-elle ne devient pas un arrêt automatique de staging à chaque push. Le pipeline
-ne relève pas les quotas et ne dégrade pas la stratégie de production implicitement.
+Ce constat est daté. Avant chaque activation, revérifier le quota et les
+ressources nécessaires aux deux environnements et à leurs stratégies de rollout.
+Dimensionner et versionner leur coexistence avant d'activer la CD : le staging
+complet, sa base et son worker doivent rester disponibles pendant les publications
+de production. Arrêter le staging ou ses dépendances à chaque push ne fait pas
+partie du fonctionnement normal. Si la marge manque, bloquer avant mutation
+avec une explication exploitable. Les changements de quota ou de stratégie
+nécessitent une préparation et une validation explicites.
 
 ## Critères de réussite en production
 
@@ -171,10 +196,14 @@ La recette automatique doit donc vérifier avec des délais bornés :
 - L'absence de régression pertinente sur les parcours concernés, sans soumettre
   de newsletter, de formulaire ou d'écriture métier comme simple test de santé.
 
-Le staging isolé est exclu de cette preuve : ses états attendus sont
-`degraded/unavailable/stopped`, son rendu dépend du ConfigMap de preview et il
-conserve `noindex`. Un succès staging ne prouve pas le fonctionnement du worker,
-de la base ou des smartlinks résolus en production.
+Le staging complet doit réussir les mêmes critères de santé en mode normal
+sur ses propres dépendances : `mode=normal`, `database.state=read_write` et
+`episodeWorker.state=ready`. Sa recette comprend les écritures et jobs métier
+sur des données isolées et les intégrations externes de test, selon le
+[contrat du staging](hebergement-deploiement.md#staging-complet-exigé).
+Les états dégradés des relevés de preview sont des écarts à corriger ; ils ne
+valident pas ce staging. Un succès du staging ne prouve pas à lui seul la santé
+de la production, qui conserve sa recette après activation.
 
 Le résumé du run doit afficher version souhaitée, version active, digest, durée,
 contrôles exécutés et échec éventuel, avec le lien du run. En cas d'échec après

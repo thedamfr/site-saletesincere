@@ -39,9 +39,13 @@ subsiste, mais le mur vocal et ses uploads sont désactivés sur la production O
 - **Dev** : Nodemon + Docker Compose
 
 La production **`saletesincere.fr` est servie par OVH**, derrière Cloudflare.
-Au relevé du 10 septembre 2026, `staging.saletesincere.fr` sert une
-prévisualisation podcast séparée, sans base ni worker, avec `noindex`.
-Voir la [description de cette preview](documentation/hebergement-deploiement.md#prévisualisation-observée-sur-staging).
+Au contrôle du 10 septembre 2026 vers 17:10 UTC, `staging.saletesincere.fr`
+reste partiel : `/health` signale une base `read_only` et un worker `stopped`.
+Le propriétaire demande un **staging complet et isolé**, avec application,
+PostgreSQL, worker, stockage nécessaire et configuration propres ; la preview
+partielle ne satisfait pas cette demande. Voir
+[l'état observé](documentation/hebergement-deploiement.md#prévisualisation-observée-sur-staging)
+et [les critères du staging complet](documentation/hebergement-deploiement.md#staging-complet-exigé).
 Clever Cloud reste actif séparément et reçoit encore les mises à jour de `main`.
 
 **Une fusion sur `main` publie l’image GHCR, mais ne déploie pas automatiquement
@@ -617,8 +621,11 @@ La procédure de référence est le
   publiées par [GitHub Actions](.github/workflows/publish-image.yml).
 - Activation : mise à jour explicite du conteneur `web` sur OVH, puis contrôle du
   rollout, de l’image active et du domaine public.
-- Staging : preview podcast séparée au relevé du 10 septembre, sans base ni
-  worker et avec `noindex` ; elle ne valide pas tous les parcours de production.
+- Staging : encore incomplet au relevé du 10 septembre vers 17:10 UTC. La cible
+  exige les mêmes critères de santé en mode normal que la production, des tests
+  métier sur des données et dépendances isolées, et aucun effet de production.
+  Il doit rester disponible pendant les rollouts de production ; voir le
+  [contrat du staging complet](documentation/hebergement-deploiement.md#staging-complet-exigé).
 - Clever Cloud : installation historique toujours reliée à GitHub. Un déploiement
   réussi sur Clever ne suffit pas à publier sur le domaine public.
 

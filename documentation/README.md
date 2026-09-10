@@ -28,7 +28,8 @@ Documentation technique et décisions architecturales du projet Saleté Sincère
 ### Hébergement et livraison
 
 - **Procédure actuelle OVH** : [Hébergement et déploiement](hebergement-deploiement.md) — publication GHCR puis activation explicite sur MicroK8s.
-- **Direction décidée** : [Livraison continue](livraison-continue.md) — audit du pipeline, builds sélectifs, activation automatique de `main` et preuve de version ; non implémentée.
+- **Direction décidée** : [Livraison continue](livraison-continue.md) — builds sélectifs, staging complet et isolé, activation automatique de `main` en production et preuve de version ; non implémentée.
+- **Staging exigé** : [Contrat du staging complet](hebergement-deploiement.md#staging-complet-exigé) — base et worker actifs, stockage/configuration propres, recette métier et coexistence avec la production ; état encore partiel observé séparément.
 
 ### 📌 Product Requirements
 - **Homepage** : [`./prd_homepage.md`](./prd_homepage.md)
