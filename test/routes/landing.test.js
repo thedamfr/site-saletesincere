@@ -113,7 +113,7 @@ describe('GET / landing redesign', () => {
     assertContains(response.body, /<meta property="article:author" content="Damien Cavaillès">/)
     assertContains(response.body, /<meta property="article:published_time" content="2026-09-09T00:00:00\+02:00">/)
     assertContains(response.body, new RegExp(`<meta property="og:description" content="${description}">`))
-    assertContains(response.body, /<meta property="og:image" content="https:\/\/saletesincere\.fr\/images\/shareimg-v3\.jpg">/)
+    assertContains(response.body, /<meta property="og:image" content="https:\/\/saletesincere\.fr\/cdn-cgi\/image\/width=1200,height=627,fit=cover,quality=85,format=png\/images\/shareimg\.jpg">/)
     assertContains(response.body, /<meta property="og:image:type" content="image\/jpeg">/)
     assertContains(response.body, /<meta property="og:image:width" content="1200">/)
     assertContains(response.body, /<meta property="og:image:height" content="627">/)
@@ -121,22 +121,21 @@ describe('GET / landing redesign', () => {
     assertContains(response.body, /<meta name="twitter:card" content="summary_large_image">/)
     assertContains(response.body, /<meta name="twitter:title" content="Saleté Sincère">/)
     assertContains(response.body, new RegExp(`<meta name="twitter:description" content="${description}">`))
-    assertContains(response.body, /<meta name="twitter:image" content="https:\/\/saletesincere\.fr\/images\/shareimg-v3\.jpg">/)
+    assertContains(response.body, /<meta name="twitter:image" content="https:\/\/saletesincere\.fr\/cdn-cgi\/image\/width=1200,height=627,fit=cover,quality=85,format=png\/images\/shareimg\.jpg">/)
     assertContains(response.body, /<meta name="twitter:image:alt" content="Damien Cavaillès au micro avec le logo Saleté Sincère">/)
     assert.ok(description.length >= 100)
   })
 
-  test('serves a LinkedIn-ready JPEG below the recompression threshold', async () => {
+  test('serves the original JPEG source used by Cloudflare', async () => {
     const app = await createApp()
 
-    const response = await app.inject({ method: 'GET', url: '/images/shareimg-v3.jpg' })
+    const response = await app.inject({ method: 'GET', url: '/images/shareimg.jpg' })
 
     assert.equal(response.statusCode, 200)
     assert.match(response.headers['content-type'], /^image\/jpeg/)
-    assert.ok(response.rawPayload.byteLength < 100_000)
 
     const image = await Jimp.read(response.rawPayload)
-    assert.deepEqual([image.bitmap.width, image.bitmap.height], [1200, 627])
+    assert.deepEqual([image.bitmap.width, image.bitmap.height], [1920, 1080])
   })
 
   test('renders at most three real RSS episodes with format, duration and links', async () => {
