@@ -9,11 +9,12 @@ cluster partagé.
 | Cible | Rôle actuel | Mise à jour |
 | --- | --- | --- |
 | `saletesincere.fr` | Production publique, Cloudflare → OVH/MicroK8s | Image GHCR à activer explicitement sur OVH |
-| `staging.saletesincere.fr` | Même Service, Deployment et base, Ingress avec `noindex` | Change en même temps que la production OVH |
+| `staging.saletesincere.fr` | Prévisualisation podcast séparée, sans base ni worker, avec `noindex` | Deployment `site-saletesincere-preview` |
 | Application Clever `sale-wall` | Installation historique distincte, toujours active | Intégration GitHub encore déclenchée par `main` |
 
-**Staging n’est pas isolé de la production.** Ne pas y essayer une image ou une
-mutation de données en supposant que le domaine public restera intact.
+**Le staging sert une preview visuelle séparée au relevé du 10 septembre.**
+Elle ne valide pas les écritures, la base ou le worker de production. Voir
+[la description de son périmètre](#prévisualisation-observée-sur-staging).
 
 Le namespace, le Service et le Deployment OVH se nomment `site-saletesincere` ;
 le conteneur applicatif est `web`. PostgreSQL et le worker `pg-boss` sont actifs.
@@ -26,6 +27,14 @@ d’amorçage ne suivent pas automatiquement les releases : **ne pas relancer
 `kubectl apply -k k8s/ovh` pour une simple publication**, au risque de rétablir une
 ancienne image ou de toucher aux ressources persistantes. Ne pas relancer les
 scripts de transfert de secrets ou de restauration de base pour une release.
+
+Le manifeste d’amorçage `k8s/ovh/ingress.yaml` pointe encore le staging vers
+le Service de production : le réappliquer annulerait le routage de preview
+observé. Le Job `k8s/ovh/migration-job.yaml`, à nom et image historiques,
+n’est pas une étape générique de release. La
+[direction de livraison continue](livraison-continue.md) prévoit de rendre
+ces opérations rejouables sans écraser la version active ; elle n’est pas activée.
+
 
 ## Accès à vérifier avant intervention
 
@@ -179,7 +188,7 @@ de distinguer l’origine du proxy, sans changer le DNS. Les commandes
 `clever status --alias sale-wall` et `clever activity --alias sale-wall` restent
 utiles pour l’installation historique uniquement ; ne pas afficher `clever env`.
 
-## Dernière recette consignée
+## Recette historique — PR 29
 
 Le 10 septembre 2026, la [PR 29](https://github.com/thedamfr/site-saletesincere/pull/29)
 a publié le commit `d6ed6ff9c0438b05cc8df74a4e3b2f60b79b4d15`. L’image GHCR a été
@@ -196,3 +205,43 @@ warmup). Ce suivi reste distinct de la recette HTTP de production.
 
 Historique et décision : [ADR 0018](adr/adr_0018_migration_ovh_et_retrait_sale_wall.md),
 [ancienne installation Clever Cloud](adr/adr_0003_deployment_production_clevercloud.md).
+
+
+## Audit de livraison — 10 septembre 2026
+
+Au relevé vers 15:54 UTC, le `main` distant et le tag du Deployment de
+production correspondent à `f03a1be99bd48ae839f08e9cf310cf87aa1b99f3` (PR 30).
+La [publication GHCR](https://github.com/thedamfr/site-saletesincere/actions/runs/34466109980)
+a réussi ; son workflow ne déploie pas OVH. La concordance ponctuelle des SHA
+ne prouve pas une livraison automatique.
+
+Le pod de production est prêt. `/health` confirme `mode=normal`,
+`database.state=read_write`, `episodeWorker.state=ready`. Ce relevé ne
+réexécute pas toute la recette PR 30. La direction demandée est
+[GitHub Actions → GHCR → déploiement OVH vérifié](livraison-continue.md),
+avec sélection des builds et activation après CI verte sur `main`.
+Elle reste à implémenter ; la procédure manuelle ci-dessus décrit l’existant.
+
+## Prévisualisation observée sur staging
+
+Le 10 septembre 2026, l’Ingress `site-saletesincere-staging` cible le Service
+`site-saletesincere-preview`. Ce Deployment sert une recette visuelle du podcast
+sur la même image de base que la production, avec le template et le CSS montés
+depuis un ConfigMap. Il ne reçoit pas les secrets métier et désactive base,
+worker, stockage et Sale-wall. Son `/health` retourne volontairement
+`degraded/unavailable/stopped`. Ce montage temporaire ne constitue pas un
+staging fonctionnel complet. Les manifests d’amorçage ne le reproduisent pas.
+
+La production `saletesincere.fr` garde le Service `site-saletesincere` et son
+application avec base et worker. Aucune modification de design n’est publiée
+par la présente PR documentaire. La preview est un état déjà observé sur le
+serveur ; ses changements applicatifs sont gérés séparément.
+
+Le routage et les deux Deployments prêts ont été revérifiés vers 16:20 UTC.
+Le quota du namespace reste entièrement utilisé pour les limites CPU (2/2)
+et mémoire (2/2 GiB). La preview occupe ainsi la marge nécessaire au pod
+supplémentaire du rollout de production, malgré la capacité libre de l’hôte.
+La direction CD impose un précontrôle du quota et une stratégie de coexistence
+avant activation : aucun arrêt implicite de staging ni relèvement automatique
+du quota. Une mise à zéro temporaire de la preview doit être coordonnée et
+autorisée ; elle n’est pas exécutée par cette revue documentaire.

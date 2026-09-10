@@ -39,8 +39,9 @@ subsiste, mais le mur vocal et ses uploads sont désactivés sur la production O
 - **Dev** : Nodemon + Docker Compose
 
 La production **`saletesincere.fr` est servie par OVH**, derrière Cloudflare.
-`staging.saletesincere.fr` pointe sur le même Deployment et la même base : ce
-n’est pas un environnement isolé. Son en-tête `noindex` est ajouté par l’Ingress.
+Au relevé du 10 septembre 2026, `staging.saletesincere.fr` sert une
+prévisualisation podcast séparée, sans base ni worker, avec `noindex`.
+Voir la [description de cette preview](documentation/hebergement-deploiement.md#prévisualisation-observée-sur-staging).
 Clever Cloud reste actif séparément et reçoit encore les mises à jour de `main`.
 
 **Une fusion sur `main` publie l’image GHCR, mais ne déploie pas automatiquement
@@ -48,6 +49,13 @@ OVH.** Il faut mettre à jour le Deployment avec le tag du commit fusionné puis
 vérifier le domaine public. Voir le
 [guide d’hébergement et de déploiement](documentation/hebergement-deploiement.md)
 et [l’ADR 0018](documentation/adr/adr_0018_migration_ovh_et_retrait_sale_wall.md).
+
+**Direction à suivre :** sélection et build sur les runners GitHub Actions,
+publication GHCR, puis déploiement automatique par digest sur Penthouse après
+CI verte du push `main` et recette applicative. Le serveur ne reconstruit pas
+l’application dans le parcours courant. Cette
+[livraison continue](documentation/livraison-continue.md) reste à implémenter.
+
 
 ### Mode dégradé PostgreSQL
 
@@ -609,8 +617,8 @@ La procédure de référence est le
   publiées par [GitHub Actions](.github/workflows/publish-image.yml).
 - Activation : mise à jour explicite du conteneur `web` sur OVH, puis contrôle du
   rollout, de l’image active et du domaine public.
-- Staging : même application et même base que la production, avec un Ingress
-  `noindex` ; ce n’est pas un environnement indépendant.
+- Staging : preview podcast séparée au relevé du 10 septembre, sans base ni
+  worker et avec `noindex` ; elle ne valide pas tous les parcours de production.
 - Clever Cloud : installation historique toujours reliée à GitHub. Un déploiement
   réussi sur Clever ne suffit pas à publier sur le domaine public.
 
@@ -710,4 +718,5 @@ Ce projet suit une approche **Test-Driven Development** stricte :
 
 ## 📄 Licence
 
-MIT License - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+Le README historique annonce MIT, mais aucun fichier `LICENSE` n’est versionné
+dans ce checkout au 10 septembre 2026. Le texte de licence reste à formaliser.

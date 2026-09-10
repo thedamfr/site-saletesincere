@@ -3,7 +3,7 @@ title: Documentation Technique
 description: Navigation vers toute la documentation technique du projet Saleté Sincère
 owner: @thedamfr
 status: active
-review_after: 2026-01-01
+review_after: 2026-10-10
 canonical_url: https://github.com/thedamfr/site-saletesincere/blob/main/documentation/README.md
 tags: [documentation, navigation, adr, security, tdd]
 ---
@@ -16,14 +16,19 @@ Documentation technique et décisions architecturales du projet Saleté Sincère
 
 | Décision | Statut | Impact |
 |----------|--------|---------|
-| [Voice Posting MVP](./adr/adr_0001_voice_posting_mvp.md) | ✅ Implémenté | Fonctionnalité cœur |
-| [Production CleverCloud](./adr/adr_0003_deployment_production_clevercloud.md) | ✅ Actif | Infrastructure |
+| [Voice Posting MVP](./adr/adr_0001_voice_posting_mvp.md) | Historique, désactivé sur OVH | Sale-wall |
+| [Production CleverCloud](./adr/adr_0003_deployment_production_clevercloud.md) | Historique, installation distincte | Ancien hébergement public |
 | [Migration OVH et retrait du Sale-wall](./adr/adr_0018_migration_ovh_et_retrait_sale_wall.md) | 🚀 Implémenté | Infrastructure |
 | [Rate Limiting & Security](./adr/adr_0004_rate_limiting_security.md) | ✅ Actif | Sécurité |
 
 **� Tous les ADRs** : [`./adr/index.md`](./adr/index.md)
 
 ## 📚 Documentation Technique
+
+### Hébergement et livraison
+
+- **Procédure actuelle OVH** : [Hébergement et déploiement](hebergement-deploiement.md) — publication GHCR puis activation explicite sur MicroK8s.
+- **Direction décidée** : [Livraison continue](livraison-continue.md) — audit du pipeline, builds sélectifs, activation automatique de `main` et preuve de version ; non implémentée.
 
 ### 📌 Product Requirements
 - **Homepage** : [`./prd_homepage.md`](./prd_homepage.md)
@@ -63,4 +68,5 @@ Documentation technique et décisions architecturales du projet Saleté Sincère
 **Pour le développement** :
 1. **Setup local** : [`../readme.md#développement-local`](../readme.md#%EF%B8%8F-développement-local)
 2. **Sécurité** : [`./audit_guide.md`](./audit_guide.md) - Lancer les audits
-3. **Déploiement** : [`./adr/adr_0003_deployment_production_clevercloud.md`](./adr/adr_0003_deployment_production_clevercloud.md)
+3. **Déploiement actuel OVH** : [Hébergement et déploiement](hebergement-deploiement.md)
+4. **Automatisation à construire** : [Livraison continue](livraison-continue.md)
