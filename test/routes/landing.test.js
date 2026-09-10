@@ -1,5 +1,6 @@
 import { afterEach, describe, test } from 'node:test'
 import assert from 'node:assert/strict'
+import { Jimp } from 'jimp'
 import { buildApp } from '../../server.js'
 
 const apps = []
@@ -63,6 +64,7 @@ describe('GET / landing redesign', () => {
 
     assert.equal(response.statusCode, 200)
     assertContains(response.body, /class="landing-page"/)
+    assertContains(response.body, /<link rel="stylesheet" href="\/style\.css\?v=logo-ribbons-1">/)
     assertContains(response.body, /logo-salete-sincere-horizontal\.png/)
     assertContains(response.body, /class="landing-hero-mark"[^>]*data-logo-replay[^>]*aria-label="Rejouer l’animation du logo"/)
     assertContains(response.body, /data-logo-animation[^>]*src="\/images\/logo-noname-web\.svg\?v=logo-ribbons-1"[^>]*alt=""[^>]*aria-hidden="true"/)
@@ -96,35 +98,44 @@ describe('GET / landing redesign', () => {
     const app = await createApp()
 
     const response = await app.inject({ method: 'GET', url: '/' })
+    const description = 'Saleté Sincère : journalisme, production éditoriale et prise de parole dans la tech, avec Damien Cavaillès.'
 
     assert.equal(response.statusCode, 200)
     assertContains(response.body, /<link rel="canonical" href="https:\/\/saletesincere\.fr\/">/)
+    assertContains(response.body, new RegExp(`<meta name="description" content="${description}">`))
+    assertContains(response.body, /<meta name="author" content="Damien Cavaillès">/)
+    assertContains(response.body, /<meta name="date" content="2026-09-09">/)
     assertContains(response.body, /<meta property="og:type" content="website">/)
     assertContains(response.body, /<meta property="og:locale" content="fr_FR">/)
     assertContains(response.body, /<meta property="og:site_name" content="Saleté Sincère">/)
     assertContains(response.body, /<meta property="og:url" content="https:\/\/saletesincere\.fr\/">/)
     assertContains(response.body, /<meta property="og:title" content="Saleté Sincère">/)
-    assertContains(response.body, /<meta property="og:description" content="Journalisme, production éditoriale et prise de parole dans la tech\.">/)
-    assertContains(response.body, /<meta property="og:image" content="https:\/\/saletesincere\.fr\/images\/shareimg\.jpg">/)
+    assertContains(response.body, /<meta property="article:author" content="Damien Cavaillès">/)
+    assertContains(response.body, /<meta property="article:published_time" content="2026-09-09T00:00:00\+02:00">/)
+    assertContains(response.body, new RegExp(`<meta property="og:description" content="${description}">`))
+    assertContains(response.body, /<meta property="og:image" content="https:\/\/saletesincere\.fr\/cdn-cgi\/image\/width=1200,height=627,fit=cover,quality=92,format=jpeg\/https:\/\/saletesincere\.fr\/images\/shareimg\.jpg">/)
     assertContains(response.body, /<meta property="og:image:type" content="image\/jpeg">/)
-    assertContains(response.body, /<meta property="og:image:width" content="1920">/)
-    assertContains(response.body, /<meta property="og:image:height" content="1080">/)
+    assertContains(response.body, /<meta property="og:image:width" content="1200">/)
+    assertContains(response.body, /<meta property="og:image:height" content="627">/)
     assertContains(response.body, /<meta property="og:image:alt" content="Damien Cavaillès au micro avec le logo Saleté Sincère">/)
     assertContains(response.body, /<meta name="twitter:card" content="summary_large_image">/)
     assertContains(response.body, /<meta name="twitter:title" content="Saleté Sincère">/)
-    assertContains(response.body, /<meta name="twitter:description" content="Journalisme, production éditoriale et prise de parole dans la tech\.">/)
-    assertContains(response.body, /<meta name="twitter:image" content="https:\/\/saletesincere\.fr\/images\/shareimg\.jpg">/)
+    assertContains(response.body, new RegExp(`<meta name="twitter:description" content="${description}">`))
+    assertContains(response.body, /<meta name="twitter:image" content="https:\/\/saletesincere\.fr\/cdn-cgi\/image\/width=1200,height=627,fit=cover,quality=92,format=jpeg\/https:\/\/saletesincere\.fr\/images\/shareimg\.jpg">/)
     assertContains(response.body, /<meta name="twitter:image:alt" content="Damien Cavaillès au micro avec le logo Saleté Sincère">/)
+    assert.ok(description.length >= 100)
   })
 
-  test('serves the supplied social image as a JPEG asset', async () => {
+  test('serves the original JPEG source used by Cloudflare', async () => {
     const app = await createApp()
 
     const response = await app.inject({ method: 'GET', url: '/images/shareimg.jpg' })
 
     assert.equal(response.statusCode, 200)
     assert.match(response.headers['content-type'], /^image\/jpeg/)
-    assert.ok(response.rawPayload.byteLength > 100_000)
+
+    const image = await Jimp.read(response.rawPayload)
+    assert.deepEqual([image.bitmap.width, image.bitmap.height], [1920, 1080])
   })
 
   test('renders at most three real RSS episodes with format, duration and links', async () => {
