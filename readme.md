@@ -342,6 +342,9 @@ npm test
 npm run test:watch
 ```
 
+Pour le logo animé, le [contrôle visuel du laboratoire](documentation/logo-animation.md)
+vérifie les pixels de 101 étapes dans un navigateur avec `npm run check:logo-animation`.
+
 La suite par défaut reste hermétique au réseau et aux bases externes. Les anciens
 tests d'intégration réels sont opt-in : `RUN_DATABASE_INTEGRATION_TESTS=true`
 avec une `DATABASE_URL` de test pour PostgreSQL, ou

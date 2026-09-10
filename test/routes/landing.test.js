@@ -64,10 +64,10 @@ describe('GET / landing redesign', () => {
 
     assert.equal(response.statusCode, 200)
     assertContains(response.body, /class="landing-page"/)
-    assertContains(response.body, /<link rel="stylesheet" href="\/style\.css\?v=s-gesture-11">/)
+    assertContains(response.body, /<link rel="stylesheet" href="\/style\.css\?v=logo-ribbons-1">/)
     assertContains(response.body, /logo-salete-sincere-horizontal\.png/)
     assertContains(response.body, /class="landing-hero-mark"[^>]*data-logo-replay[^>]*aria-label="Rejouer l’animation du logo"/)
-    assertContains(response.body, /data-logo-animation[^>]*src="\/images\/logo-noname-web\.svg\?v=s-gesture-11"[^>]*alt=""[^>]*aria-hidden="true"/)
+    assertContains(response.body, /data-logo-animation[^>]*src="\/images\/logo-noname-web\.svg\?v=logo-ribbons-1"[^>]*alt=""[^>]*aria-hidden="true"/)
     assertContains(response.body, /<script src="\/js\/landing\.js" defer><\/script>/)
     assertContains(response.body, /On gratte la surface pour retrouver la saleté sincère\./i)
     assertContains(response.body, /250 à 400 € par séance/)

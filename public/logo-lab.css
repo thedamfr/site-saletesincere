@@ -23,6 +23,8 @@ input {
 
 .lab-header {
   display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
   align-items: center;
   justify-content: space-between;
   width: min(1180px, calc(100% - 40px));
@@ -32,6 +34,7 @@ input {
 }
 
 .lab-header img {
+  display: block;
   width: 174px;
   height: auto;
 }
@@ -99,6 +102,10 @@ input {
   display: block;
   width: min(100%, 560px);
   height: auto;
+}
+
+.logo-lab-guides[hidden] {
+  display: none;
 }
 
 .lab-controls {
@@ -175,7 +182,7 @@ input {
 .lab-legend {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
   margin: 0;
   padding: 0;
@@ -200,18 +207,37 @@ input {
   border-radius: 999px;
 }
 
-.lab-swatch-upper {
+.lab-swatch-before {
   background: #eb4d4b;
 }
 
-.lab-swatch-loop {
+.lab-swatch-after {
   background: #3578e5;
 }
 
-.lab-swatch-return {
-  background: #15966f;
+a {
+  color: inherit;
+  text-underline-offset: 3px;
 }
 
+.lab-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #b7b6b1;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.lab-footer p {
+  margin: 0;
+}
+
+a:focus-visible,
 button:focus-visible,
 select:focus-visible,
 input:focus-visible {

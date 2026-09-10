@@ -1,114 +1,166 @@
-import { execFileSync } from 'node:child_process'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import assert from 'node:assert/strict'
+import { mkdir, readFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { Jimp } from 'jimp'
+import { chromium } from 'playwright'
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const sourcePath = path.join(root, 'public/images/logo-noname-web.svg')
-const outputDirectory = path.join(os.tmpdir(), 'salete-logo-animation-frames')
-const durationSeconds = 3.6
-const frameProgress = [0, 0.2, 0.36, 0.4, 0.44, 0.52, 0.64, 0.8, 0.96, 1]
-const segments = [
-  { id: 'logo-gesture-upper', start: 0, end: 0.4, length: 446 },
-  { id: 'logo-gesture-loop', start: 0.38, end: 0.64, length: 356 },
-  { id: 'logo-gesture-return', start: 0.62, end: 0.96, length: 403 }
-]
-const supportingTraces = [
-  { selector: '.logo-trace-upper-fill', start: 0, end: 0.28, length: 342 },
-  { selector: '.logo-trace-upper-mid', start: 0, end: 0.34, length: 361 }
-]
-
-function clamp(value, minimum = 0, maximum = 1) {
-  return Math.min(maximum, Math.max(minimum, value))
-}
-
-function getSegmentProgress(value, segment) {
-  return clamp((value - segment.start) / (segment.end - segment.start))
-}
-
-function getFrameStyles(progress) {
-  const segmentRules = segments.map((segment) => {
-    const segmentProgress = getSegmentProgress(progress, segment)
-    const offset = segment.length * (1 - segmentProgress)
-    return `#${segment.id} { stroke-dashoffset: ${offset.toFixed(3)} !important; }`
-  }).join('\n')
-  const finishOpacity = clamp((progress - 0.96) / 0.04)
-  const dotProgress = clamp((progress - 0.92) / 0.08)
-  const supportingRules = supportingTraces.map((trace) => (
-    `${trace.selector} { stroke-dashoffset: ${(trace.length * (1 - getSegmentProgress(progress, trace))).toFixed(3)} !important; }`
-  )).join('\n')
-
-  return `<style>
-    .logo-trace, .logo-dot, .logo-reveal-finish { animation: none !important; }
-    ${segmentRules}
-    ${supportingRules}
-    .logo-reveal-finish { opacity: ${finishOpacity.toFixed(3)} !important; }
-    .logo-dot {
-      opacity: ${dotProgress.toFixed(3)} !important;
-      transform: translate(${(-12 * (1 - dotProgress)).toFixed(3)}px, ${(10 * (1 - dotProgress)).toFixed(3)}px) scale(${(0.35 + (0.65 * dotProgress)).toFixed(3)}) !important;
-    }
-  </style>`
-}
-
-function renderSvg(inputPath, outputPath) {
-  execFileSync('rsvg-convert', [
-    '--width', '997',
-    '--height', '827',
-    '--background-color', '#fff',
-    '--output', outputPath,
-    inputPath
-  ])
-}
-
+// Uses the browser's real CSS timeline, also scrubbed by the laboratory.
+const browser = await chromium.launch({ headless: true, channel: process.env.LOGO_BROWSER_CHANNEL || undefined })
+const outputDirectory = path.join(os.tmpdir(), 'salete-logo-browser-check')
 await mkdir(outputDirectory, { recursive: true })
-const source = await readFile(sourcePath, 'utf8')
-const framePaths = []
+const svg = await readFile(new URL('../public/images/logo-noname-web.svg', import.meta.url), 'utf8')
+const shape = svg.match(/id="logo-shape" d="([^"]+)"/)[1]
+const width = 748, height = 621
+const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1, reducedMotion: 'no-preference' })
+const style = '<style>html,body{margin:0;background:white}svg{display:block;width:748px;height:621px}</style>'
+const capture = async () => Jimp.read(await page.screenshot())
+const inkAt = (bitmap, x, y) => {
+  const offset = (Math.round(y * height / 413.65) * width + Math.round(x * width / 498.62)) * 4
+  return 255 - bitmap.data[offset]
+}
+const advance = async progress => page.evaluate(time => {
+  for (const animation of document.querySelector('svg').getAnimations({ subtree: true })) {
+    animation.pause()
+    animation.currentTime = time
+  }
+}, progress * 3600)
 
-for (const progress of frameProgress) {
-  const label = String(Math.round(progress * 100)).padStart(3, '0')
-  const frameSvgPath = path.join(outputDirectory, `frame-${label}.svg`)
-  const framePngPath = path.join(outputDirectory, `frame-${label}.png`)
-  const frameSvg = source.replace('</svg>', `${getFrameStyles(progress)}</svg>`)
-
-  await writeFile(frameSvgPath, frameSvg)
-  renderSvg(frameSvgPath, framePngPath)
-  framePaths.push(framePngPath)
+function countInkComponents(bitmap) {
+  const visited = new Uint8Array(width * height)
+  const queue = new Int32Array(width * height)
+  let components = 0
+  for (let pixel = 0; pixel < visited.length; pixel++) {
+    if (visited[pixel] || bitmap.data[pixel * 4] >= 200) continue
+    let head = 0, tail = 1
+    queue[0] = pixel
+    visited[pixel] = 1
+    while (head < tail) {
+      const current = queue[head++]
+      const x = current % width, y = Math.floor(current / width)
+      for (const next of [x > 0 ? current - 1 : -1, x < width - 1 ? current + 1 : -1, y > 0 ? current - width : -1, y < height - 1 ? current + width : -1]) {
+        if (next < 0 || visited[next] || bitmap.data[next * 4] >= 200) continue
+        visited[next] = 1
+        queue[tail++] = next
+      }
+    }
+    if (tail >= 8) components++
+  }
+  return components
 }
 
-const referenceSvgPath = path.join(outputDirectory, 'reference.svg')
-const referencePngPath = path.join(outputDirectory, 'reference.png')
-const referenceSvg = source.replace(' class="logo-symbol" mask="url(#logo-reveal)"', ' class="logo-symbol"')
-await writeFile(referenceSvgPath, referenceSvg)
-renderSvg(referenceSvgPath, referencePngPath)
-
-let comparisonOutput = ''
 try {
-  comparisonOutput = execFileSync('compare', [
-    '-metric', 'AE',
-    referencePngPath,
-    framePaths.at(-1),
-    'null:'
-  ], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
-} catch (error) {
-  comparisonOutput = `${error.stdout || ''}${error.stderr || ''}`
+  await page.setContent(`${style}<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 498.62 413.65"><path d="${shape}"/></svg>`)
+  const reference = (await capture()).bitmap
+  const defs = svg.match(/<defs>[\s\S]*?<\/defs>/)[0]
+  await page.setContent(`${style}<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 498.62 413.65">${defs}<g clip-path="url(#logo-silhouette)"><rect width="499" height="414" mask="url(#logo-mask-blue)"/><rect width="499" height="414" fill="white" mask="url(#logo-mask-red)"/></g></svg>`)
+  const blueOnly = (await capture()).bitmap
+  await page.setContent(`${style}${svg}`)
+  await advance(0)
+  const blank = (await capture()).bitmap
+  assert.equal(blank.data.filter((value, index) => index % 4 !== 3 && value < 250).length, 0, 'At 0%, no ink may be visible')
+
+  for (const progress of [0.36, 0.42, 0.48]) {
+    await advance(progress)
+    const frame = (await capture()).bitmap
+    for (const [x, y] of [[75, 310], [250, 350], [385, 155]]) {
+      assert.ok(inkAt(frame, x, y) < 5, `At ${progress * 100}%, the future blue surface at ${x},${y} must remain empty`)
+    }
+  }
+
+  // Before any finishing effect: the strokes themselves must cover the logo.
+  await advance(0.96)
+  const drawn = (await capture()).bitmap
+  let missingInteriorPixels = 0, spillPixels = 0
+  for (let i = 0; i < reference.data.length; i += 4) {
+    if (reference.data[i] < 5 && drawn.data[i] > 15) missingInteriorPixels++
+    if (reference.data[i] > 250 && drawn.data[i] < 240) spillPixels++
+  }
+  assert.equal(missingInteriorPixels, 0, 'The animated strokes must cover every interior pixel without a final logo overlay')
+  assert.equal(spillPixels, 0, 'The strokes must remain inside the original silhouette')
+
+  const snapshots = new Set([0, 10, 20, 30, 36, 42, 48, 52, 60, 68, 80, 96, 100])
+  const images = []
+  let previous
+  for (let percent = 0; percent <= 100; percent++) {
+    await advance(percent / 100)
+    const frame = await capture()
+    if (percent <= 52) {
+      let prematureBluePixels = 0
+      for (let i = 0; i < blueOnly.data.length; i += 4) {
+        if (blueOnly.data[i] < 5 && frame.bitmap.data[i] < 240) prematureBluePixels++
+      }
+      assert.equal(prematureBluePixels, 0, `The red stroke must never fill the blue surface at ${percent}%`)
+    }
+    if (percent <= 96) assert.ok(countInkComponents(frame.bitmap) <= 1, `No detached ink fragments at ${percent}%`)
+    if (previous && percent <= 96) {
+      let disappearingPixels = 0
+      for (let i = 0; i < frame.bitmap.data.length; i += 4) {
+        if (previous.data[i] < 30 && frame.bitmap.data[i] > 230) disappearingPixels++
+      }
+      assert.equal(disappearingPixels, 0, `The stroke must not disappear at ${percent}%`)
+    }
+    previous = frame.bitmap
+    if (snapshots.has(percent)) {
+      await frame.write(path.join(outputDirectory, `frame-${String(percent).padStart(3, '0')}.png`))
+      images.push({ percent, url: await frame.getBase64('image/png') })
+    }
+  }
+
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.setContent(`${style}${svg}`)
+  const reduced = (await capture()).bitmap
+  for (let i = 0; i < reference.data.length; i += 4) {
+    assert.ok(reference.data[i] > 5 || reduced.data[i] < 15, 'Reduced motion must show the complete static logo')
+  }
+  await page.setViewportSize({ width: 1400, height: 1080 })
+  await page.setContent(`<style>body{margin:0;background:#eee;font:16px sans-serif}main{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:8px}figure{margin:0;background:white}img{width:100%;display:block}figcaption{text-align:center;padding:6px}</style><main>${images.map(({ percent, url }) => `<figure><img src="${url}"><figcaption>${percent}%</figcaption></figure>`).join('')}</main>`)
+  await page.screenshot({ path: path.join(outputDirectory, 'contact-sheet.png'), fullPage: true })
+
+  // Exercise the actual lab script and controls without requiring a running server.
+  const assets = new Map(await Promise.all([
+    ['/laboratoire-du-geste', '../server/views/logo-lab.hbs', 'text/html'],
+    ['/js/logo-lab.js', '../public/js/logo-lab.js', 'text/javascript'],
+    ['/logo-lab.css', '../public/logo-lab.css', 'text/css'],
+    ['/images/logo-noname-web.svg', '../public/images/logo-noname-web.svg', 'image/svg+xml']
+  ].map(async ([url, file, contentType]) => [url, { body: await readFile(new URL(file, import.meta.url), 'utf8'), contentType }])) )
+  await page.route('http://logo.test/**', route => {
+    const asset = assets.get(new URL(route.request().url()).pathname)
+    return route.fulfill(asset || { status: 404, body: '' })
+  })
+  await page.goto('http://logo.test/laboratoire-du-geste')
+  await page.waitForSelector('.logo-lab-guides circle')
+  for (const percent of [0, 36, 48, 52, 60, 68, 96, 100]) {
+    await page.locator('[data-logo-progress]').evaluate((input, value) => {
+      input.value = String(value * 10)
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+    }, percent)
+    const state = await page.evaluate(value => {
+      const traces = [...document.querySelectorAll('.logo-trace')]
+      const active = traces.find(trace => value < Number(trace.dataset.end)) || traces.at(-1)
+      const marker = document.querySelector('.logo-lab-guides circle')
+      const drawn = Math.min(1, Math.max(0, 1 - Number.parseFloat(getComputedStyle(active).strokeDashoffset)))
+      const point = active.getPointAtLength(active.getTotalLength() * drawn)
+      return {
+        distance: Math.hypot(Number(marker.getAttribute('cx')) - point.x, Number(marker.getAttribute('cy')) - point.y),
+        colorMatches: marker.getAttribute('fill') === active.dataset.guideColor,
+        times: document.querySelector('.lab-stage svg').getAnimations({ subtree: true }).map(animation => animation.currentTime)
+      }
+    }, percent / 100)
+    assert.ok(state.distance < 0.01 && state.colorMatches, 'The marker must follow the actual active stroke')
+    assert.equal(state.times.length, 4, 'The lab must use the four actual SVG animations, also under reduced motion')
+    assert.ok(state.times.every(time => Math.abs(time - percent * 36) < 0.01), 'All SVG animations must share the scrubber time')
+  }
+  await page.getByRole('checkbox').uncheck()
+  assert.equal(await page.locator('.logo-lab-guides').isVisible(), false)
+  await page.getByRole('button', { name: 'Recommencer' }).click()
+  assert.equal(await page.locator('[data-logo-progress]').inputValue(), '0')
+  for (const width of [320, 390, 800, 1400]) {
+    await page.setViewportSize({ width, height: 900 })
+    const fitsViewport = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)
+    assert.ok(fitsViewport, `The public lab must not overflow horizontally at ${width}px`)
+  }
+  console.log(JSON.stringify({ checkedFrames: 101, missingInteriorPixels, spillPixels, detachedFragments: 0, prematureBluePixels: 0, reducedMotion: 'passed', labControls: 'passed', responsiveLayout: 'passed', outputDirectory }, null, 2))
+} finally {
+  await browser.close()
 }
-
-const pixelDifference = Number.parseInt(comparisonOutput.trim().split(/\s+/)[0] || '0', 10)
-if (!Number.isFinite(pixelDifference) || pixelDifference !== 0) {
-  throw new Error(`Final logo differs from its source by ${comparisonOutput.trim()} pixels`)
-}
-
-const contactSheetPath = path.join(outputDirectory, 'contact-sheet.png')
-const firstRowPath = path.join(outputDirectory, 'row-1.png')
-const secondRowPath = path.join(outputDirectory, 'row-2.png')
-execFileSync('magick', [...framePaths.slice(0, 5), '+append', firstRowPath])
-execFileSync('magick', [...framePaths.slice(5), '+append', secondRowPath])
-execFileSync('magick', [firstRowPath, secondRowPath, '-append', contactSheetPath])
-
-console.log(JSON.stringify({
-  durationSeconds,
-  renderedFrames: framePaths.length,
-  pixelDifference,
-  contactSheetPath
-}, null, 2))

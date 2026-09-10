@@ -38,6 +38,7 @@
     "node": ">=24"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "playwright": "^1.62.1"
   }
 }

@@ -147,7 +147,6 @@ export async function buildApp({
   storageEnabled = process.env.DISABLE_STORAGE !== 'true',
   initializeStorage = storageEnabled,
   wallEnabled = process.env.DISABLE_WALL !== 'true',
-  logoLabEnabled = process.env.NODE_ENV !== 'production',
   databaseAdapterFactory = createPostgresAdapter,
   databaseUrl: databaseUrlOverride,
   databaseConfigured: databaseConfiguredOverride,
@@ -911,19 +910,24 @@ app.get("/", {
   });
 });
 
-if (logoLabEnabled) {
-  app.get("/__logo-lab", {
-    config: {
-      rateLimit: pageLimiter
-    }
-  }, async (req, reply) => {
-    return reply
-      .header('X-Robots-Tag', 'noindex, nofollow, noarchive')
-      .view("logo-lab.hbs", {
-        title: "Laboratoire du geste"
-      });
+// Public brand experience: independent of database and worker availability.
+app.get("/laboratoire-du-geste", {
+  config: {
+    rateLimit: pageLimiter
+  }
+}, async (req, reply) => {
+  return reply.view("logo-lab.hbs", {
+    title: "Laboratoire du geste"
   });
-}
+});
+
+app.get("/__logo-lab", {
+  config: {
+    rateLimit: pageLimiter
+  }
+}, async (req, reply) => {
+  return reply.code(301).redirect('/laboratoire-du-geste');
+});
 
 // Route Sale-wall (ancien home)
 app.get("/wall", {

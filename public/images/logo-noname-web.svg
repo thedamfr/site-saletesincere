@@ -1,149 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="Calque_1" data-name="Calque 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 498.62 413.65">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 498.62 413.65">
   <defs>
     <style>
       .logo-trace {
         fill: none;
-        stroke: #fff;
-        stroke-linecap: round;
+        stroke: #000;
+        stroke-linecap: butt;
         stroke-linejoin: round;
+        stroke-dasharray: 1 2;
         stroke-dashoffset: 0;
       }
+      .logo-trace-main { stroke-width: 140; }
+      .logo-trace-small-loop { stroke-width: 98; }
+      .logo-trace-return { stroke-width: 110; }
+      .logo-dot { transform-box: fill-box; transform-origin: center; }
 
-      .logo-trace-upper {
-        stroke-width: 72;
-        stroke-linecap: butt;
-        stroke-dasharray: 446;
+      @keyframes logo-draw-main {
+        0% { stroke-dashoffset: 1.0001; }
+        36%, 100% { stroke-dashoffset: 0; }
       }
-
-      .logo-trace-upper-fill {
-        stroke-width: 132;
-        stroke-dasharray: 342;
+      @keyframes logo-draw-small-loop {
+        0%, 36% { stroke-dashoffset: 1.0001; }
+        52%, 100% { stroke-dashoffset: 0; }
       }
-
-      .logo-trace-upper-mid {
-        stroke-width: 100;
-        stroke-dasharray: 361;
-      }
-
-      .logo-trace-loop {
-        stroke-width: 82;
-        stroke-dasharray: 356;
-      }
-
-      .logo-trace-return {
-        stroke-width: 116;
-        stroke-dasharray: 403;
-      }
-
-      .logo-dot {
-        transform-box: fill-box;
-        transform-origin: center;
-      }
-
-      .logo-reveal-finish {
-        opacity: 1;
-      }
-
-      @keyframes logo-draw-upper {
-        0% { stroke-dashoffset: 446; }
-        40%, 100% { stroke-dashoffset: 0; }
-      }
-
-      @keyframes logo-draw-upper-fill {
-        0% { stroke-dashoffset: 342; }
-        28%, 100% { stroke-dashoffset: 0; }
-      }
-
-      @keyframes logo-draw-upper-mid {
-        0% { stroke-dashoffset: 361; }
-        34%, 100% { stroke-dashoffset: 0; }
-      }
-
-      @keyframes logo-draw-loop {
-        0%, 38% { stroke-dashoffset: 356; }
-        64%, 100% { stroke-dashoffset: 0; }
-      }
-
       @keyframes logo-draw-return {
-        0%, 62% { stroke-dashoffset: 403; }
+        0%, 52% { stroke-dashoffset: 1.0001; }
         96%, 100% { stroke-dashoffset: 0; }
       }
-
       @keyframes logo-dot {
-        0%, 92% { opacity: 0; transform: translate(-12px, 10px) scale(.35); }
-        97% { opacity: 1; transform: translate(0, 0) scale(1.12); }
-        100% { opacity: 1; transform: translate(0, 0) scale(1); }
+        0%, 96% { opacity: 0; transform: scale(.5); }
+        100% { opacity: 1; transform: scale(1); }
       }
-
-      @keyframes logo-finish {
-        0%, 96% { opacity: 0; }
-        100% { opacity: 1; }
-      }
-
       @media (prefers-reduced-motion: no-preference) {
-        .logo-trace-upper {
-          animation: logo-draw-upper 3.6s cubic-bezier(.45, 0, .2, 1) both;
-        }
-
-        .logo-trace-upper-fill {
-          animation: logo-draw-upper-fill 3.6s cubic-bezier(.45, 0, .2, 1) both;
-        }
-
-        .logo-trace-upper-mid {
-          animation: logo-draw-upper-mid 3.6s cubic-bezier(.45, 0, .2, 1) both;
-        }
-
-        .logo-trace-loop {
-          animation: logo-draw-loop 3.6s cubic-bezier(.45, 0, .2, 1) both;
-        }
-
-        .logo-trace-return {
-          animation: logo-draw-return 3.6s cubic-bezier(.45, 0, .2, 1) both;
-        }
-
-        .logo-dot {
-          opacity: 0;
-          animation: logo-dot 3.6s cubic-bezier(.18, .89, .32, 1.28) both;
-        }
-
-        .logo-reveal-finish {
-          opacity: 0;
-          animation: logo-finish 3.6s cubic-bezier(0, 0, .2, 1) both;
-        }
+        .logo-trace-main { animation: logo-draw-main 3.6s linear both; }
+        .logo-trace-small-loop { animation: logo-draw-small-loop 3.6s linear both; }
+        .logo-trace-return { animation: logo-draw-return 3.6s linear both; }
+        .logo-dot { animation: logo-dot 3.6s ease-out both; }
       }
-
-      @media (prefers-reduced-motion: reduce) {
-        .logo-trace {
-          animation: none;
-          stroke-dashoffset: 0;
-        }
-
-        .logo-dot {
-          animation: none;
-          opacity: 1;
-          transform: none;
-        }
-
-        .logo-reveal-finish {
-          animation: none;
-          opacity: 1;
-        }
-
-      }
+      /* The lab pauses these same animations, including when reduced motion is on. */
+      [data-logo-lab] .logo-trace-main { animation: logo-draw-main 3.6s linear both; }
+      [data-logo-lab] .logo-trace-small-loop { animation: logo-draw-small-loop 3.6s linear both; }
+      [data-logo-lab] .logo-trace-return { animation: logo-draw-return 3.6s linear both; }
+      [data-logo-lab] .logo-dot { animation: logo-dot 3.6s ease-out both; }
     </style>
-
-    <mask id="logo-reveal" maskUnits="userSpaceOnUse" x="-10" y="-10" width="520" height="440">
-      <rect x="-10" y="-10" width="520" height="440" fill="#000"/>
-      <path class="logo-trace logo-trace-upper-fill" d="M384,83 C373,41 338,19 298,39 C259,58 247,117 232,197 C228,215.5 223.25,232.188 217.703,246.969"/>
-      <path class="logo-trace logo-trace-upper-mid" d="M384,83 C373,41 338,19 298,39 C259,58 247,117 232,197 C226.4,222.9 219.33,245.248 210.661,263.785"/>
-      <path id="logo-gesture-upper" class="logo-trace logo-trace-upper" d="M384,83 C373,41 338,19 298,39 C259,58 247,117 232,197 C220,252 179,315 170.5,340"/>
-      <path id="logo-gesture-loop" class="logo-trace logo-trace-loop" d="M170.5,340 C160,347 153,352 147,356 C132,372 110,383 82.5,383 C54,383 25,358 20,330 C18,306 51,303 87.5,316.5 C118,326 146,330 170.5,340"/>
-      <path id="logo-gesture-return" class="logo-trace logo-trace-return" d="M170.5,340 C198,351 233,354 267,339 C286,332 304,321 318,306 C369,252 404,161 384,83"/>
-      <rect class="logo-reveal-finish" x="-10" y="-10" width="520" height="440" fill="#fff"/>
+    <path id="logo-shape" d="M72.72,405.42c-26.65-10.64-52.75-31.5-66.24-56.99-5.07-9.58-9.08-22.5-4.41-32.24,2.65-5.52,7.23-9.11,12.34-12.18,4.22-2.54,8.36-4.39,13.29-5.44,10.9-2.32,21.68-2.23,32.86-.86,17.61,3.09,34.81,6.83,51.49,13.29l22.13,8.56c5.69-12.59,10.25-24.82,14.41-37.77,5.33-16.58,10.05-32.85,13.92-49.86l11.85-51.99,9.16-41.67c3.15-14.35,7.05-28.02,11.9-41.87,8.86-25.3,21.65-50.19,41.11-68.72C253.32,11.66,274.46,2.16,297.62.37c12.23-.94,23.92-.03,35.99,2.18,18.29,3.34,34.48,12.24,47.01,25.96,25.54,27.97,33.44,70.19,32.13,107.43-1.22,34.59-9.64,68.37-24.41,99.64-10.25,21.71-23.8,41.24-39.98,58.83l-16.35,16.36c-12.18,11.17-25.21,20.75-39.56,29.05-26.92,15.42-58.47,25.73-89.82,25.86-20.85,27.69-51.11,47.67-86.78,47.96-14.96.09-29.23-2.67-43.13-8.23ZM286.87,298.44c19.12-18.49,32.91-48.29,40.48-73.45,9.53-31.69,16.42-74.44,10.57-106.74-1.29-7.09-3.42-13.75-7.01-19.78-3.73-6.27-9.33-10-16.42-11.1-42.31-6.56-50.86,70.75-54.79,101.74-2.27,17.85-6.5,34.94-11.54,52.24-8.72,29.92-19.6,58.62-32.08,87.63,26.06-3.63,51.55-12.08,70.81-30.53ZM112.85,338.71l-18.53-6.7c-11.64-4.21-57.85-19.16-53.89-2.68.8,3.31,2.56,6.38,4.9,9.08,8.09,9.3,18.99,15.9,31.18,18.13,15.48,2.83,28.26-4.23,36.33-17.82Z"/>
+    <clipPath id="logo-silhouette"><use href="#logo-shape"/></clipPath>
+    <!-- The two ribbons share only the crossing; their outer edges come from the original contours.
+         A one-pixel overlap at their end seams avoids antialiasing cracks inside the silhouette. -->
+    <mask id="logo-mask-red" maskUnits="userSpaceOnUse" x="-1" y="-1" width="500" height="416">
+      <path d="M406.318412,77.154702 C401.270644,59.046719 393.026616,42.097042 380.62,28.51 C368.09,14.79 351.9,5.89 333.61,2.55 C321.54,0.34 309.85,-0.57 297.62,0.37 C274.46,2.16 253.32,11.66 236.53,27.68 C217.07,46.21 204.28,71.1 195.42,96.4 C190.57,110.25 186.67,123.92 183.52,138.27 L174.36,179.94 L162.51,231.93 C158.64,248.94 153.92,265.21 148.59,281.79 C144.43,294.74 139.87,306.97 134.18,319.56 L112.85,338.71 L112.84,338.72 C104.77,352.31 91.99,359.37 76.51,356.54 C64.32,354.31 53.42,347.71 45.33,338.41 C42.99,335.71 41.23,332.64 40.43,329.33 L0.178616,329.33 C0.867832,335.966704 3.489525,342.779358 6.48,348.43 C19.97,373.92 46.07,394.78 72.72,405.42 L72.72,405.41 C86.62,410.97 100.89,413.73 115.85,413.64 C151.52,413.35 181.78,393.37 202.63,365.68 L216.08,328.98 C228.56,299.97 239.44,271.27 248.16,241.35 C253.2,224.05 257.43,206.96 259.7,189.11 C263.63,158.12 272.18,80.81 314.49,87.37 C321.0586,88.389106 326.348292,91.665614 330.056897,97.127956 L406.318412,77.154702 Z" fill="white" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+    </mask>
+    <mask id="logo-mask-blue" maskUnits="userSpaceOnUse" x="-1" y="-1" width="500" height="416">
+      <path d="M0.178616,329.33 C-0.300653,324.714951 0.15454,320.184984 2.07,316.19 C4.72,310.67 9.3,307.08 14.41,304.01 C18.63,301.47 22.77,299.62 27.7,298.57 C38.6,296.25 49.38,296.34 60.56,297.71 C78.17,300.8 95.37,304.54 112.05,311 L134.18,319.56 L216.08,328.98 C242.14,325.35 267.63,316.9 286.89,298.45 L286.87,298.44 C305.99,279.95 319.78,250.15 327.35,224.99 C336.88,193.3 343.77,150.55 337.92,118.25 C336.63,111.16 334.5,104.5 330.91,98.47 C330.635695,98.008903 330.351277,97.561543 330.056897,97.127956 L406.318412,77.154702 C411.661873,96.323433 413.423639,116.790148 412.75,135.94 C411.53,170.53 403.11,204.31 388.34,235.58 C378.09,257.29 364.54,276.82 348.36,294.41 L332.01,310.77 C319.83,321.94 306.8,331.52 292.45,339.82 C265.53,355.24 233.98,365.55 202.63,365.68 L112.85,338.71 L94.32,332.01 C82.68,327.8 36.47,312.85 40.43,329.33 L0.178616,329.33 Z" fill="white" stroke="white" stroke-width="2" stroke-linejoin="round"/>
     </mask>
   </defs>
-
-  <path class="logo-symbol" mask="url(#logo-reveal)" d="M72.72,405.42c-26.65-10.64-52.75-31.5-66.24-56.99-5.07-9.58-9.08-22.5-4.41-32.24,2.65-5.52,7.23-9.11,12.34-12.18,4.22-2.54,8.36-4.39,13.29-5.44,10.9-2.32,21.68-2.23,32.86-.86,17.61,3.09,34.81,6.83,51.49,13.29l22.13,8.56c5.69-12.59,10.25-24.82,14.41-37.77,5.33-16.58,10.05-32.85,13.92-49.86l11.85-51.99,9.16-41.67c3.15-14.35,7.05-28.02,11.9-41.87,8.86-25.3,21.65-50.19,41.11-68.72C253.32,11.66,274.46,2.16,297.62.37c12.23-.94,23.92-.03,35.99,2.18,18.29,3.34,34.48,12.24,47.01,25.96,25.54,27.97,33.44,70.19,32.13,107.43-1.22,34.59-9.64,68.37-24.41,99.64-10.25,21.71-23.8,41.24-39.98,58.83l-16.35,16.36c-12.18,11.17-25.21,20.75-39.56,29.05-26.92,15.42-58.47,25.73-89.82,25.86-20.85,27.69-51.11,47.67-86.78,47.96-14.96.09-29.23-2.67-43.13-8.23ZM286.87,298.44c19.12-18.49,32.91-48.29,40.48-73.45,9.53-31.69,16.42-74.44,10.57-106.74-1.29-7.09-3.42-13.75-7.01-19.78-3.73-6.27-9.33-10-16.42-11.1-42.31-6.56-50.86,70.75-54.79,101.74-2.27,17.85-6.5,34.94-11.54,52.24-8.72,29.92-19.6,58.62-32.08,87.63,26.06-3.63,51.55-12.08,70.81-30.53ZM112.85,338.71l-18.53-6.7c-11.64-4.21-57.85-19.16-53.89-2.68.8,3.31,2.56,6.38,4.9,9.08,8.09,9.3,18.99,15.9,31.18,18.13,15.48,2.83,28.26-4.23,36.33-17.82Z"/>
+  <g clip-path="url(#logo-silhouette)">
+    <path class="logo-trace logo-trace-main" data-start="0" data-end="0.36" data-guide-color="#eb4d4b" pathLength="1" mask="url(#logo-mask-red)" d="M384.392857,84.5 L384,83 C373,41 338,19 298,39 C259,58 247,117 232,197 C220,252 194,324.333333 170.5,340 C160,347 153,352 147,356 L146.4,356.4"/>
+    <path class="logo-trace logo-trace-small-loop" data-start="0.36" data-end="0.52" data-guide-color="#eb4d4b" pathLength="1" mask="url(#logo-mask-red)" d="M147.6,355.6 L147,356 C127,369.333333 110,383 82.5,383 C54,383 20,358 20,329.33 L20,328.8"/>
+    <path class="logo-trace logo-trace-return" data-start="0.52" data-end="0.96" data-guide-color="#3578e5" pathLength="1" mask="url(#logo-mask-blue)" d="M20,329.8 L20,329.33 C20,306 51,303 87.5,316.5 C118,326 146,330 170.5,340 C198,351 233,354 267,339 C286,332 304,321 318,306 C369,252 404,161 384,83 L383.607143,81.5"/>
+  </g>
   <path class="logo-dot" d="M470.91,329.87c-10.33,3.37-20.75-.29-26.65-9.03-3.93-5.82-5.96-12.37-7.02-19.38-2.3-15.25-1.11-31.99,14.75-37.29,7.16-2.39,14.33-2.29,21.83-1.67,10.05.84,18.28,6.34,22.12,15.97,5.21,13.07,2.74,28.59-6.63,39.28-4.99,5.69-11.12,9.73-18.4,12.11Z"/>
 </svg>
