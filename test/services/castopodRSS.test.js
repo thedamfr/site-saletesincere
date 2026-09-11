@@ -71,6 +71,33 @@ describe('Castopod RSS Parser', () => {
   });
 
   describe('fetchEpisodeFromRSS', () => {
+    it('recognizes a primary MP4 enclosure and keeps the alternate MP3 for audio playback', async () => {
+      const rss = RSS_LIST_FIXTURE.replace(
+        '<enclosure url="https://media.example/2.mp3"/>',
+        `<enclosure url="https://media.example/2.mp4" type="video/mp4"/>
+        <podcast:alternateEnclosure type="audio/mpeg">
+          <podcast:source uri="javascript:invalid"/>
+          <podcast:source uri="https://media.example/2.mp3"/>
+        </podcast:alternateEnclosure>`
+      );
+      const episode = await fetchEpisodeFromRSS(2, 2, 5000, async () => new Response(rss));
+
+      assert.equal(episode.hasVideo, true);
+      assert.equal(episode.hasPrimaryVideo, true);
+      assert.deepEqual(episode.videoFormats, { mp4: true, hls: false });
+      assert.equal(episode.audioUrl, 'https://media.example/2.mp3');
+    });
+
+    it('does not send a video-only enclosure to the audio player', async () => {
+      const rss = RSS_LIST_FIXTURE.replace(
+        '<enclosure url="https://media.example/2.mp3"/>',
+        '<enclosure url="https://media.example/2.mp4" type="video/mp4"/>'
+      );
+      const episode = await fetchEpisodeFromRSS(2, 2, 5000, async () => new Response(rss));
+
+      assert.equal(episode.audioUrl, '');
+    });
+
     it('should parse episode S2E1 from RSS', async () => {
       const episode = await fetchEpisodeFromRSS(2, 1, 5000, rssFetch);
       

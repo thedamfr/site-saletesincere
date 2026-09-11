@@ -153,7 +153,7 @@ export async function stopQueue(instance = boss) {
  * @param {string} imageUrl - URL image cover
  * @returns {Promise<object>} Résultat explicite de mise en queue
  */
-export async function queueEpisodeResolution(season, episode, episodeDate, title, imageUrl, feedLastBuildDate = null, audioUrl = null) {
+export async function queueEpisodeResolution(season, episode, episodeDate, title, imageUrl, feedLastBuildDate = null, audioUrl = null, itemGuid = null) {
   if (queueShuttingDown) {
     return {
       queued: false,
@@ -171,7 +171,7 @@ export async function queueEpisodeResolution(season, episode, episodeDate, title
   
   try {
     const jobId = await boss.send('resolve-episode',
-      { season, episode, episodeDate, title, imageUrl, feedLastBuildDate, audioUrl },
+      { season, episode, episodeDate, title, imageUrl, feedLastBuildDate, audioUrl, itemGuid },
       {
         singletonKey: `episode-${season}-${episode}`,  // Idempotency key (throttling)
         singletonSeconds: 300  // Throttle 5 min : 1 job max par slot temporel
@@ -227,7 +227,7 @@ export async function startWorker(fastify, options = {}, queue = boss) {
     // pg-boss v9 passe un array de jobs (batch mode par défaut)
     const job = jobs[0]
     
-    const { season, episode, episodeDate, title, imageUrl, feedLastBuildDate, audioUrl } = job.data
+    const { season, episode, episodeDate, title, imageUrl, feedLastBuildDate, audioUrl, itemGuid } = job.data
     
     console.log(`[Worker ${job.id}] Resolving S${season}E${episode}: ${title}`)
     console.log(`[Worker ${job.id}] imageUrl:`, imageUrl, '| feedLastBuildDate:', feedLastBuildDate)
@@ -299,7 +299,7 @@ export async function startWorker(fastify, options = {}, queue = boss) {
     // Appeler les APIs en parallèle
     const [spotifyResult, appleResult, deezerResult, youtubeResult] = await Promise.allSettled([
       searchSpotifyEpisode(episodeDate),
-      searchAppleEpisode(episodeDate),
+      searchAppleEpisode(episodeDate, { itemGuid }),
       searchDeezerEpisode(episodeDate),
       youtubeResolutionEnabled ? searchYouTubeEpisodeMedia(season, episode) : Promise.resolve(null)
     ])

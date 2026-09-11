@@ -55,6 +55,27 @@ validation sont dans [`../prd_youtube_podcast.md`](../prd_youtube_podcast.md).
 
 ---
 
+**Amendement 2026-09-11 — identité Apple et lecteur YouTube.** Le worker transmet
+le GUID RSS jusqu'au lookup Apple et exige une correspondance exacte dans le
+podcast configuré. Les anciens jobs sans GUID ne peuvent utiliser la date que
+si elle désigne un unique épisode. Un lien Apple manquant ou un RSS plus récent
+relance l'enrichissement même lorsque le stockage des images est désactivé.
+
+Le RSS peut fournir un MP4 vidéo comme enclosure principale, format accepté par
+Apple. Le parseur le reconnaît et réserve le MP3 alternatif au lecteur audio.
+Une enclosure vidéo principale ou un HLS alternatif, associés au lien Apple
+direct, rendent la pastille Apple ; le MP4 alternatif seul ne la déclenche pas.
+S3E2 porte la qualité éditoriale Apple « Full HD », vérifiée à 1920 × 1080.
+
+À la demande du propriétaire, la page épisode embarque aussi sa vidéo YouTube
+résolue dans une iframe responsive. L'URL d'intégration est construite depuis un
+identifiant validé et un hôte YouTube autorisé, via `youtube-nocookie.com`, avec
+chargement différé, titre accessible, contrôles natifs et plein écran, sans
+lecture automatique. Les cartes de plateformes et le lecteur audio restent
+accessibles. Aucune iframe n'est affichée sur `/podcast` ou sans lien vidéo
+valide. Aucune migration ni modification de cycle de vie `pg-boss` n'est requise.
+Recette et limites : [PRD vidéo](../prd_youtube_podcast.md).
+
 ## Contexte
 
 ### Besoin business clarifié

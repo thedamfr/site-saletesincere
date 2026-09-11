@@ -82,6 +82,7 @@ describe('podcast YouTube links', () => {
     assert.match(response.body, new RegExp(`href="${legacyChannelUrl}"`))
     assert.match(response.body, /Voir les épisodes vidéo/)
     assert.match(response.body, /src="\/images\/youtube-logo\.svg" alt=""/)
+    assert.doesNotMatch(response.body, /<iframe/)
   })
 
   test('links an episode page to its resolved YouTube video', async () => {
@@ -93,6 +94,14 @@ describe('podcast YouTube links', () => {
     assert.equal(response.statusCode, 200)
     assert.match(response.body, /href="https:\/\/www\.youtube\.com\/watch\?v&#x3D;Bbbbbbbbb-1"/)
     assert.match(response.body, /Voir Mais l’IA consomme de l’eau/)
+    const iframe = response.body.match(/<iframe\b[^>]*>[\s\S]*?<\/iframe>/)?.[0]
+    assert.ok(iframe, 'A resolved video must have an embedded player')
+    assert.match(iframe, /src="https:\/\/www\.youtube-nocookie\.com\/embed\/Bbbbbbbbb-1\?playsinline&#x3D;1"/)
+    assert.match(iframe, /title="Voir Mais l’IA consomme de l’eau sur YouTube"/)
+    assert.match(iframe, /loading="lazy"/)
+    assert.match(iframe, /referrerpolicy="strict-origin-when-cross-origin"/)
+    assert.match(iframe, /allowfullscreen/)
+    assert.doesNotMatch(iframe, /autoplay/)
   })
 
   test('removes the YouTube card when the episode has no resolved video', async () => {
@@ -105,5 +114,21 @@ describe('podcast YouTube links', () => {
     assert.doesNotMatch(response.body, /Voir la chaîne du podcast/)
     assert.doesNotMatch(response.body, /src="\/images\/youtube-logo\.svg"/)
     assert.equal(response.headers['cache-control'], 'public, max-age=60')
+    assert.doesNotMatch(response.body, /<iframe/)
+  })
+
+  test('does not embed a channel, malformed ID or foreign URL from the cache', async () => {
+    for (const youtubeUrl of [
+      legacyChannelUrl,
+      'https://www.youtube.com/watch?v=invalid',
+      'https://www.youtube.com.evil.example/watch?v=Bbbbbbbbb-1',
+      'https://attacker@www.youtube.com/watch?v=Bbbbbbbbb-1',
+      'javascript:alert(1)'
+    ]) {
+      const app = await createApp({ youtubeUrl })
+      const response = await app.inject({ method: 'GET', url: '/podcast/3/1' })
+      assert.equal(response.statusCode, 200)
+      assert.doesNotMatch(response.body, /<iframe/)
+    }
   })
 })

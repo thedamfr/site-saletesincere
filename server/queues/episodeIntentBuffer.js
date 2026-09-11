@@ -22,6 +22,8 @@ export function isValidEpisodeIntent(payload) {
     && payload.title.length <= 500
     && isValidUrl(payload.imageUrl)
     && isValidUrl(payload.audioUrl)
+    && (payload.itemGuid == null
+      || (typeof payload.itemGuid === 'string' && payload.itemGuid.length <= 2048))
     && (payload.feedLastBuildDate === null
       || payload.feedLastBuildDate === undefined
       || (typeof payload.feedLastBuildDate === 'string'

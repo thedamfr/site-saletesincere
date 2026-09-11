@@ -5,8 +5,38 @@ const SPOTIFY_EPISODE_ID_PATTERN = /^[A-Za-z0-9]{1,64}$/
 // confirmed for the episodes concerned and remain independent per platform.
 const EDITORIAL_VIDEO_QUALITY = Object.freeze({
   '3:1': Object.freeze({ spotify: 'HD' }),
-  '3:2': Object.freeze({ spotify: '4K', youtube: '4K' })
+  // Apple Lookup's S3E2 MP4 was measured at 1920 × 1080 on 2026-09-11.
+  '3:2': Object.freeze({ spotify: '4K', youtube: '4K', apple: 'Full HD' })
 })
+
+export function isAppleEpisodeUrl(value) {
+  try {
+    const url = new URL(value)
+    return url.protocol === 'https:'
+      && url.hostname === 'podcasts.apple.com'
+      && !url.port && !url.username && !url.password
+      && /\/podcast\/(?:[^/]+\/)?id\d+$/.test(url.pathname)
+      && /^\d+$/.test(url.searchParams.get('i') || '')
+  } catch {
+    return false
+  }
+}
+
+export function getYouTubeEmbedUrl(value) {
+  try {
+    const url = new URL(value)
+    const videoId = url.searchParams.get('v')
+    if (url.protocol !== 'https:'
+      || url.hostname !== 'www.youtube.com'
+      || url.port || url.username || url.password
+      || url.pathname !== '/watch'
+      || !/^[A-Za-z0-9_-]{11}$/.test(videoId || '')) return null
+
+    return `https://www.youtube-nocookie.com/embed/${videoId}?playsinline=1`
+  } catch {
+    return null
+  }
+}
 
 function parseSpotifyEpisodeUrl(value) {
   try {
@@ -81,6 +111,6 @@ export async function inspectSpotifyEpisodeVideo(spotifyEpisodeUrl, {
 
 export function getEpisodeVideoQuality(season, episode, platform) {
   if (!Number.isInteger(season) || !Number.isInteger(episode)) return null
-  if (platform !== 'spotify' && platform !== 'youtube') return null
+  if (!['spotify', 'youtube', 'apple'].includes(platform)) return null
   return EDITORIAL_VIDEO_QUALITY[`${season}:${episode}`]?.[platform] || null
 }

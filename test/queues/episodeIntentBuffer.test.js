@@ -56,6 +56,7 @@ describe('episode intent buffer', () => {
 
     assert.equal(buffer.remember(episodePayload()).remembered, true)
     assert.equal(buffer.remember({ season: 2, episode: 99 }).remembered, false)
+    assert.equal(buffer.remember(episodePayload({ itemGuid: 'x'.repeat(2049) })).remembered, false)
     currentTime = 1000
 
     assert.equal(buffer.size(), 0)

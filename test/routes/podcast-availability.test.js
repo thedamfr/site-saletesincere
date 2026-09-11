@@ -59,6 +59,7 @@ async function createApp(platformLinks = null, {
 } = {}) {
   const app = await buildApp({
     initializeStorage: false,
+    storageEnabled: false,
     databaseConfigured: false,
     databaseAdapter: databaseAdapter(platformLinks, podcastPlatformRows),
     databaseAvailability: createDatabaseAvailability({
@@ -81,6 +82,61 @@ function elementById(body, tag, id) {
 }
 
 describe('podcast format and platform availability', () => {
+  test('requeues missing Apple links and RSS updates even when image storage is disabled', async () => {
+    const completeCache = {
+      spotify_url: 'https://open.spotify.com/episode/direct', spotify_video_available: false,
+      apple_url: 'https://podcasts.apple.com/fr/podcast/id1846531745?i=1000787798745',
+      deezer_url: 'https://deezer.com/episode/direct',
+      youtube_url: 'https://www.youtube.com/watch?v=Bbbbbbbbb-1', youtube_thumbnail_checked: true,
+      feed_last_build: '2026-09-04T08:00:00.000Z'
+    }
+    for (const cached of [
+      { ...completeCache, apple_url: null },
+      { ...completeCache, feed_last_build: '2026-09-03T08:00:00.000Z' }
+    ]) {
+      const app = await createApp(cached)
+      const response = await app.inject({ method: 'GET', url: '/podcast/3/2' })
+      assert.equal(response.statusCode, 200)
+      assert.equal(app.episodeIntentBuffer.size(), 1)
+      assert.equal(app.episodeIntentBuffer.entries()[0].payload.itemGuid, 'guid-3-2')
+    }
+    const completeApp = await createApp(completeCache)
+    await completeApp.inject({ method: 'GET', url: '/podcast/3/2' })
+    assert.equal(completeApp.episodeIntentBuffer.size(), 0)
+  })
+
+  test('shows Apple Full HD for the confirmed S3E2 primary video with a direct link', async () => {
+    const app = await createApp({
+      apple_url: 'https://podcasts.apple.com/fr/podcast/id1846531745?i=1000787798745'
+    }, {
+      episode: { ...episodeData({ hasVideo: true, videoFormats: { mp4: true, hls: false } }), hasPrimaryVideo: true }
+    })
+
+    const response = await app.inject({ method: 'GET', url: '/podcast/3/2' })
+    const availability = elementById(response.body, 'div', 'episode-video-availability')
+    const appleCard = response.body.match(/<a href="https:\/\/podcasts.apple.com[^>]*>[\s\S]*?<\/a>/)?.[0]
+
+    assert.match(availability, /Apple Podcasts \(Full HD\)/)
+    assert.match(appleCard, />Vidéo Full HD<\/span>/)
+    assert.doesNotMatch(appleCard, /4K/)
+  })
+
+  test('does not announce Apple video for a show fallback or an alternate MP4 alone', async () => {
+    for (const [appleUrl, hasPrimaryVideo] of [
+      [null, true],
+      ['https://podcasts.apple.com/fr/podcast/id1846531745', true],
+      ['https://podcasts.apple.com/fr/podcast/id1846531745?i=1000787798745', false]
+    ]) {
+      const app = await createApp({ apple_url: appleUrl }, {
+        episode: { ...episodeData({ hasVideo: true, videoFormats: { mp4: true, hls: false } }), hasPrimaryVideo }
+      })
+      const response = await app.inject({ method: 'GET', url: '/podcast/3/2' })
+      const availability = elementById(response.body, 'div', 'episode-video-availability')
+      assert.doesNotMatch(availability, /Apple Podcasts/)
+      assert.doesNotMatch(response.body, />Vidéo Full HD<\/span>/)
+    }
+  })
+
   test('does not render an aggregate video tag on /podcast', async () => {
     const hostedEpisode = episodeData({
       season: 3,
@@ -102,7 +158,7 @@ describe('podcast format and platform availability', () => {
         {
           season: 3,
           episode: 3,
-          apple_url: 'https://podcasts.apple.com/episode/direct',
+          apple_url: 'https://podcasts.apple.com/fr/podcast/id1846531745?i=1000787798745',
           spotify_video_available: false,
           youtube_url: null
         }
@@ -135,7 +191,7 @@ describe('podcast format and platform availability', () => {
     const app = await createApp({
       spotify_url: 'https://open.spotify.com/episode/direct',
       spotify_video_available: true,
-      apple_url: 'https://podcasts.apple.com/episode/direct',
+      apple_url: 'https://podcasts.apple.com/fr/podcast/id1846531745?i=1000787798745',
       deezer_url: 'https://deezer.com/episode/direct',
       podcast_addict_url: 'https://podcastaddict.com/episode/direct',
       youtube_url: 'https://www.youtube.com/watch?v=Bbbbbbbbb-1',
@@ -188,7 +244,7 @@ describe('podcast format and platform availability', () => {
     const app = await createApp({
       spotify_url: 'https://open.spotify.com/episode/direct',
       spotify_video_available: false,
-      apple_url: 'https://podcasts.apple.com/episode/direct',
+      apple_url: 'https://podcasts.apple.com/fr/podcast/id1846531745?i=1000787798745',
       deezer_url: null,
       podcast_addict_url: null,
       youtube_url: null,
