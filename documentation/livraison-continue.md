@@ -146,6 +146,17 @@ La recette GitHub est répétée après 30 secondes de stabilité et expose son
 résultat dans le résumé du run. Une nouvelle mesure des deux domaines vérifie
 ces rollouts avec [check-availability.mjs](../scripts/delivery/check-availability.mjs).
 
+Le [run staging 34575412587](https://github.com/thedamfr/site-saletesincere/actions/runs/34575412587)
+a livré le correctif `f06f1a4d56cdb4a3444247054fe2f160a95a1bf6`, digest
+`sha256:687496f9de669c13effd0c82772c7f6fd18a4ab40e18065ffeee518c12449d92`,
+automatiquement en 23 secondes, à 07:46:20 UTC. Un second remplacement du pod
+staging, sous le verrou commun, a vérifié le retrait d'un pod possédant déjà
+le nouveau hook. Les deux recettes HTTP espacées de 30 secondes ont réussi.
+Entre 07:37:08 et 07:49:03 UTC, la sonde a enregistré 699 réponses normales
+sur chacun des deux domaines, sans erreur, pendant ces deux rollouts staging.
+La [PR 33](https://github.com/thedamfr/site-saletesincere/pull/33) consigne également
+le résultat de l'activation et du contrôle de production après sa fusion.
+
 
 <details>
 <summary>Audit initial du 10 septembre 2026, conservé comme historique</summary>
