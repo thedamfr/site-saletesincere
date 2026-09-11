@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { namespace, imageRepository, environments, assertCurrentRelease, assertCapacity, selectCandidate, validateRelease } from './policy.mjs';
 import { github } from './github.mjs';
 import { smoke } from './smoke.mjs';
+import { notifyDeliveries } from './notify.mjs';
 
 const config = JSON.parse(fs.readFileSync('/etc/site-saletesincere-delivery/config.json', 'utf8'));
 process.env.KUBECONFIG = `${process.env.CREDENTIALS_DIRECTORY}/kubeconfig`;
@@ -90,7 +91,7 @@ async function reconcile(environment) {
   } catch (error) {
     // Never report raw subprocess output: Kubernetes configuration may contain secrets.
     const message = error.code || error.status ? 'Kubernetes operation failed; inspect namespace events' : error.message;
-    fs.writeFileSync(statePath, JSON.stringify({ ...release, success: false, error: message, retryAfter: Date.now() + 300000 }));
+    fs.writeFileSync(statePath, JSON.stringify({ ...release, success: false, error: message, failedAt: new Date().toISOString(), retryAfter: Date.now() + 300000 }));
     console.error(JSON.stringify({ environment, runId: release.runId, error: message }));
     process.exitCode = 1;
   }
@@ -101,3 +102,5 @@ for (const environment of ['staging', 'production']) {
   try { await reconcile(environment); }
   catch { console.error(`Unable to reconcile ${environment}; check GitHub access and namespace prerequisites`); process.exitCode = 1; }
 }
+try { await notifyDeliveries(stateDirectory, process.env.CREDENTIALS_DIRECTORY); }
+catch { console.error('Deployment notification unavailable; check bot credential references and public GitHub access.'); process.exitCode = 1; }
