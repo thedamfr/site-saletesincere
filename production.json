@@ -1,10 +1,10 @@
 {
   "environment": "production",
-  "assessedCommit": "26b5a7e162ab5d1629273d2fbc8e6a856a26be1b",
-  "imageCommit": "f06f1a4d56cdb4a3444247054fe2f160a95a1bf6",
-  "digest": "sha256:687496f9de669c13effd0c82772c7f6fd18a4ab40e18065ffeee518c12449d92",
-  "fingerprint": "c4f961a50c9880e97d25c741313b2dcf1cc3f3179f1ba15924b34f7ce2270d08",
+  "assessedCommit": "9c018552532de78bd5e9d734a134d8e5b768c173",
+  "imageCommit": "f76b005c9df2516801b182b98e857eb30e28beca",
+  "digest": "sha256:534fbf39fed128ad90638e5f08a5e7744ffedc3190fc21f90990c22a858b627d",
+  "fingerprint": "42c29e59edf979884bb9f97c26aec9b78314454dfb3b4ea98e6f5ddb3b049d3c",
   "schema": "4be3748523b5253a0dc5a1ea3de8797a5e5ddc3d103f3e3e3e6535732935b6b3",
-  "runId": 34579601727,
+  "runId": 34581524102,
   "cssHash": "fa5e81c5e97561f7eeadde8a20592e58a50533f04f64f1069455327a1e9b539d"
 }
