@@ -44,7 +44,9 @@ Le propriétaire a autorisé les notifications Telegram de succès et d'échec.
 Le service OVH envoie au destinataire privé déjà associé au bot, avec ses fichiers
 de credentials fournis par systemd ; ils ne sont ni copiés vers GitHub ni placés
 dans l'image applicative. Une réussite exige l'état de rollout vérifié et deux
-recettes publiques espacées de 30 secondes. Les échecs de CI sont aussi lus via
+recettes publiques encadrant au moins 60 secondes de santé continue, mesurée
+chaque seconde sans chevauchement. Le message inclut l'heure UTC, la durée et
+l'absence d'anomalie sur cette fenêtre. Les échecs de CI sont aussi lus via
 l'API publique GitHub toutes les cinq minutes ; une publication réussie sans
 activation constatée après quinze minutes est signalée.
 
@@ -55,7 +57,9 @@ production est injoignable ou en erreur HTTP depuis OVH. Il s'agit de l'impact
 observé, sans attribution automatique de l'incident au déploiement. Les reçus
 Telegram sont persistés par run, résultat et sévérité ; une reprise ne réémet pas
 un message déjà confirmé et une récupération peut envoyer le succès. Un refus
-d'envoi reste journalisé et est retenté après cinq minutes. Le bot conversationnel
+confirmé est retenté après cinq minutes. Un timeout ou une interruption entre
+l'envoi et le reçu laisse une acceptation incertaine : aucun renvoi automatique
+avant revue de cet état. Le bot conversationnel
 et l'observabilité partagée ne sont pas modifiés.
 
 ## Staging et données

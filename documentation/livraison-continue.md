@@ -38,9 +38,11 @@ et son fichier d’état conservent cette preuve distincte de la recette HTTP.
 ## Notifications Telegram
 
 Après une réussite de staging ou de production, le service refait deux recettes
-publiques à 30 secondes d'intervalle, puis notifie le propriétaire via son bot
+publiques encadrant au moins 60 secondes de santé continue, sondée chaque seconde
+sans chevauchement, puis notifie le propriétaire via son bot
 existant. Le message donne l'environnement, la sévérité, le commit évalué,
-la version attendue et observée, le digest et les liens du site et du run GitHub.
+la version attendue et observée, le digest, l'heure UTC, la durée d'observation
+et les liens du site et du run GitHub.
 Un succès n'est jamais annoncé sur la seule publication GHCR.
 
 Les échecs de rollout et de recette sont notifiés, y compris lors d'une nouvelle
@@ -71,8 +73,12 @@ départ, les runs récemment consultés et les accusés d'acceptation Telegram, 
 token ni identifiant de chat. Un run, résultat et niveau de sévérité déjà accepté
 n'est pas réémis. Une récupération après échec peut donc envoyer un succès ; une
 aggravation peut envoyer une autre sévérité. Les refus sont journalisés et repris
-après cinq minutes, sans refaire le déploiement. Un crash entre l'acceptation
-Telegram et la sauvegarde du reçu peut néanmoins produire un doublon au retry.
+après cinq minutes, sans refaire le déploiement. Une tentative est enregistrée
+avant l'envoi : un timeout ou un crash sans reçu confirmé la classe dans
+`uncertain` et bloque sa réémission automatique. Vérifier la conversation et
+la tentative concernée avant d'autoriser son renvoi ; ne pas effacer les autres
+reçus. Une panne du stockage peut empêcher cette trace et doit être traitée
+avant une reprise.
 L'acceptation par l'API ne prouve pas la réception sur le téléphone.
 
 Le mécanisme dépend de l'hôte OVH et de l'accès aux API publiques GitHub/Telegram.
