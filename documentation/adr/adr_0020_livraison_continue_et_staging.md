@@ -40,6 +40,24 @@ le digest réellement exécuté, la santé, les pages et les assets sur le domai
 Un statut GitHub distinct et le workflow `Verify OVH delivery` rapportent son
 résultat ; une publication GHCR seule n'est pas une recette réussie.
 
+Le propriétaire a autorisé les notifications Telegram de succès et d'échec.
+Le service OVH envoie au destinataire privé déjà associé au bot, avec ses fichiers
+de credentials fournis par systemd ; ils ne sont ni copiés vers GitHub ni placés
+dans l'image applicative. Une réussite exige l'état de rollout vérifié et deux
+recettes publiques espacées de 30 secondes. Les échecs de CI sont aussi lus via
+l'API publique GitHub toutes les cinq minutes ; une publication réussie sans
+activation constatée après quinze minutes est signalée.
+
+La sévérité dépend de l'observation : avertissement pour un staging en échec ou
+une production saine avec livraison bloquée ; élevée si la production répond en
+mode dégradé ou si la version attendue échoue à sa recette ; critique si la
+production est injoignable ou en erreur HTTP depuis OVH. Il s'agit de l'impact
+observé, sans attribution automatique de l'incident au déploiement. Les reçus
+Telegram sont persistés par run, résultat et sévérité ; une reprise ne réémet pas
+un message déjà confirmé et une récupération peut envoyer le succès. Un refus
+d'envoi reste journalisé et est retenté après cinq minutes. Le bot conversationnel
+et l'observabilité partagée ne sont pas modifiés.
+
 ## Staging et données
 
 Le staging dispose d'un PostgreSQL 17 et d'un PVC propres, d'identifiants neufs,

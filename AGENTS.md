@@ -194,6 +194,10 @@ proportionné au risque.
 - Un déploiement autorisé n’est terminé qu’après contrôle de l’image réellement
   active sur OVH, des pods, de `/health` et des routes touchées sur le domaine
   public. Un workflow vert ou un statut Clever `running` ne suffit pas.
+- Les livraisons du Site doivent notifier le propriétaire via son bot Telegram,
+  après réussite vérifiée comme après échec, avec une sévérité fondée sur l'état
+  observé du service. Vérifier l'acceptation de l'envoi sans déduire sa réception
+  sur le téléphone. Suivre le mécanisme de déduplication du runbook.
 - Ne pas réappliquer aveuglément les manifests d’amorçage Kubernetes : leurs tags
   d’image peuvent être anciens. Ne pas modifier DNS, secrets ou ressources
   partagées au titre d’une simple publication applicative.

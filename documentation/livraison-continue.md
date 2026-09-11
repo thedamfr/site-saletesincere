@@ -1,6 +1,6 @@
 # Livraison continue vers OVH
 
-Version 4 — **11 septembre 2026**. CI, staging et livraison de production
+Version 5 — **11 septembre 2026**. CI, staging et livraison de production
 livrés et vérifiés. La recette et la correction du retrait des pods sont
 consignées dans la section de livraison.
 La décision est décrite dans [l’ADR 0020](adr/adr_0020_livraison_continue_et_staging.md).
@@ -34,6 +34,64 @@ contrôle la santé normale, les pages, l’épisode, les redirections et le CSS
 Il publie le statut `OVH / production` ou `OVH / staging`. Un échec ou un délai
 dépassé reste rouge. Le service contrôle aussi les imageID des pods ; son journal
 et son fichier d’état conservent cette preuve distincte de la recette HTTP.
+
+## Notifications Telegram
+
+Après une réussite de staging ou de production, le service refait deux recettes
+publiques à 30 secondes d'intervalle, puis notifie le propriétaire via son bot
+existant. Le message donne l'environnement, la sévérité, le commit évalué,
+la version attendue et observée, le digest et les liens du site et du run GitHub.
+Un succès n'est jamais annoncé sur la seule publication GHCR.
+
+Les échecs de rollout et de recette sont notifiés, y compris lors d'une nouvelle
+tentative d'un même run. Les échecs de tests, build ou publication sont relevés
+dans les 100 derniers runs GitHub toutes les cinq minutes, même sans manifeste
+de livraison. Une publication réussie restée sans activation après quinze minutes
+est également signalée. Les PR et les annulations remplacées par une demande
+plus récente ne produisent pas de message ; l'historique antérieur à l'activation
+des notifications n'est pas rejoué.
+
+| Sévérité | Observation |
+| --- | --- |
+| INFORMATION | Déploiement réussi, version et recette vérifiées |
+| AVERTISSEMENT | Échec de staging, ou livraison bloquée avec production toujours saine |
+| ÉLEVÉE | Production répondant en mode dégradé, ou version attendue active dont la recette échoue |
+| CRITIQUE | Production injoignable ou en erreur HTTP, après deux observations depuis OVH |
+
+Les credentials restent dans les fichiers existants du bot, transmis au service
+par `LoadCredential`. Ils ne sont ni exportés vers GitHub ni inclus dans les images
+ou les logs. Le destinataire doit être un chat privé positif, lié au même bot.
+L'installateur crée deux références locales sous `/etc/credstore`, sans recopier
+les valeurs. Ces identifiants sont facultatifs au démarrage de systemd : leur
+absence fait échouer l'envoi, sans empêcher le réconciliateur de démarrer.
+Le relais conversationnel, son historique et sa configuration restent inchangés.
+
+`/var/lib/site-saletesincere-delivery/notifications.json` conserve le point de
+départ, les runs récemment consultés et les accusés d'acceptation Telegram, sans
+token ni identifiant de chat. Un run, résultat et niveau de sévérité déjà accepté
+n'est pas réémis. Une récupération après échec peut donc envoyer un succès ; une
+aggravation peut envoyer une autre sévérité. Les refus sont journalisés et repris
+après cinq minutes, sans refaire le déploiement. Un crash entre l'acceptation
+Telegram et la sauvegarde du reçu peut néanmoins produire un doublon au retry.
+L'acceptation par l'API ne prouve pas la réception sur le téléphone.
+
+Le mécanisme dépend de l'hôte OVH et de l'accès aux API publiques GitHub/Telegram.
+Une panne complète de cet hôte ne peut être signalée par ce même service ; les
+statuts GitHub restent un contrôle indépendant. Si Telegram est indisponible,
+consulter son erreur dans le journal du service et le prochain retry enregistré.
+
+Recette du 11 septembre 2026 : 193 tests réussis, 12 intégrations externes
+ignorées, build et contrôles de syntaxe réussis. Le
+[run staging 34580876597](https://github.com/thedamfr/site-saletesincere/actions/runs/34580876597)
+a été activé en 23 secondes ; après deux recettes publiques, Telegram a accepté
+le message de succès à 08:50:48 UTC. Le
+[run contrôlé 34580878785](https://github.com/thedamfr/site-saletesincere/actions/runs/34580878785)
+demandait volontairement une publication production hors `main` : il a échoué
+sur `Production requires main`, avant tout build ou activation. La production
+est restée saine et son pod inchangé ; Telegram a accepté l'AVERTISSEMENT
+à 08:51:52 UTC. Ces reçus prouvent l'acceptation par l'API, pas la lecture des
+messages sur le téléphone. La [PR 36](https://github.com/thedamfr/site-saletesincere/pull/36)
+consigne également la notification du déploiement de production après fusion.
 
 ## Livrer un candidat en staging
 
