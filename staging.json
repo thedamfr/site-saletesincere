@@ -1,0 +1,10 @@
+{
+  "environment": "staging",
+  "assessedCommit": "bf099cb0de9dc4dd412c3b195ab2dd7dfa57e2e8",
+  "imageCommit": "bf099cb0de9dc4dd412c3b195ab2dd7dfa57e2e8",
+  "fingerprint": "a8e18eb093144ca19683bd633a5e7524151a1a20c38304380aeb6c6b4f47c8fb",
+  "schema": "4be3748523b5253a0dc5a1ea3de8797a5e5ddc3d103f3e3e3e6535732935b6b3",
+  "runId": 34574005832,
+  "digest": "sha256:12fbabc9fc470ea916949d350e6587e1404a16f75ebd4047ade2a2d05b5b3262",
+  "cssHash": "fa5e81c5e97561f7eeadde8a20592e58a50533f04f64f1069455327a1e9b539d"
+}
