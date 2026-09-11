@@ -1,7 +1,8 @@
 # Livraison continue vers OVH
 
-Version 2 — **11 septembre 2026**. Mise en œuvre autorisée, CI et staging
-opérationnels. La recette de production est consignée dans la section de livraison.
+Version 3 — **11 septembre 2026**. CI, staging et livraison de production
+opérationnels. La recette et la correction du retrait des pods sont consignées
+dans la section de livraison.
 La décision est décrite dans [l’ADR 0020](adr/adr_0020_livraison_continue_et_staging.md).
 
 ## Publier
@@ -88,6 +89,8 @@ sa métadonnée de digest et les contrôles de readiness du Deployment concerné
 
 Les deux applications conservent `maxUnavailable: 0` et `maxSurge: 1`. La readiness
 vérifie `normal/read_write/ready` ; `/health` reste une liveness HTTP en 200.
+Le nouveau pod doit rester prêt 10 secondes et le hook `preStop` laisse 15 secondes
+aux routes et connexions avant l’arrêt du processus.
 Le quota du namespace couvre 5 CPU et 6 GiB de limites, 2 CPU et 3 GiB de demandes,
 deux PVC et 8 GiB de stockage. Il laisse une marge pour les deux rollouts sans
 arrêter staging. La publication vérifie cette marge avant mutation.
@@ -124,8 +127,36 @@ formulaire newsletter reçu par l’API de test, pages et asset CSS vérifiés.
 Le navigateur a confirmé le rendu podcast, l’ouverture de la description,
 la jaquette d’épisode et les liens résolus Spotify/YouTube.
 
-La première activation de production est vérifiée après merge ; son résultat
-sera ajouté ici, sans assimiler la publication GHCR à une recette de production.
+La [PR 31](https://github.com/thedamfr/site-saletesincere/pull/31) a été fusionnée
+au commit évalué `e62bd3e044d6f8ed82d7fc874532cb4076de9291`.
+Le [run main 34574712054](https://github.com/thedamfr/site-saletesincere/actions/runs/34574712054)
+a réutilisé le digest staging sans nouveau build Docker. OVH l’a activé et vérifié
+le 11 septembre à 07:33:22 UTC (12 secondes), et le
+[contrôle GitHub distinct](https://github.com/thedamfr/site-saletesincere/actions/runs/34574871790)
+a réussi. Les deux domaines étaient alors `normal/read_write/ready`.
+
+La sonde publique a cependant enregistré un timeout de 8 secondes à 07:33:18 UTC,
+pendant le retrait de l’ancien pod, puis des réponses normales. Ce premier
+rollout ne constitue donc pas une preuve d’absence d’interruption. L’ancien
+pod ne possédait pas de hook de drainage ; le lien causal est une hypothèse
+cohérente avec la chronologie, sans trace réseau permettant de l’affirmer.
+Le durcissement ajoute `minReadySeconds: 10`, conserve le nouveau pod avant le
+retrait de l’ancien et porte le `preStop` des nouvelles versions à 15 secondes.
+La recette GitHub est répétée après 30 secondes de stabilité et expose son
+résultat dans le résumé du run. Une nouvelle mesure des deux domaines vérifie
+ces rollouts avec [check-availability.mjs](../scripts/delivery/check-availability.mjs).
+
+Le [run staging 34575412587](https://github.com/thedamfr/site-saletesincere/actions/runs/34575412587)
+a livré le correctif `f06f1a4d56cdb4a3444247054fe2f160a95a1bf6`, digest
+`sha256:687496f9de669c13effd0c82772c7f6fd18a4ab40e18065ffeee518c12449d92`,
+automatiquement en 23 secondes, à 07:46:20 UTC. Un second remplacement du pod
+staging, sous le verrou commun, a vérifié le retrait d'un pod possédant déjà
+le nouveau hook. Les deux recettes HTTP espacées de 30 secondes ont réussi.
+Entre 07:37:08 et 07:49:03 UTC, la sonde a enregistré 699 réponses normales
+sur chacun des deux domaines, sans erreur, pendant ces deux rollouts staging.
+La [PR 33](https://github.com/thedamfr/site-saletesincere/pull/33) consigne également
+le résultat de l'activation et du contrôle de production après sa fusion.
+
 
 <details>
 <summary>Audit initial du 10 septembre 2026, conservé comme historique</summary>

@@ -27,9 +27,10 @@ Documentation technique et décisions architecturales du projet Saleté Sincère
 
 ### Hébergement et livraison
 
-- **Procédure actuelle OVH** : [Hébergement et déploiement](hebergement-deploiement.md) — publication GHCR puis activation explicite sur MicroK8s.
-- **Direction décidée** : [Livraison continue](livraison-continue.md) — builds sélectifs, staging complet et isolé, activation automatique de `main` en production et preuve de version ; non implémentée.
-- **Staging exigé** : [Contrat du staging complet](hebergement-deploiement.md#staging-complet-exigé) — base et worker actifs, stockage/configuration propres, recette métier et coexistence avec la production ; état encore partiel observé séparément.
+- **Procédure actuelle OVH** : [Hébergement et déploiement](hebergement-deploiement.md) — cibles et historique d’exploitation.
+- **Livraison opérationnelle** : [Livraison continue](livraison-continue.md) — CI, sélection des images, activation par digest et recette distincte du domaine public.
+- **Staging isolé** : [Livrer un candidat](livraison-continue.md#livrer-un-candidat-en-staging) — PostgreSQL, PVC et worker dédiés, newsletter de test et coexistence avec la production.
+- **Décision** : [ADR 0020](adr/adr_0020_livraison_continue_et_staging.md) — récupération d’un état public validé depuis OVH, sans token GitHub sur le serveur.
 
 ### 📌 Product Requirements
 - **Homepage** : [`./prd_homepage.md`](./prd_homepage.md)

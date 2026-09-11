@@ -3,7 +3,7 @@ title: Index des ADRs
 description: Index complet de toutes les Architecture Decision Records du projet
 owner: @thedamfr
 status: active
-review_after: 2026-01-01
+review_after: 2026-10-11
 canonical_url: https://github.com/thedamfr/site-saletesincere/blob/main/documentation/adr/index.md
 tags: [adr, index, architecture, decisions]
 ---
@@ -34,13 +34,15 @@ tags: [adr, index, architecture, decisions]
 | [ADR-0016](./adr_0016_homepage_landing_restructuration.md) | Restructuration routing homepage/landing | ✅ **Accepté** | 2025-12 | Frontend, Routing | Architecture |
 | [ADR-0017](./adr_0017_identite_claire_et_territoire_charbon_wafer.md) | Identité claire et territoire Charbon & Wafer | ✅ **Accepté** | 2026-09 | Frontend, Identité | Architecture |
 | [ADR-0018](./adr_0018_migration_ovh_et_retrait_sale_wall.md) | Production OVH et retrait du Sale-wall | 🚀 **Implémenté** | 2026-09 | Infrastructure, Podcast | Critique |
+| [ADR-0019](./adr_0019_preview_podcast_isolee.md) | Preview podcast temporaire | 📚 **Historique** | 2026-09 | Staging, Podcast | Infrastructure |
+| [ADR-0020](./adr_0020_livraison_continue_et_staging.md) | Livraison continue et staging complet | 🚀 **Implémenté** | 2026-09 | CI/CD, Kubernetes | Critique |
 
 ## 📊 Statistiques
 
-- **Total ADRs** : 18
+- **Total ADRs** : 20
 - **Actifs** : 1 (sécurité)
-- **Historiques** : 1 (ancienne production Clever Cloud)
-- **Implémentés** : 10 (audio + podcasting + templates + migration OVH)
+- **Historiques** : 2 (ancienne production Clever Cloud et preview podcast)
+- **Implémentés** : 11 (audio + podcasting + templates + OVH + livraison continue)
 - **Acceptés** : 4 (newsletter DOI + frontend)
 - **En cours** : 1 (newsletter intégration)
 - **Attente** : 1 (podcasting DNS)

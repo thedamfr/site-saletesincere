@@ -41,6 +41,7 @@ metadata:
     app.kubernetes.io/component: staging-web
 spec:
   replicas: 1
+  minReadySeconds: 10
   revisionHistoryLimit: 3
   selector:
     matchLabels:
@@ -63,6 +64,10 @@ spec:
         - name: web
           image: ghcr.io/thedamfr/site-saletesincere:bootstrap-required
           imagePullPolicy: IfNotPresent
+          lifecycle:
+            preStop:
+              exec:
+                command: [node, -e, "setTimeout(() => {}, 15000)"]
           envFrom:
             - configMapRef:
                 name: site-saletesincere-staging-env
