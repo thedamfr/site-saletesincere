@@ -58,11 +58,11 @@ async function reconcile(environment) {
       // resourceVersion also refuses a concurrent operator mutation after our read.
       kubectl('patch', 'deployment', target.deployment, '--type=strategic', '-p', JSON.stringify({
         metadata: { resourceVersion: deployment.metadata.resourceVersion },
-        spec: { template: { metadata: { annotations: { 'delivery.saletesincere.fr/source': release.imageCommit } },
+        spec: { minReadySeconds: 10, template: { metadata: { annotations: { 'delivery.saletesincere.fr/source': release.imageCommit } },
           spec: { containers: [{ name: 'web', image,
             env: [{ name: 'RELEASE_DIGEST', value: release.digest }],
             readinessProbe: { httpGet: null, exec: { command: ['node', 'scripts/delivery/readiness.mjs'] }, periodSeconds: 5, timeoutSeconds: 3, failureThreshold: 3 },
-            lifecycle: { preStop: { exec: { command: ['node', '-e', 'setTimeout(() => {}, 5000)'] } } }
+            lifecycle: { preStop: { exec: { command: ['node', '-e', 'setTimeout(() => {}, 15000)'] } } }
           }] } } }
       }));
     }

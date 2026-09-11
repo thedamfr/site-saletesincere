@@ -606,7 +606,7 @@ La procédure de référence est le
 
 - Production : [saletesincere.fr](https://saletesincere.fr), MicroK8s OVH,
   namespace et Deployment `site-saletesincere`.
-- Images : `ghcr.io/thedamfr/site-saletesincere:<SHA du commit fusionné>`,
+- Images : `ghcr.io/thedamfr/site-saletesincere:<SHA du commit source>`,
   publiées par [GitHub Actions](.github/workflows/publish-image.yml).
 - Activation : automatique par digest après CI verte de `main`, avec contrôle
   des pods, de la santé et du domaine public.

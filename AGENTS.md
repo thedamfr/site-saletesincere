@@ -182,10 +182,15 @@ proportionné au risque.
 - Pour `gh`, contrôler l'authentification avec l'accès réseau et au trousseau prévu
   par l'environnement. Un échec dans le sandbox ne suffit pas à conclure que le CLI
   est déconnecté.
-- Une mise à jour de `main` publie une image GHCR et déclenche encore le déploiement
-  historique Clever Cloud. Elle ne met pas automatiquement à jour OVH : après
-  publication de l’image, activer explicitement son tag de commit immuable dans le
-  Deployment Kubernetes, puis attendre la fin du rollout.
+- Une mise à jour de `main` déclenche la CI, la publication ou réutilisation d'une
+  image GHCR validée, puis sa réconciliation automatique par digest sur OVH.
+  Attendre le contrôle distinct `Verify OVH delivery` et vérifier le domaine.
+  Le commit évalué de `main` peut différer du commit source d'une image réutilisée ;
+  conserver cette distinction. L'installation historique Clever reçoit encore `main`.
+- Tout déploiement manuel ou retour arrière doit respecter le verrou commun du
+  service de livraison. Suspendre le timer et attendre le service avant une
+  intervention exceptionnelle, puis suivre `documentation/livraison-continue.md`.
+  Ne pas installer de token GitHub sur OVH : le service utilise l'état public validé.
 - Un déploiement autorisé n’est terminé qu’après contrôle de l’image réellement
   active sur OVH, des pods, de `/health` et des routes touchées sur le domaine
   public. Un workflow vert ou un statut Clever `running` ne suffit pas.

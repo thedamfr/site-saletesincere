@@ -1,6 +1,8 @@
 # ADR 0019 — Prévisualisation isolée du podcast
 
-Date : 2026-09-10. Statut : accepté pour la proposition demandée.
+Date : 2026-09-10. Statut : historique, remplacé pour le staging par
+[l’ADR 0020](adr_0020_livraison_continue_et_staging.md). Le montage ci-dessous
+conserve la recette visuelle initiale et ses décisions.
 
 Le domaine staging partageait le Service et la base de production. Pour montrer
 la refonte du podcast avant sa validation, son Ingress cible désormais un Service

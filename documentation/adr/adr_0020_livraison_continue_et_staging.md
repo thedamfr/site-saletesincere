@@ -32,7 +32,9 @@ un lancement plus récent échoué ou en cours ne fait pas réactiver un ancien 
 La mutation du Deployment utilise aussi sa resourceVersion. Une activation n'est
 pas interrompue par l'annulation d'un build GitHub plus ancien.
 
-Le rollout conserve `maxUnavailable: 0`, `maxSurge: 1`. La readiness vérifie le
+Le rollout conserve `maxUnavailable: 0`, `maxSurge: 1`, avec 10 secondes de
+stabilité avant disponibilité et un hook `preStop` de 15 secondes pour le retrait
+des connexions. La vérification HTTP finale est répétée après 30 secondes. La readiness vérifie le
 contenu de `/health`, sans changer sa liveness HTTP publique. La recette contrôle
 le digest réellement exécuté, la santé, les pages et les assets sur le domaine.
 Un statut GitHub distinct et le workflow `Verify OVH delivery` rapportent son
