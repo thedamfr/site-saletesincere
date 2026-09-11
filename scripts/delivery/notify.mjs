@@ -2,8 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { github } from './github.mjs';
 import { environments } from './policy.mjs';
-import { smoke } from './smoke.mjs';
-import { notificationCandidates, notificationFor, inspectHealth, sendTelegram, deliverOnce } from './notifications.mjs';
+import { notificationCandidates, notificationFor, recoverNotificationAttempts, observeDelivery, inspectHealth, sendTelegram, deliverOnce } from './notifications.mjs';
 
 const read = (file, fallback) => fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : fallback;
 const compactRun = run => Object.fromEntries(['id', 'status', 'conclusion', 'head_sha', 'head_branch', 'event', 'path', 'display_title', 'updated_at', 'head_repository'].map(key => [key,
@@ -14,6 +13,7 @@ const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 export async function notifyDeliveries(stateDirectory, credentialsDirectory) {
   const statePath = path.join(stateDirectory, 'notifications.json');
   const cache = read(statePath, { enabledAt: Date.now(), sent: {}, retryAfter: {}, runs: [], nextPollAt: 0 });
+  recoverNotificationAttempts(cache);
   const save = () => {
     fs.writeFileSync(`${statePath}.tmp`, JSON.stringify(cache, null, 2), { mode: 0o600 });
     fs.renameSync(`${statePath}.tmp`, statePath);
@@ -48,40 +48,51 @@ export async function notifyDeliveries(stateDirectory, credentialsDirectory) {
   for (const candidate of candidates) {
     const { run, release } = candidate;
     if (cache.retryAfter[run.id] > Date.now()) continue;
+    if (candidate.verification === 'success' && cache.uncertain[`${run.id}:success:info`]) continue;
     let notification;
     try {
       const environment = notificationFor({ ...candidate, health: { availability: 'unavailable' } }).environment;
       const url = environments[environment].url;
       let verification = candidate.verification;
+      let observation;
       if (verification === 'success') {
-        try {
-          await smoke(url, release.cssHash, release);
-          await pause(30000);
-          await smoke(url, release.cssHash, release);
-        } catch { verification = 'failure'; }
+        try { observation = await observeDelivery(url, release); }
+        catch { verification = 'failure'; }
       }
       let health = await inspectHealth(url);
       if (health.availability !== 'healthy') { await pause(3000); health = await inspectHealth(url); }
-      notification = notificationFor({ ...candidate, verification, health });
+      notification = notificationFor({ ...candidate, verification, health, observation });
+      if (cache.uncertain[notification.key]) continue;
       const result = await deliverOnce(notification, {
         alreadySent: async key => Boolean(cache.sent[key]),
         send: text => {
           const token = fs.readFileSync(path.join(credentialsDirectory, 'telegram-token'), 'utf8').trim();
           const recipient = read(path.join(credentialsDirectory, 'telegram-recipient'), {});
           if (String(recipient.bot_id) !== token.split(':')[0]) throw new Error('Telegram recipient mismatch');
+          cache.inFlight[notification.key] = { startedAt: new Date().toISOString() };
+          save();
           return sendTelegram(text, { token, chatId: recipient.chat_id });
         },
         record: async (key, receipt) => {
-          cache.sent[key] = { acceptedAt: new Date().toISOString(), messageId: receipt.messageId };
+          cache.sent[key] = { acceptedAt: new Date().toISOString(), messageId: receipt.messageId,
+            ...(observation ? { observedSeconds: observation.durationSeconds, verifiedAt: observation.completedAt } : {}) };
+          delete cache.inFlight[key];
           delete cache.retryAfter[run.id];
           save();
         }
       });
       if (result === 'sent') console.log(JSON.stringify({ telegram: 'accepted', environment, runId: run.id, outcome: notification.outcome, severity: notification.severity }));
-    } catch {
-      cache.retryAfter[run.id] = Date.now() + 5 * 60000;
+    } catch (error) {
+      const key = notification?.key;
+      const uncertain = key && cache.inFlight[key] && !['TELEGRAM_REJECTED', 'TELEGRAM_CONFIGURATION'].includes(error.code);
+      if (uncertain) {
+        cache.uncertain[key] = { ...cache.inFlight[key], reason: 'acceptance_unconfirmed' };
+        delete cache.retryAfter[run.id];
+      } else cache.retryAfter[run.id] = Date.now() + 5 * 60000;
+      if (key) delete cache.inFlight[key];
       save();
-      console.error(JSON.stringify({ telegram: 'failed', runId: run.id, retryInSeconds: 300 }));
+      console.error(JSON.stringify({ telegram: uncertain ? 'unknown_requires_review' : 'failed', runId: run.id,
+        ...(uncertain ? {} : { retryInSeconds: 300 }) }));
       process.exitCode = 1;
     }
   }

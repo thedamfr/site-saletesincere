@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { notificationFor, notificationCandidates, inspectHealth, sendTelegram, deliverOnce } from '../../scripts/delivery/notifications.mjs';
+import { notificationFor, notificationCandidates, recoverNotificationAttempts, observeDelivery, inspectHealth, sendTelegram, deliverOnce } from '../../scripts/delivery/notifications.mjs';
 
 const sha = 'a'.repeat(40);
 const run = { id: 123, head_sha: sha, head_branch: 'main', event: 'push', conclusion: 'success',
@@ -9,7 +9,8 @@ const run = { id: 123, head_sha: sha, head_branch: 'main', event: 'push', conclu
 const release = { environment: 'production', assessedCommit: sha, imageCommit: sha,
   digest: `sha256:${'b'.repeat(64)}`, schema: 'c'.repeat(64), fingerprint: 'd'.repeat(64), runId: 123 };
 const health = { availability: 'healthy', sourceCommit: sha, digest: release.digest };
-const event = change => notificationFor({ run, release, health, verification: 'success', ...change });
+const observation = { durationSeconds: 60, completedAt: '2026-09-11T09:00:00Z' };
+const event = change => notificationFor({ run, release, health, observation, verification: 'success', ...change });
 
 test('Telegram success requires verified delivery and the expected healthy public version', () => {
   const result = event();
@@ -18,6 +19,9 @@ test('Telegram success requires verified delivery and the expected healthy publi
   assert.match(result.text, /https:\/\/saletesincere.fr/);
   assert.match(result.text, /actions\/runs\/123/);
   assert.notEqual(event({ health: { ...health, digest: 'old' } }).outcome, 'success');
+  assert.notEqual(event({ observation: { durationSeconds: 30 } }).outcome, 'success');
+  assert.match(result.text, /60 s|60 secondes/);
+  assert.match(result.text, /UTC/);
 });
 
 test('Telegram excludes PRs, unrelated repositories and superseded deliveries', () => {
@@ -63,9 +67,39 @@ test('Telegram accepts only a positive private recipient and confirms the return
 test('Telegram transport errors never expose the token, provider response or URL', async () => {
   const token = '123:abcdefghijklmnopqrst';
   for (const fetchImpl of [async () => { throw new Error(`https://api.telegram.org/bot${token}/sendMessage`); },
-    async () => ({ ok: false, json: async () => ({ ok: false, description: token }) })]) {
-    await assert.rejects(sendTelegram('message', { token, chatId: '1234', fetchImpl }), error => error.message === 'Telegram delivery failed; retry the notification job');
+    async () => ({ ok: false, status: 400, json: async () => ({ ok: false, description: token }) })]) {
+    await assert.rejects(sendTelegram('message', { token, chatId: '1234', fetchImpl }), error =>
+      ['TELEGRAM_UNCONFIRMED', 'TELEGRAM_REJECTED'].includes(error.code) && !error.message.includes(token));
   }
+});
+
+test('success observation covers sixty continuous seconds and rejects a health interruption', async () => {
+  let clock = 0; let probes = 0; let recipes = 0;
+  const options = { now: () => clock, sleep: async ms => { clock += ms; },
+    probe: async () => { probes++; return health; }, smokeCheck: async () => { recipes++; } };
+  const result = await observeDelivery('https://example.invalid', release, options);
+  assert.ok(result.durationSeconds >= 60);
+  assert.ok(probes >= 60);
+  assert.equal(recipes, 2);
+  clock = 0;
+  await assert.rejects(observeDelivery('https://example.invalid', release, { ...options,
+    probe: async () => clock >= 30000 ? { availability: 'degraded' } : health }), /stable/);
+});
+
+test('a Telegram timeout is uncertain, while a confirmed API refusal is retryable', async () => {
+  const credentials = { token: '123:abcdefghijklmnopqrst', chatId: '1234' };
+  await assert.rejects(sendTelegram('message', { ...credentials, fetchImpl: async () => { throw new Error('timeout'); } }), { code: 'TELEGRAM_UNCONFIRMED' });
+  await assert.rejects(sendTelegram('message', { ...credentials, fetchImpl: async () => ({ ok: false, status: 429,
+    json: async () => ({ ok: false }) }) }), { code: 'TELEGRAM_REJECTED' });
+});
+
+test('an interrupted send is retained as uncertain and is not automatically sent again after restart', () => {
+  const now = Date.now();
+  const cache = { enabledAt: now - 60000, sent: {}, inFlight: { '123:success:info': { startedAt: new Date(now - 1000).toISOString() } } };
+  recoverNotificationAttempts(cache);
+  assert.equal(cache.uncertain['123:success:info'].reason, 'interrupted_before_receipt');
+  assert.deepEqual(cache.inFlight, {});
+  assert.equal(notificationCandidates([run], { production: { ...release, success: true, verifiedAt: new Date(now).toISOString() } }, cache, now).length, 0);
 });
 
 test('accepted notifications are not resent on the same run and outcome, but severity changes are sent', async () => {
