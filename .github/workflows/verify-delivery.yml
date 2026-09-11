@@ -1,0 +1,24 @@
+name: Verify OVH delivery
+on:
+  workflow_run:
+    workflows: [Validate and publish]
+    types: [completed]
+permissions:
+  contents: read
+  actions: read
+  statuses: write
+jobs:
+  verify:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Wait for the expected version and verify the public domain
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DELIVERY_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: node scripts/delivery/verify.mjs

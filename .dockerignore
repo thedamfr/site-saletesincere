@@ -11,4 +11,5 @@ k8s
 security
 test
 uploads
+**/*.md
 npm-debug.log*

@@ -14,7 +14,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: site-saletesincere
+                name: site-saletesincere-staging
                 port:
                   name: http
   tls:

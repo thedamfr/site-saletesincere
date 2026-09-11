@@ -39,16 +39,16 @@ subsiste, mais le mur vocal et ses uploads sont désactivés sur la production O
 - **Dev** : Nodemon + Docker Compose
 
 La production **`saletesincere.fr` est servie par OVH**, derrière Cloudflare.
-`staging.saletesincere.fr` sert une prévisualisation isolée du design podcast,
-avec lecture des caches PostgreSQL de production et sans worker. Son en-tête `noindex` est ajouté par l’Ingress. Voir
-[l’ADR 0019](documentation/adr/adr_0019_preview_podcast_isolee.md).
-Clever Cloud reste actif séparément et reçoit encore les mises à jour de `main`.
+Le [pipeline de livraison](documentation/livraison-continue.md) valide les tests
+et les migrations sur une base CI jetable, publie GHCR puis fait activer le digest
+sur OVH après une CI verte de `main`. La recette du domaine public possède son
+propre statut ; une publication GHCR seule ne suffit pas.
 
-**Une fusion sur `main` publie l’image GHCR, mais ne déploie pas automatiquement
-OVH.** Il faut mettre à jour le Deployment avec le tag du commit fusionné puis
-vérifier le domaine public. Voir le
-[guide d’hébergement et de déploiement](documentation/hebergement-deploiement.md)
-et [l’ADR 0018](documentation/adr/adr_0018_migration_ovh_et_retrait_sale_wall.md).
+[Staging](https://staging.saletesincere.fr) possède son application, son PostgreSQL,
+son volume et son worker. La newsletter y utilise un service de test sans envoi
+réel. Le mur et S3 restent désactivés comme en production. Voir
+[l’ADR 0020](documentation/adr/adr_0020_livraison_continue_et_staging.md).
+Clever Cloud reste une installation historique distincte, toujours reliée à `main`.
 
 ### Mode dégradé PostgreSQL
 
@@ -608,11 +608,11 @@ La procédure de référence est le
   namespace et Deployment `site-saletesincere`.
 - Images : `ghcr.io/thedamfr/site-saletesincere:<SHA du commit fusionné>`,
   publiées par [GitHub Actions](.github/workflows/publish-image.yml).
-- Activation : mise à jour explicite du conteneur `web` sur OVH, puis contrôle du
-  rollout, de l’image active et du domaine public.
-- Staging : prévisualisation podcast sur un Deployment distinct, sessions PostgreSQL en
-  lecture seule et worker arrêté, avec un Ingress `noindex`. Les caches OP3 et
-  les liens résolus de production sont consultables.
+- Activation : automatique par digest après CI verte de `main`, avec contrôle
+  des pods, de la santé et du domaine public.
+- Staging : application, PostgreSQL, PVC et worker dédiés, newsletter de test,
+  sans accès au PostgreSQL de production ; livraison manuelle d’une branche
+  candidate via le [workflow](documentation/livraison-continue.md#livrer-un-candidat-en-staging).
 - Clever Cloud : installation historique toujours reliée à GitHub. Un déploiement
   réussi sur Clever ne suffit pas à publier sur le domaine public.
 
@@ -712,4 +712,5 @@ Ce projet suit une approche **Test-Driven Development** stricte :
 
 ## 📄 Licence
 
-MIT License - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+Le README historique annonce MIT, mais aucun fichier `LICENSE` n’est versionné
+dans ce checkout au 10 septembre 2026. Le texte de licence reste à formaliser.
