@@ -1,8 +1,8 @@
 # PRD — Disponibilité vidéo sur les pages podcast
 
-**Version :** 1.5
-**Date :** 2026-09-04
-**Statut :** implémenté localement, activation production à réaliser
+**Version :** 1.6
+**Date :** 2026-09-11
+**Statut :** correctifs Apple et iframe YouTube implémentés localement, non déployés
 
 ## Problème
 
@@ -20,13 +20,17 @@ une présentation discrète inspirée des métadonnées Apple Podcasts.
 - La chaîne YouTube reste proposée parmi les plateformes de diffusion de
   `/podcast`.
 - `/podcast/:season/:episode` affiche la même métadonnée au niveau de l’épisode.
-- Les cartes Spotify et YouTube reçoivent une micro-pastille vidéo seulement
+- Les cartes Apple, Spotify et YouTube reçoivent une micro-pastille vidéo seulement
   lorsque la vidéo de cet épisode est vérifiée sur la plateforme concernée.
 - La carte YouTube n'existe sur une page épisode que lorsqu'un lien direct vers
   la vidéo de cet épisode a été réconcilié. Aucun lien générique de chaîne ne la
   remplace.
 - S3E1 est marqué « Spotify (HD) ».
 - S3E2 est marqué « Spotify (4K) · YouTube (4K) ».
+- S3E2 ajoute « Apple Podcasts (Full HD) » et une pastille « Vidéo Full HD ».
+- Une vidéo YouTube résolue est lisible dans une iframe responsive sur la page
+  épisode, sous ses informations et avant les plateformes. Le lecteur audio et
+  les liens de plateformes restent disponibles ; aucune lecture automatique.
 - Lorsque YouTube fournit une miniature `maxres` 16/9, elle devient l’image Open
   Graph et Twitter de la page épisode. L’image OG existante reste le fallback.
 - Aucun encart de disponibilité dédié n’est ajouté.
@@ -35,8 +39,8 @@ une présentation discrète inspirée des métadonnées Apple Podcasts.
 
 | Destination | Preuve exigée pour un épisode |
 | --- | --- |
-| Site officiel | `podcast:alternateEnclosure` MP4 ou HLS avec source HTTP(S) valide |
-| Apple Podcasts | enclosure HLS et lien Apple direct de ce même épisode |
+| Site officiel | enclosure principale vidéo ou `podcast:alternateEnclosure` MP4/HLS avec source HTTP(S) valide |
+| Apple Podcasts | enclosure principale vidéo ou HLS alternatif, et lien Apple direct de ce même épisode |
 | Spotify | lien Spotify direct et réponse vidéo de l’oEmbed officiel, mise en cache |
 | YouTube | lien vidéo direct résolu depuis la description de la vidéo |
 
@@ -49,13 +53,20 @@ Une preuve ne vaut jamais pour une autre destination. En particulier :
 
 ### Flux RSS vidéo
 
-Le parseur accepte les `podcast:alternateEnclosure` Podcasting 2.0 de type MP4
+Le parseur accepte les enclosures principales vidéo ainsi que les
+`podcast:alternateEnclosure` Podcasting 2.0 de type MP4
 ou HLS et exige au moins un `podcast:source` HTTP(S). Il n’expose au rendu que
-les capacités `mp4` et `hls`, jamais les URLs médias.
+les capacités `mp4` et `hls` et le booléen `hasPrimaryVideo`, sans URL vidéo à
+charger dans le lecteur audio. Si le fichier principal est vidéo, ce lecteur
+utilise une source HTTP(S) audio alternative ; sans celle-ci, il n'est pas rendu.
 
-Le MP4 et le HLS ajoutés chez l’hébergeur restent donc la preuve du format vidéo
-sur le site officiel. Le HLS, combiné au lien Apple direct du même épisode,
-qualifie Apple Podcasts.
+Un MP4 alternatif seul reste la preuve du format vidéo sur le site officiel.
+Le HLS alternatif ou la vidéo principale, combinés au lien Apple direct du même
+épisode, qualifient Apple Podcasts. Lors du contrôle du 11 septembre, le lookup
+Apple confirme également `episodeContentType=video` pour S3E2. L'association
+utilise le GUID RSS ; la date seule n'est conservée que pour les anciens jobs
+sans GUID et à condition qu'elle soit unique. Les réponses ambiguës, les autres
+podcasts et les liens non conformes sont rejetés ; le lookup est borné à 5 s.
 
 Références : [Podcast Namespace — alternate enclosure](https://github.com/Podcastindex-org/podcast-namespace/blob/main/docs/1.0.md#alternate-enclosure) et
 [Apple Podcasts — publier une vidéo](https://podcasters.apple.com/support/5593-how-to-publish-video).
@@ -103,17 +114,33 @@ plateformes. Les labels sont donc des métadonnées éditoriales explicites et
 limitées aux faits confirmés :
 
 - S3E1 : Spotify HD ;
-- S3E2 : Spotify 4K et YouTube 4K.
+- S3E2 : Apple Full HD, Spotify 4K et YouTube 4K.
 
 Une vidéo vérifiée sans qualité éditoriale reste indiquée simplement « Vidéo ».
+
+### Lecteur YouTube intégré
+
+Seul un lien `https://www.youtube.com/watch?v={id}` résolu par le worker peut
+produire une iframe. L'identifiant doit comporter 11 caractères autorisés ; le
+serveur construit une URL `https://www.youtube-nocookie.com/embed/{id}` sans
+recopier les autres paramètres du cache. Le lecteur conserve les contrôles
+YouTube, le clavier et le plein écran, avec un titre français, un chargement
+différé et `referrerpolicy="strict-origin-when-cross-origin"`. Il ne se lance pas
+automatiquement et respecte une hauteur minimale de 200 px sur mobile.
+
+La présence d'un lien ne garantit pas que YouTube autorise encore l'intégration
+(restriction ultérieure, vidéo privée ou retirée). Le lien de la carte YouTube
+reste disponible. Aucun appel à l'API YouTube n'est ajouté au rendu serveur.
+Référence : [lecteurs intégrés YouTube](https://developers.google.com/youtube/player_parameters).
 
 ## Fonctionnement
 
 1. Le RSS fournit les métadonnées et les capacités vidéo hébergées.
 2. La route lit les liens directs et les preuves de plateforme dans
    `episode_links`.
-3. Si un lien Spotify n’a pas encore de verdict vidéo, ou si la miniature
-   YouTube n’a pas encore été vérifiée, l’intention rejoint le job
+3. Si un lien Apple/Spotify/Deezer manque, si Spotify n’a pas encore de verdict
+   vidéo, si la miniature YouTube n’a pas encore été vérifiée ou si le RSS a
+   changé, l’intention portant le GUID rejoint le job
    `resolve-episode` existant.
 4. Le worker résout les liens, vérifie l’oEmbed Spotify et récupère la miniature
    YouTube en parallèle avec les enrichissements existants.
@@ -163,6 +190,10 @@ optionnelle des nouvelles colonnes perd uniquement ce cache dérivé.
 
 ## Activation production à réaliser
 
+Cette liste conserve le plan initial de la version 1.5. Le relevé public du
+11 septembre ci-dessous distingue l'état actuellement servi des correctifs
+locaux 1.6 ; aucune nouvelle migration n'est nécessaire pour ces correctifs.
+
 1. Appliquer les migrations 009 puis 010.
 2. Vérifier la configuration YouTube existante sans révéler la clé.
 3. Déployer et visiter S3E1 puis S3E2 pour déclencher l’enrichissement.
@@ -205,3 +236,35 @@ pour assurer un contraste lisible.
 
 Aucun changement de production, de variable Clever Cloud ou de base distante
 n’est inclus dans cette activation locale.
+
+### Contrôle du 11 septembre 2026 — version 1.6
+
+- OVH : Deployment et pod applicatif prêts, santé `normal/read_write/ready`,
+  aucune intention en attente. Image active
+  `sha256:687496f9de669c13effd0c82772c7f6fd18a4ab40e18065ffeee518c12449d92`,
+  commit source `f06f1a4d56cdb4a3444247054fe2f160a95a1bf6`.
+- La page publique S3E2 pointe déjà vers le bon épisode Apple
+  `1000787798745`, mais n'affiche pas Apple vidéo ni l'iframe YouTube.
+- Le lookup public Apple annonce S3E2 en `video/mp4` ; son URL média correspond
+  à l'enclosure principale RSS. `ffprobe` confirme **1920 × 1080**. S3E1 est
+  encore annoncé audio par Apple, sans vidéo dans le RSS.
+- La comparaison hors ligne des réponses publiques Apple et RSS retrouve les
+  **27 épisodes par GUID**. La méthode historique par date confond S1E2, S1E3
+  et S1E4 avec un autre épisode publié le même jour ; leurs anciens caches de
+  production n'ont pas été modifiés par ce contrôle.
+- Les tests de régression couvrent le MP4 principal et l'audio alternatif, les
+  identités Apple, le trajet GUID → job → lien sauvegardé, la reprise de cache
+  sans stockage et les conditions de rendu Apple/YouTube.
+- Validation locale : 43 tests ciblés réussis ; suite `npm test` de 205 tests,
+  **193 réussis, 12 intégrations ignorées, aucun échec** ; `npm run build` et
+  `git diff --check` réussis.
+- Contrôle visuel à 390 px et sur ordinateur : métadonnées Apple Full HD et
+  iframe sans débordement. Le chargement et la lecture réelle de S3E2 dans
+  l'iframe sont vérifiés dans Chrome, puis mis en pause. Le navigateur intégré
+  à l'outil de développement conservait cette iframe vide ; ce résultat ne
+  reproduit pas le fonctionnement constaté dans Chrome. Les téléchargements
+  audio OP3 ont été neutralisés uniquement dans le serveur d'aperçu temporaire.
+
+Les correctifs restent locaux. Après publication autorisée, vérifier sur le
+domaine S3E2 (iframe, MP3 et badge Apple Full HD), S3E1 (sans badge Apple vidéo),
+ainsi que les anciens liens de saison 1 après leur prochaine résolution.

@@ -35,7 +35,8 @@ function createFakeBoss({ failAt, sendResult, sendError } = {}) {
   candidate.schedule = async (name) => {
     candidate.calls.push(`schedule:${name}`)
   }
-  candidate.send = async () => {
+  candidate.send = async (...args) => {
+    candidate.sent = args
     if (sendError) throw sendError
     return sendResult === undefined
       ? '00000000-0000-0000-0000-000000000001'
@@ -53,6 +54,41 @@ afterEach(async () => {
 })
 
 describe('episodeQueue lifecycle', () => {
+  test('preserves the RSS GUID from enqueue to the Apple link saved by the worker', async (t) => {
+    const previousPodcastId = process.env.APPLE_PODCAST_ID
+    process.env.APPLE_PODCAST_ID = '1846531745'
+    t.after(() => {
+      if (previousPodcastId === undefined) delete process.env.APPLE_PODCAST_ID
+      else process.env.APPLE_PODCAST_ID = previousPodcastId
+    })
+    const appleUrl = 'https://podcasts.apple.com/fr/podcast/id1846531745?i=1000787798745'
+    t.mock.method(globalThis, 'fetch', async (url) => String(url).startsWith('https://itunes.apple.com/')
+      ? { ok: true, json: async () => ({ results: [{
+        wrapperType: 'podcastEpisode', collectionId: 1846531745,
+        episodeGuid: 'rss-guid-s3e2', releaseDate: '2026-09-10T10:00:00Z',
+        trackViewUrl: appleUrl, episodeContentType: 'video'
+      }] }) }
+      : { ok: false })
+    const queries = []
+    const candidate = createFakeBoss()
+    const fastify = { pg: { connect: async () => ({
+      query: async (sql, params) => { queries.push({ sql, params }); return { rows: [] } },
+      release() {}
+    }) } }
+    await initializeEpisodeWorker(fastify, {
+      queueOptions: { bossFactory: () => candidate },
+      workerOptions: { storageEnabled: false }
+    })
+
+    await queueEpisodeResolution(3, 2, '2026-09-04', 'Episode vidéo', null, null, null, 'rss-guid-s3e2')
+    const output = await candidate.handler([{ id: 'apple-video-job', data: candidate.sent[1] }])
+
+    assert.equal(output.links.apple, appleUrl)
+    const saved = queries.find(({ sql }) => sql.includes('INSERT INTO episode_links'))
+    assert.deepEqual(saved.params.slice(0, 2), [3, 2])
+    assert.equal(saved.params[4], appleUrl)
+  })
+
   test('requires a YouTube link only when YouTube resolution is enabled', () => {
     const expectedOgImageS3Key = getOGImageS3Key({
       season: 3,

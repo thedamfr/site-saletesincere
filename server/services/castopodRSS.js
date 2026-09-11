@@ -39,30 +39,35 @@ function asArray(value) {
   return Array.isArray(value) ? value : [value]
 }
 
-function hasHttpSource(alternateEnclosure) {
-  return asArray(alternateEnclosure?.['podcast:source']).some((source) => {
-    const uri = source?.['@_uri']
-    if (typeof uri !== 'string') return false
+function isHttpUrl(value) {
+  if (typeof value !== 'string') return false
+  try {
+    const url = new URL(value)
+    return url.protocol === 'https:' || url.protocol === 'http:'
+  } catch {
+    return false
+  }
+}
 
-    try {
-      const url = new URL(uri)
-      return url.protocol === 'https:' || url.protocol === 'http:'
-    } catch {
-      return false
-    }
-  })
+function getHttpSource(enclosure) {
+  return asArray(enclosure?.['podcast:source'])
+    .map((source) => source?.['@_uri'])
+    .find(isHttpUrl) || ''
+}
+
+function getMediaType(enclosure) {
+  return String(enclosure?.['@_type'] || '').split(';', 1)[0].trim().toLowerCase()
 }
 
 function extractVideoFormats(item) {
   const videoFormats = { mp4: false, hls: false }
 
-  for (const alternateEnclosure of asArray(item?.['podcast:alternateEnclosure'])) {
-    if (!hasHttpSource(alternateEnclosure)) continue
+  const enclosures = [...asArray(item?.['podcast:alternateEnclosure'])]
+  if (isHttpUrl(item?.enclosure?.['@_url'])) enclosures.push(item.enclosure)
+  for (const enclosure of enclosures) {
+    if (enclosure !== item.enclosure && !getHttpSource(enclosure)) continue
 
-    const mediaType = String(alternateEnclosure?.['@_type'] || '')
-      .split(';', 1)[0]
-      .trim()
-      .toLowerCase()
+    const mediaType = getMediaType(enclosure)
     if (mediaType === 'video/mp4') videoFormats.mp4 = true
     if (HLS_MEDIA_TYPES.has(mediaType)) videoFormats.hls = true
   }
@@ -89,6 +94,15 @@ function mapEpisodeItem(item, feedLastBuildDate) {
     ? `${descriptionRaw.substring(0, MAX_DESCRIPTION_LENGTH).trim()}...`
     : descriptionRaw
   const videoFormats = extractVideoFormats(item)
+  const primaryMediaType = getMediaType(item.enclosure)
+  const hasPrimaryVideo = isHttpUrl(item.enclosure?.['@_url'])
+    && (primaryMediaType === 'video/mp4' || HLS_MEDIA_TYPES.has(primaryMediaType))
+  // Apple can consume the primary MP4 while the on-site player uses its MP3 alternative.
+  const audioUrl = !primaryMediaType || primaryMediaType.startsWith('audio/')
+    ? item.enclosure?.['@_url'] || ''
+    : asArray(item['podcast:alternateEnclosure'])
+        .filter((enclosure) => getMediaType(enclosure).startsWith('audio/'))
+        .map(getHttpSource).find(Boolean) || ''
 
   return {
     season,
@@ -102,11 +116,12 @@ function mapEpisodeItem(item, feedLastBuildDate) {
     rawPubDate: publicationDate.toISOString().split('T')[0],
     duration: formatDuration(durationSeconds),
     image: item['itunes:image']?.['@_href'] || null,
-    audioUrl: item.enclosure?.['@_url'] || '',
+    audioUrl,
     episodeLink: item.link || '',
     itemGuid: extractItemGuid(item.guid),
     feedLastBuildDate,
     hasVideo: videoFormats.mp4 || videoFormats.hls,
+    hasPrimaryVideo,
     videoFormats
   }
 }
@@ -201,4 +216,5 @@ function formatDateFrench(date) {
  * @property {string|null} feedLastBuildDate
  * @property {boolean} hasVideo
  * @property {{mp4: boolean, hls: boolean}} videoFormats
+ * @property {boolean} hasPrimaryVideo
  */

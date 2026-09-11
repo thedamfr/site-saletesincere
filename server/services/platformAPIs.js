@@ -3,6 +3,8 @@
  * Phase 1 TDD - Implémentation minimale
  */
 
+import { isAppleEpisodeUrl } from './podcastVideoAvailability.js'
+
 export async function getSpotifyToken() {
   const clientId = process.env.SPOTIFY_CLIENT_ID
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET
@@ -48,22 +50,40 @@ export async function searchSpotifyEpisode(episodeDate) {
   return episode ? episode.external_urls.spotify : null
 }
 
-export async function searchAppleEpisode(episodeDate) {
-  const podcastId = process.env.APPLE_PODCAST_ID
-  
-  const response = await fetch(
-    `https://itunes.apple.com/lookup?id=${podcastId}&entity=podcastEpisode&limit=200`
-  )
-  
-  if (!response.ok) {
+export async function searchAppleEpisode(episodeDate, {
+  itemGuid,
+  podcastId = process.env.APPLE_PODCAST_ID,
+  fetchImpl = fetch
+} = {}) {
+  if (!/^\d+$/.test(String(podcastId || ''))) return null
+
+  try {
+    const response = await fetchImpl(
+      `https://itunes.apple.com/lookup?id=${podcastId}&entity=podcastEpisode&limit=200`,
+      { signal: AbortSignal.timeout(5000) }
+    )
+    if (!response.ok) return null
+    const data = await response.json()
+    if (!Array.isArray(data?.results)) return null
+
+    const episodes = data.results.filter(item => (
+      item?.wrapperType === 'podcastEpisode'
+      && String(item.collectionId) === String(podcastId)
+    ))
+    // Republishing as video may change a date, title or media URL, but not the RSS GUID.
+    // Old queued jobs without a GUID can use a date only when it identifies one episode.
+    const matches = episodes.filter(ep => itemGuid
+      ? ep.episodeGuid === itemGuid
+      : typeof ep.releaseDate === 'string' && ep.releaseDate.split('T')[0] === episodeDate)
+    if (matches.length !== 1) return null
+
+    const url = matches[0].trackViewUrl
+    return isAppleEpisodeUrl(url) && new URL(url).pathname.endsWith(`/id${podcastId}`)
+      ? url
+      : null
+  } catch {
     return null
   }
-  
-  const data = await response.json()
-  const episodes = data.results.filter(item => item.wrapperType === 'podcastEpisode')
-  const episode = episodes.find(ep => ep.releaseDate.split('T')[0] === episodeDate)
-  
-  return episode ? episode.trackViewUrl : null
 }
 
 export async function searchDeezerEpisode(episodeDate) {

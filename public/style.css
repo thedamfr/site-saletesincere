@@ -1963,6 +1963,19 @@ body.landing-page {
 .podcast-feature-copy:only-child, .podcast-episode-copy:only-child {
   grid-column: 1 / -1;
 }
+.podcast-episode-video {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.podcast-episode-video iframe {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 200px;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  background: #000;
+}
 .podcast-page .podcast-feature h2 {
   font-size: clamp(1.8rem, 3vw, 2.8rem);
   line-height: 1.15;

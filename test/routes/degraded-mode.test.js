@@ -17,7 +17,7 @@ const RSS_EPISODE = {
   audioUrl: 'https://media.example/episode.mp3',
   episodeLink: 'https://podcasts.example/episode',
   feedLastBuildDate: '2026-08-19T12:00:00.000Z',
-  itemGuid: null,
+  itemGuid: 'rss-guid-s2e1',
   isTruncated: false
 }
 
@@ -197,6 +197,7 @@ describe('degraded startup', () => {
     })
     assert.equal(startCalls, 2)
     assert.equal(queuedIntents.length, 1)
+    assert.equal(queuedIntents[0][7], RSS_EPISODE.itemGuid)
 
     await app.close()
     assert.equal(candidate.stopCalls, 1)

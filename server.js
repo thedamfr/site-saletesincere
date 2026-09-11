@@ -31,7 +31,7 @@ import {
   selectPopularEpisode
 } from "./server/services/op3Service.js";
 import { isYouTubeEpisodeResolutionConfigured } from "./server/services/platformAPIs.js";
-import { getEpisodeVideoQuality } from "./server/services/podcastVideoAvailability.js";
+import { getEpisodeVideoQuality, getYouTubeEmbedUrl, isAppleEpisodeUrl } from "./server/services/podcastVideoAvailability.js";
 import { getPodcastDescription } from "./server/services/podcastDescription.js";
 import {
   EpisodeQueueReason,
@@ -106,6 +106,14 @@ function getEpisodeVideoAvailability(episodeData, platformLinks) {
     && platformLinks.spotify_video_available === true
   );
   const youtubeVideoAvailable = Boolean(platformLinks?.youtube_url);
+  const appleVideoAvailable = Boolean(
+    hostedVideo
+    && (episodeData.hasPrimaryVideo || episodeData.videoFormats?.hls)
+    && isAppleEpisodeUrl(platformLinks?.apple_url)
+  );
+  const appleQuality = appleVideoAvailable
+    ? getEpisodeVideoQuality(episodeData?.season, episodeData?.episode, 'apple')
+    : null;
   const spotifyQuality = spotifyVideoAvailable
     ? getEpisodeVideoQuality(episodeData?.season, episodeData?.episode, 'spotify')
     : null;
@@ -114,8 +122,8 @@ function getEpisodeVideoAvailability(episodeData, platformLinks) {
     : null;
 
   if (hostedVideo && episodeData.episodeLink) platforms.push('Site officiel');
-  if (hostedVideo && episodeData.videoFormats?.hls && platformLinks?.apple_url) {
-    platforms.push('Apple Podcasts');
+  if (appleVideoAvailable) {
+    platforms.push(appleQuality ? `Apple Podcasts (${appleQuality})` : 'Apple Podcasts');
   }
   if (spotifyVideoAvailable) {
     platforms.push(spotifyQuality ? `Spotify (${spotifyQuality})` : 'Spotify');
@@ -127,6 +135,9 @@ function getEpisodeVideoAvailability(episodeData, platformLinks) {
   return platforms.length > 0
     ? {
         platformsText: platforms.join(' · '),
+        appleBadgeText: appleVideoAvailable
+          ? `Vidéo${appleQuality ? ` ${appleQuality}` : ''}`
+          : null,
         spotifyBadgeText: spotifyVideoAvailable
           ? `Vidéo${spotifyQuality ? ` ${spotifyQuality}` : ''}`
           : null,
@@ -457,7 +468,8 @@ async function enqueueEpisodeIntent(intent) {
     intent.title,
     intent.imageUrl,
     intent.feedLastBuildDate,
-    intent.audioUrl
+    intent.audioUrl,
+    intent.itemGuid
   );
 
   if (result.reason === EpisodeQueueReason.QUEUE_ERROR && result.error) {
@@ -1161,7 +1173,8 @@ app.get("/podcast", {
       title: latestEpisode.title,
       imageUrl: latestEpisode.image,
       feedLastBuildDate: latestEpisode.feedLastBuildDate,
-      audioUrl: latestEpisode.audioUrl
+      audioUrl: latestEpisode.audioUrl,
+      itemGuid: latestEpisode.itemGuid
     };
     const workerReady = episodeWorkerManager?.getStatus().state === EpisodeWorkerState.READY;
     const queueResult = workerReady
@@ -1323,6 +1336,12 @@ app.get("/podcast/:season/:episode", {
         );
         shouldQueueJob = !platformLinks.spotify_url
           || platformLinks.spotify_video_available == null
+          || !platformLinks.apple_url
+          || !platformLinks.deezer_url
+          || Boolean(episodeData.feedLastBuildDate && !(
+            new Date(platformLinks.feed_last_build || 0).getTime()
+            >= new Date(episodeData.feedLastBuildDate).getTime()
+          ))
           || (
             youtubeEpisodeResolutionEnabled
             && (!platformLinks.youtube_url || platformLinks.youtube_thumbnail_checked !== true)
@@ -1348,7 +1367,8 @@ app.get("/podcast/:season/:episode", {
       title: episodeData.title,
       imageUrl: episodeData.image,
       feedLastBuildDate: episodeData.feedLastBuildDate,
-      audioUrl: episodeData.audioUrl
+      audioUrl: episodeData.audioUrl,
+      itemGuid: episodeData.itemGuid
     };
     const workerReady = episodeWorkerManager?.getStatus().state === EpisodeWorkerState.READY;
     const queueResult = workerReady
@@ -1404,6 +1424,7 @@ app.get("/podcast/:season/:episode", {
     episodeDescription: getPodcastDescription(episodeData.descriptionParagraphs, episodeData.description),
     episodeVideoAvailability: getEpisodeVideoAvailability(episodeData, platformLinks),
     youtubeUrl: platformLinks?.youtube_url || null,
+    youtubeEmbedUrl: getYouTubeEmbedUrl(platformLinks?.youtube_url),
     ogImageUrl: platformLinks?.og_image_url || null, // Pass OG image for player cover
     episodeStats, // OP3 badge data (ADR-0015)
   });

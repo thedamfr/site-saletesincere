@@ -364,6 +364,16 @@
                 </div>
                 {{/if}}
                 </div>
+                {{#if youtubeEmbedUrl}}
+                <div class="podcast-episode-video">
+                    <iframe src="{{youtubeEmbedUrl}}"
+                            title="Voir {{episodeData.title}} sur YouTube"
+                            width="960" height="540" loading="lazy"
+                            referrerpolicy="strict-origin-when-cross-origin"
+                            allow="encrypted-media; picture-in-picture; fullscreen"
+                            allowfullscreen></iframe>
+                </div>
+                {{/if}}
             </div>
             {{/if}}
             
@@ -424,7 +434,12 @@
                                 <img src="/images/apple-podcasts-logo.svg" alt="Apple Podcasts" class="w-full h-full">
                             </div>
                             <div class="text-left">
-                                <div class="font-semibold text-black">Apple Podcasts</div>
+                                <div class="flex flex-wrap items-center gap-2 font-semibold text-black">
+                                    <span>Apple Podcasts</span>
+                                    {{#if episodeVideoAvailability.appleBadgeText}}
+                                    <span class="podcast-video-badge">{{episodeVideoAvailability.appleBadgeText}}</span>
+                                    {{/if}}
+                                </div>
                                 <div class="text-xs text-gray-500">{{#if platformLinks.apple_url}}Écouter {{episodeData.title}}{{else}}Écouter le podcast{{/if}}</div>
                             </div>
                         </div>
