@@ -1,8 +1,8 @@
 # Livraison continue vers OVH
 
-Version 3 — **11 septembre 2026**. CI, staging et livraison de production
-opérationnels. La recette et la correction du retrait des pods sont consignées
-dans la section de livraison.
+Version 4 — **11 septembre 2026**. CI, staging et livraison de production
+livrés et vérifiés. La recette et la correction du retrait des pods sont
+consignées dans la section de livraison.
 La décision est décrite dans [l’ADR 0020](adr/adr_0020_livraison_continue_et_staging.md).
 
 ## Publier
@@ -156,6 +156,26 @@ Entre 07:37:08 et 07:49:03 UTC, la sonde a enregistré 699 réponses normales
 sur chacun des deux domaines, sans erreur, pendant ces deux rollouts staging.
 La [PR 33](https://github.com/thedamfr/site-saletesincere/pull/33) consigne également
 le résultat de l'activation et du contrôle de production après sa fusion.
+
+La PR 33 a été fusionnée au commit évalué
+`d8ee318fc96ef0a4e01b38fda230d82a0a2c5bf0`.
+Le [run main 34576426165](https://github.com/thedamfr/site-saletesincere/actions/runs/34576426165)
+a réutilisé le digest `sha256:687496f9de669c13effd0c82772c7f6fd18a4ab40e18065ffeee518c12449d92`
+sans build Docker. OVH l'a activé et vérifié en 18 secondes, à 07:55:03 UTC.
+La [double recette GitHub](https://github.com/thedamfr/site-saletesincere/actions/runs/34576546599)
+a réussi ; les deux domaines et leurs pods exécutent cette image, avec base
+`read_write`, worker `ready` et aucun redémarrage des pods applicatifs.
+Le navigateur a également confirmé la page podcast publique.
+
+Entre 07:37:08 et 07:56:06 UTC, la sonde a enregistré 1 112 réponses normales
+sur chacun des deux domaines, soit 2 224 réponses sans erreur. Cette fenêtre
+couvre les deux rollouts staging et le rollout de production renforcé, avec une
+mesure chaque seconde. Elle ne supprime pas le timeout initial de 07:33:18 UTC,
+ni ne garantit la disponibilité hors de la fenêtre mesurée.
+
+Suivis non bloquants : la réception d'un véritable email DOI n'est pas testée
+par la sandbox ; l'ancienne preview et ses ressources sont conservées. Toute
+évolution de schéma exige une validation opérateur distincte avant activation.
 
 
 <details>

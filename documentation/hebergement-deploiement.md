@@ -30,12 +30,12 @@ d’amorçage ne suivent pas automatiquement les releases : **ne pas relancer
 ancienne image ou de toucher aux ressources persistantes. Ne pas relancer les
 scripts de transfert de secrets ou de restauration de base pour une release.
 
-Le manifeste d’amorçage `k8s/ovh/ingress.yaml` pointe encore le staging vers
-le Service de production : le réappliquer annulerait le routage de preview
-observé. Le Job `k8s/ovh/migration-job.yaml`, à nom et image historiques,
-n’est pas une étape générique de release. La
-[direction de livraison continue](livraison-continue.md) prévoit de rendre
-ces opérations rejouables sans écraser la version active ; elle n’est pas activée.
+Le manifeste `k8s/ovh/ingress.yaml` route le staging vers son Service dédié
+`site-saletesincere-staging`. Le Job `k8s/ovh/migration-job.yaml`, à nom et image
+historiques, n’est pas une étape générique de release. La
+[livraison continue active](livraison-continue.md) met à jour uniquement le
+Deployment concerné, sans réappliquer les manifests d’amorçage ni exécuter de
+migration de production.
 
 
 ## Accès à vérifier avant intervention
@@ -217,6 +217,13 @@ Historique et décision : [ADR 0018](adr/adr_0018_migration_ovh_et_retrait_sale_
 [ancienne installation Clever Cloud](adr/adr_0003_deployment_production_clevercloud.md).
 
 
+<details>
+<summary>Audit du 10 septembre 2026 et exigences initiales, avant mise en œuvre</summary>
+
+Les observations et formulations ci-dessous sont conservées comme historique.
+L’état livré le 11 septembre et sa recette figurent dans
+[Livraison continue vers OVH](livraison-continue.md#recette-de-livraison).
+
 ## Audit de livraison — 10 septembre 2026
 
 Au relevé vers 15:54 UTC, le `main` distant et le tag du Deployment de
@@ -321,3 +328,5 @@ succès ne remplace pas cette recette en mode normal. Publier l'URL staging,
 le commit, le digest et les résultats permet au propriétaire de tester une
 version complète avant sa présentation comme prête. La validation staging
 ne dispense pas de la recette du domaine de production après publication.
+
+</details>
