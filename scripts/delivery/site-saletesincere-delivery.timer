@@ -1,0 +1,9 @@
+[Unit]
+Description=Check for validated site releases every minute
+[Timer]
+OnBootSec=45s
+OnUnitInactiveSec=60s
+AccuracySec=5s
+Unit=site-saletesincere-delivery.service
+[Install]
+WantedBy=timers.target

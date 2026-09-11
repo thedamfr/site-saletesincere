@@ -1,4 +1,8 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+@source "./server/**/*.hbs";
+@source "./server/**/*.js";
+@source "./server.js";
+@source "./public/**/*.js";
 
 body.landing-page {
   --landing-paper: #f7f6f2;

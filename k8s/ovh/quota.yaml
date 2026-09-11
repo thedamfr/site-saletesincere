@@ -4,12 +4,12 @@ metadata:
   name: site-saletesincere
 spec:
   hard:
-    requests.cpu: "500m"
-    requests.memory: 768Mi
-    limits.cpu: "2"
-    limits.memory: 2Gi
-    persistentvolumeclaims: "1"
-    requests.storage: 4Gi
+    requests.cpu: "2"
+    requests.memory: 3Gi
+    limits.cpu: "5"
+    limits.memory: 6Gi
+    persistentvolumeclaims: "2"
+    requests.storage: 8Gi
 ---
 apiVersion: v1
 kind: LimitRange

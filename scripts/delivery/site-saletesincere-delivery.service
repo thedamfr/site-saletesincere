@@ -1,0 +1,28 @@
+[Unit]
+Description=Reconcile validated Salete Sincere images on OVH
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=oneshot
+User=site-delivery
+Group=site-delivery
+WorkingDirectory=/opt/site-saletesincere-delivery
+ExecStart=/usr/bin/flock -n /var/lib/site-saletesincere-delivery/activation.lock /usr/bin/node /opt/site-saletesincere-delivery/reconcile.mjs
+LoadCredential=github-token:/etc/site-saletesincere-delivery/github-token
+LoadCredential=kubeconfig:/etc/site-saletesincere-delivery/kubeconfig
+StateDirectory=site-saletesincere-delivery
+StateDirectoryMode=0700
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+RestrictSUIDSGID=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+TimeoutStartSec=12min
+MemoryMax=256M
+CPUQuota=50%
+[Install]
+WantedBy=multi-user.target
