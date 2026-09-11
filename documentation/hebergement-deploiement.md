@@ -1,6 +1,6 @@
 # Hébergement et déploiement — Saleté Sincère
 
-État vérifié le **10 septembre 2026**. Ce guide concerne uniquement le site et
+État actualisé le **11 septembre 2026**. Ce guide concerne uniquement le site et
 ses smartlinks ; il ne déploie ni Podcast Studio ni les autres applications du
 cluster partagé.
 
@@ -8,15 +8,15 @@ cluster partagé.
 
 | Cible | Rôle actuel | Mise à jour |
 | --- | --- | --- |
-| `saletesincere.fr` | Production publique, Cloudflare → OVH/MicroK8s | Image GHCR à activer explicitement sur OVH |
-| `staging.saletesincere.fr` | Staging encore partiel au 10 septembre 2026, 17:10 UTC : base signalée en lecture seule, worker arrêté | Deployment `site-saletesincere-preview` ; cible complète et isolée à réaliser |
-| Application Clever `sale-wall` | Installation historique distincte, toujours active | Intégration GitHub encore déclenchée par `main` |
+| `saletesincere.fr` | Production publique, Cloudflare → OVH/MicroK8s | Livraison automatique par digest après CI verte de `main` |
+| `staging.saletesincere.fr` | Application, PostgreSQL, PVC et worker dédiés ; newsletter de test | Lancement manuel du workflow avec `environment=staging` |
+| Application Clever `sale-wall` | Installation historique distincte | Intégration GitHub encore déclenchée par `main` |
 
-**Le propriétaire demande un staging complet et isolé pour présenter et tester
-le travail.** La preview partielle observée ne satisfait pas cette exigence.
-Voir [l'état daté](#prévisualisation-observée-sur-staging) et le
-[contrat du staging complet](#staging-complet-exigé). Cette mise à jour documentaire
-ne réalise pas sa duplication ni son déploiement.
+La procédure courante et les résultats de recette sont dans
+[Livraison continue vers OVH](livraison-continue.md). Voir aussi
+[l’ADR 0020](adr/adr_0020_livraison_continue_et_staging.md).
+Le staging isolé est opérationnel ; les observations de preview conservées plus
+bas sont historiques. Le pipeline ne modifie ni DNS ni secrets de production.
 
 Le namespace, le Service et le Deployment de production se nomment `site-saletesincere` ;
 le conteneur applicatif est `web`. PostgreSQL et le worker `pg-boss` sont actifs.
@@ -60,7 +60,10 @@ Les opérations Kubernetes passent par `sudo -n /snap/bin/microk8s kubectl` sur 
 serveur. Toujours préciser le namespace ; ne pas modifier les autres applications.
 Ne jamais lire ou afficher les valeurs des Secrets pendant une recette.
 
-## Publier une version
+## Procédure manuelle historique, avant la livraison continue
+
+Les étapes ci-dessous conservent le fonctionnement précédent. Pour une publication
+courante ou un retour arrière, suivre [la procédure actuelle](livraison-continue.md).
 
 ### 1. Préparer et vérifier le code
 

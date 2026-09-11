@@ -1,10 +1,134 @@
 # Livraison continue vers OVH
 
-Mise en œuvre en cours le **11 septembre 2026**, autorisée par le propriétaire.
-Voir [ADR 0020](adr/adr_0020_livraison_continue_et_staging.md).
-La recette finale sera consignée après validation du staging puis de la production.
+Version 2 — **11 septembre 2026**. Mise en œuvre autorisée, CI et staging
+opérationnels. La recette de production est consignée dans la section de livraison.
+La décision est décrite dans [l’ADR 0020](adr/adr_0020_livraison_continue_et_staging.md).
 
-## État initial conservé — 10 septembre 2026
+## Publier
+
+Une PR exécute les tests, le build CSS, les migrations sur PostgreSQL jetable
+(deux exécutions successives) et le rendu Kustomize. Après merge sur `main`,
+`Validate and publish` compare toutes les entrées de l’image à celles d’un
+artefact validé. Il construit et publie sur GHCR seulement si elles diffèrent.
+Un changement documentaire peut donc réutiliser un digest validé en staging,
+même lorsque le commit évalué est un nouveau merge. Les chemins inconnus
+provoquent une reconstruction. L’absence d’un artefact encore conservé déclenche
+également un build, ce qui permet une reprise après expiration des artefacts.
+
+Le run écrit un manifeste public dans la branche `codex/delivery-state` :
+commit évalué, commit source de l’image, digest, empreinte des entrées, empreinte
+des migrations et hash du CSS. Il ne contient aucun secret. Le service OVH attend
+la réussite complète du run, en vérifie la provenance et la tête de branche, puis
+active le digest. La production accepte uniquement `main`.
+
+Le service `site-saletesincere-delivery.timer` vérifie cet état toutes les minutes.
+Il tourne sous `site-delivery`, avec un accès Kubernetes limité aux deux
+Deployments applicatifs et à la lecture des pods/quotas du namespace.
+Aucun token GitHub n’est stocké sur OVH et aucun port entrant n’a été ouvert.
+L’image est téléchargée depuis le registre public GHCR. Le token GitHub reste
+sur les runners pour la publication et les statuts de recette.
+
+`Verify OVH delivery` attend la version attendue sur le domaine public puis
+contrôle la santé normale, les pages, l’épisode, les redirections et le CSS.
+Il publie le statut `OVH / production` ou `OVH / staging`. Un échec ou un délai
+dépassé reste rouge. Le service contrôle aussi les imageID des pods ; son journal
+et son fichier d’état conservent cette preuve distincte de la recette HTTP.
+
+## Livrer un candidat en staging
+
+```bash
+gh workflow run publish-image.yml --repo thedamfr/site-saletesincere \
+  --ref <BRANCHE_CANDIDATE> -f environment=staging -f force_build=false
+```
+
+L’option `force_build=true` reconstruit même si les entrées sont identiques.
+Une demande manuelle `production` est refusée hors `main`. Les anciens tags
+`image-*` ne déclenchent plus de livraison.
+
+[Staging](https://staging.saletesincere.fr) utilise le Deployment
+`site-saletesincere-staging`, PostgreSQL `site-saletesincere-staging-postgres`,
+un PVC de 4 GiB et des identifiants dédiés. Ses règles réseau bloquent l’accès
+au PostgreSQL de production. Le worker est actif. Les migrations sont appliquées
+sur une base neuve, sans copie des données ni des jobs de production.
+
+Les intégrations podcast consultent les services en lecture. La newsletter
+utilise l’API interne `site-saletesincere-staging-brevo`, sans sortie réseau et
+sans credential Brevo réel. Elle permet de tester la soumission du formulaire
+avec une adresse synthétique ; elle n’envoie aucun email. La réception effective
+d’un DOI chez Brevo n’est donc pas couverte par cette recette.
+
+Le mur et S3 restent désactivés comme en production. Le staging conserve
+`noindex`. L’ancienne preview reste démarrée pendant la transition et ne sert
+plus l’Ingress staging ; aucune de ses ressources n’a été supprimée.
+
+## Exploitation et contrôle
+
+```bash
+ssh penthouse 'sudo -n systemctl status site-saletesincere-delivery.timer --no-pager'
+ssh penthouse 'sudo -n journalctl -u site-saletesincere-delivery.service -n 20 --no-pager'
+ssh penthouse 'sudo -n cat /var/lib/site-saletesincere-delivery/production.json'
+ssh penthouse 'sudo -n cat /var/lib/site-saletesincere-delivery/staging.json'
+```
+
+Ces deux fichiers d’état sont non sensibles. Ils enregistrent le commit évalué,
+le commit image, le digest, la version précédente, la date, la durée et le résultat.
+Ne pas afficher le fichier `kubeconfig` présent sous `/etc/site-saletesincere-delivery`.
+Les sources installées sous `/opt/site-saletesincere-delivery` sont épinglées à une
+révision connue dans `config.json` ; elles ne sont pas remplacées par les artefacts
+applicatifs. Une évolution de cet outillage nécessite une installation revue via
+[install.py](../scripts/delivery/install.py), puis la vérification du service.
+
+Les [manifests staging](../k8s/staging/) sont distincts de
+[l’amorçage production](../k8s/ovh/). Le placeholder `bootstrap-required` doit être
+remplacé par un digest validé avant leur première application. Une publication
+ordinaire ne réapplique aucun de ces ensembles : elle modifie uniquement l’image,
+sa métadonnée de digest et les contrôles de readiness du Deployment concerné.
+
+## Disponibilité, migrations et retour arrière
+
+Les deux applications conservent `maxUnavailable: 0` et `maxSurge: 1`. La readiness
+vérifie `normal/read_write/ready` ; `/health` reste une liveness HTTP en 200.
+Le quota du namespace couvre 5 CPU et 6 GiB de limites, 2 CPU et 3 GiB de demandes,
+deux PVC et 8 GiB de stockage. Il laisse une marge pour les deux rollouts sans
+arrêter staging. La publication vérifie cette marge avant mutation.
+
+Le service compare l’empreinte des migrations à celle validée dans sa configuration.
+Une migration nouvelle ou modifiée bloque avant activation. Il n’exécute aucune
+migration de production. L’opérateur doit faire la recette PostgreSQL, vérifier
+la compatibilité et le retour arrière, puis actualiser cette empreinte.
+
+Le retour normal consiste à revert le changement applicatif et laisser la CI
+livrer le nouvel état de `main`. Pour une urgence : arrêter le timer, attendre la
+fin du service, puis utiliser le verrou commun
+`/var/lib/site-saletesincere-delivery/activation.lock` avec `flock` avant d’activer
+le digest précédent. Vérifier le schéma et refaire la recette. Ne réactiver le
+timer qu’après avoir corrigé la version souhaitée, sinon il rétablirait `main`.
+Ne pas supprimer un pod, volume ou Secret pour forcer un rollout.
+
+## Recette de livraison
+
+Le 11 septembre 2026 : 181 tests réussis, 12 intégrations externes ignorées,
+build et rendu Kustomize réussis. Les 10 migrations ont été appliquées sur une
+base CI jetable, puis réexécutées sans changement. Le staging a aussi reçu ces
+10 migrations sur sa propre base et son propre PVC.
+
+Le [run staging 34574005832](https://github.com/thedamfr/site-saletesincere/actions/runs/34574005832)
+a publié le commit image `bf099cb0de9dc4dd412c3b195ab2dd7dfa57e2e8`, digest
+`sha256:12fbabc9fc470ea916949d350e6587e1404a16f75ebd4047ade2a2d05b5b3262`.
+Le service a activé et vérifié cette version automatiquement en 18 secondes,
+le 11 septembre à 07:24:54 UTC.
+
+Recette staging : santé normale, accès réseau PostgreSQL production bloqué,
+job `resolve-episode` et job `op3-stats-refresh` terminés, cache d’épisode écrit,
+formulaire newsletter reçu par l’API de test, pages et asset CSS vérifiés.
+Le navigateur a confirmé le rendu podcast, l’ouverture de la description,
+la jaquette d’épisode et les liens résolus Spotify/YouTube.
+
+La première activation de production est vérifiée après merge ; son résultat
+sera ajouté ici, sans assimiler la publication GHCR à une recette de production.
+
+<details>
+<summary>Audit initial du 10 septembre 2026, conservé comme historique</summary>
 
 Audit documentaire du **10 septembre 2026**. La cible décrite ci-dessous est
 **direction décidée, non implémentée** : cette documentation n'active aucun workflow,
@@ -217,3 +341,5 @@ activation, ne pas afficher un succès : conserver les éléments de diagnostic 
 appliquer la procédure documentée de retour arrière seulement après contrôle de
 compatibilité. Aucun de ces contrôles CI/CD supplémentaires n'est activé par le
 présent document.
+
+</details>
