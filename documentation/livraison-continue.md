@@ -1,5 +1,11 @@
 # Livraison continue vers OVH
 
+Mise en œuvre en cours le **11 septembre 2026**, autorisée par le propriétaire.
+Voir [ADR 0020](adr/adr_0020_livraison_continue_et_staging.md).
+La recette finale sera consignée après validation du staging puis de la production.
+
+## État initial conservé — 10 septembre 2026
+
 Audit documentaire du **10 septembre 2026**. La cible décrite ci-dessous est
 **direction décidée, non implémentée** : cette documentation n'active aucun workflow,
 accès déployant ou déploiement. La procédure actuelle reste le
