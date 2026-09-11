@@ -8,7 +8,6 @@ User=site-delivery
 Group=site-delivery
 WorkingDirectory=/opt/site-saletesincere-delivery
 ExecStart=/usr/bin/flock -n /var/lib/site-saletesincere-delivery/activation.lock /usr/bin/node /opt/site-saletesincere-delivery/reconcile.mjs
-LoadCredential=github-token:/etc/site-saletesincere-delivery/github-token
 LoadCredential=kubeconfig:/etc/site-saletesincere-delivery/kubeconfig
 StateDirectory=site-saletesincere-delivery
 StateDirectoryMode=0700

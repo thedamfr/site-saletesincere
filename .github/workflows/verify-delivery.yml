@@ -6,38 +6,19 @@ on:
 permissions:
   contents: read
   actions: read
-  statuses: read
+  statuses: write
 jobs:
   verify:
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Wait for OVH activation and functional checks
-        uses: actions/github-script@v7
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          script: |
-            const run = context.payload.workflow_run;
-            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({ ...context.repo, run_id: run.id });
-            const artifact = artifacts.data.artifacts.find(a => /^delivery-(production|staging)$/.test(a.name));
-            if (!artifact) throw new Error('No validated release manifest');
-            const environment = artifact.name.replace('delivery-', '');
-            const deadline = Date.now() + 12 * 60 * 1000;
-            while (Date.now() < deadline) {
-              if (environment === 'production') {
-                const { data: head } = await github.rest.repos.getCommit({ ...context.repo, ref: 'main' });
-                if (head.sha !== run.head_sha) {
-                  await core.summary.addRaw('Version dépassée par un nouveau merge : aucune activation attendue pour ce run.').write();
-                  return;
-                }
-              }
-              const { data: statuses } = await github.rest.repos.listCommitStatusesForRef({ ...context.repo, ref: run.head_sha, per_page: 100 });
-              const status = statuses.find(s => s.context === `OVH / ${environment}` && s.target_url === run.html_url);
-              if (status?.state === 'success') {
-                await core.summary.addHeading(`OVH ${environment} vérifié`).addLink('Version et recette', status.target_url).addRaw(`\n${status.description}\n`).write();
-                return;
-              }
-              if (status?.state === 'failure' || status?.state === 'error') throw new Error(status.description);
-              await new Promise(resolve => setTimeout(resolve, 15000));
-            }
-            throw new Error('OVH delivery was not verified before the deadline');
+          node-version: 24
+      - name: Wait for the expected version and verify the public domain
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DELIVERY_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: node scripts/delivery/verify.mjs

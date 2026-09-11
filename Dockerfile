@@ -19,6 +19,7 @@ ENV NODE_ENV=production PORT=3000
 COPY --chown=node:node --from=builder /app ./
 RUN npm ci --omit=dev
 ARG SOURCE_COMMIT
+ENV RELEASE_COMMIT=$SOURCE_COMMIT
 LABEL org.opencontainers.image.revision=$SOURCE_COMMIT
 USER node
 EXPOSE 3000

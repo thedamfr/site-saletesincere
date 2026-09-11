@@ -59,7 +59,7 @@ jobs:
     needs: validate
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       actions: read
       packages: write
     env:
@@ -117,3 +117,7 @@ jobs:
           name: delivery-${{ env.DELIVERY_ENVIRONMENT }}
           path: release.json
           retention-days: 90
+      - name: Publish public delivery intent (OVH requires no GitHub token)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/delivery/publish-state.mjs

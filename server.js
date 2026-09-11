@@ -1,4 +1,5 @@
 import 'dotenv/config'
+import { getReleaseIdentity } from './server/services/releaseIdentity.js';
 import path from "node:path";
 import fs from "node:fs";
 import Fastify from "fastify";
@@ -1410,12 +1411,11 @@ app.get("/podcast/:season/:episode", {
 
 // Health: liveness HTTP stays 200 even when PostgreSQL or pg-boss is unavailable.
 app.decorate('episodeWorkerManager', null);
-app.get("/health", () => getHealthPayload(
-  episodeWorkerManager,
-  hasDatabase,
-  databaseAvailability,
-  episodeIntentBuffer
-));
+app.get("/health", () => {
+  const health = getHealthPayload(episodeWorkerManager, hasDatabase, databaseAvailability, episodeIntentBuffer);
+  const release = getReleaseIdentity();
+  return Object.keys(release).length ? { ...health, release } : health;
+});
 
 // Audio Proxy for CORS (ADR-0014)
 const ALLOWED_AUDIO_DOMAINS = [

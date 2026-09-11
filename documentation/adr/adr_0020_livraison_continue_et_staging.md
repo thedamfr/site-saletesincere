@@ -17,8 +17,13 @@ nouvel accès réseau entrant. Son code est installé à une révision revue et 
 jamais remplacé par un fichier téléchargé depuis un artefact. Son identité
 Kubernetes peut lire pods/quotas et modifier uniquement les deux Deployments du
 site. Elle ne peut lire les Secrets ni toucher aux bases, volumes ou autres
-applications. Les identifiants GitHub et Kubernetes sont fournis par les
-credentials systemd et ne sont pas versionnés.
+applications. Le credential Kubernetes est fourni par systemd et ne peut être lu que par le
+service. Aucun token GitHub n’est stocké sur OVH : les manifestes non sensibles
+sont publiés sur la branche publique `codex/delivery-state`. Le service vérifie
+ensuite la réussite et la provenance du run via l’API publique de GitHub. Les
+requêtes de chaque minute lisent le contenu brut public ; l’API limitée en débit
+n’est consultée que lorsqu’une livraison change. Le token GitHub reste sur les
+runners et sert à publier GHCR, l’état attendu et les statuts de recette.
 
 Un verrou local commun à toutes les activations empêche leur chevauchement. Le
 service vérifie la tête de branche avant mutation et après recette. La production

@@ -1,10 +1,10 @@
 import { spawnSync } from 'node:child_process';
 import { repository, validateRelease } from './policy.mjs';
 
-export async function github(path, body) {
+export async function github(path, body, method) {
   const response = await fetch(`https://api.github.com/repos/${repository}/${path}`, {
-    method: body ? 'POST' : 'GET',
-    headers: { Authorization: `Bearer ${process.env.GH_TOKEN}`, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
+    method: method || (body ? 'POST' : 'GET'),
+    headers: { ...(process.env.GH_TOKEN ? { Authorization: `Bearer ${process.env.GH_TOKEN}` } : {}), Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' },
     body: body ? JSON.stringify(body) : undefined,
     signal: AbortSignal.timeout(30000)
   });

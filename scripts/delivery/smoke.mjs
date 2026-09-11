@@ -1,6 +1,6 @@
 import { hash } from './policy.mjs';
 
-export async function smoke(url, cssHash) {
+export async function smoke(url, cssHash, release) {
   const get = async (path, redirect = 'follow') => {
     const response = await fetch(`${url}${path}${path.includes('?') ? '&' : '?'}delivery_check=${Date.now()}`, {
       redirect, signal: AbortSignal.timeout(20000), headers: { 'Cache-Control': 'no-cache' }
@@ -9,6 +9,7 @@ export async function smoke(url, cssHash) {
   };
   const healthResponse = await get('/health');
   const health = await healthResponse.json();
+  if (release && (health.release?.sourceCommit !== release.imageCommit || health.release?.digest !== release.digest)) throw new Error('Expected release is not active on the public domain');
   if (!healthResponse.ok || health.mode !== 'normal' || health.database?.state !== 'read_write' || health.episodeWorker?.state !== 'ready') {
     throw new Error('Health is not normal/read_write/ready');
   }
