@@ -1226,6 +1226,10 @@
     }
   }
 }
+html.landing-root {
+  overflow-x: hidden;
+  overflow-x: clip;
+}
 body.landing-page {
   --landing-paper: #f7f6f2;
   --landing-ink: #111214;

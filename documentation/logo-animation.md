@@ -28,6 +28,10 @@ même lorsque plusieurs clics arrivent avant la prochaine image du navigateur.
 Les activations clavier du même bouton comptent aussi ; les clics sur les liens
 ou hors de la zone de relance ne comptent pas.
 
+Sur mobile, le logo garde sa taille et son débordement visuel hors de l’écran.
+La racine de la home découpe le débordement horizontal pour empêcher le déplacement
+latéral, y compris dans Safari mobile, sans bloquer le défilement vertical.
+
 Le compteur est propre au chargement de la page, sans délai imposé entre les
 clics ni stockage persistant. Une seule ouverture est déclenchée par chargement :
 les clics suivants rejouent simplement le logo. L’ouverture reste synchrone avec
@@ -105,3 +109,16 @@ Aucun serveur ni accès externe n'est nécessaire.
 
 Les PNG et la planche de contrôle sont écrits dans le répertoire temporaire
 `salete-logo-browser-check`, dont le chemin est affiché par la commande.
+
+Le contrôle de mise en page de la home vérifie séparément l’absence de défilement
+horizontal de 320 à 1 400 pixels, le logo dépassant toujours du cadre sur mobile,
+sa relance au clavier et la navigation verticale vers le contact. Les fichiers
+locaux sont utilisés sans serveur ni accès externe ; les polices externes sont
+remplacées par les polices de repli du navigateur.
+
+```bash
+npm run build
+LOGO_BROWSER_CHANNEL=chrome npm run check:landing-layout
+npm exec playwright install webkit
+LANDING_BROWSER=webkit npm run check:landing-layout
+```
