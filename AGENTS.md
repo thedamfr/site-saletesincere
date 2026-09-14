@@ -174,11 +174,28 @@ proportionné au risque.
 
 ## Git, GitHub et déploiement
 
-- Ne pas créer de commit, pousser, ouvrir une PR ou déployer sans demande explicite.
+- L'autorisation du propriétaire est permanente pour créer des commits, pousser
+  les branches de travail nécessaires aux PR et ouvrir des PR en draft, sans
+  demander de confirmation supplémentaire.
 - Garder les commits et PR limités à leur objectif ; ne jamais inclure silencieusement
   des modifications locales sans rapport.
-- Ouvrir les PR en draft pendant leur préparation, puis les passer explicitement en
-  `Ready for review` lorsqu'elles sont testées et prêtes.
+- Ouvrir une PR en draft le plus tôt possible, dès qu'un premier changement peut
+  être relu, sans attendre la fin de l'implémentation ou de toutes les vérifications.
+  Mettre ensuite sa description à jour avec le périmètre et les résultats réels.
+- Le passage en `Ready for review` (R2R) est toujours autorisé sans confirmation,
+  notamment pour déclencher la revue Copilot. Signaler les vérifications encore
+  en cours ou les limites connues dans la PR.
+- Une demande de mise en production autorise et demande la fusion de la PR puis
+  la livraison jusqu'aux contrôles de production. Ne pas redemander l'autorisation
+  de fusionner ou de déployer pour ce même périmètre.
+- L'approbation du propriétaire prime sur celle de Copilot. Une approbation
+  Copilot n'est pas une condition de fusion : ne pas multiplier les cycles de
+  revue pour l'obtenir. Si ses retours sont mineurs, les documenter dans la PR
+  avec leur traitement ou leur report suffit. Corriger les problèmes bloquants
+  avérés et respecter les contrôles techniques requis ; ne relancer une revue
+  que si un changement substantiel ou un risque non résolu le justifie.
+- Sans demande de mise en production, la préparation des commits et PR et leur
+  passage en R2R n'autorisent pas une fusion ou une publication en production.
 - Pour `gh`, contrôler l'authentification avec l'accès réseau et au trousseau prévu
   par l'environnement. Un échec dans le sandbox ne suffit pas à conclure que le CLI
   est déconnecté.
@@ -198,6 +215,9 @@ proportionné au risque.
   après réussite vérifiée comme après échec, avec une sévérité fondée sur l'état
   observé du service. Vérifier l'acceptation de l'envoi sans déduire sa réception
   sur le téléphone. Suivre le mécanisme de déduplication du runbook.
+- Tout message au propriétaire via le bot Telegram existant concernant un
+  déploiement ou une panne de production est toujours autorisé, sans confirmation
+  préalable, y compris pour une panne survenue hors d'une livraison en cours.
 - Ne pas réappliquer aveuglément les manifests d’amorçage Kubernetes : leurs tags
   d’image peuvent être anciens. Ne pas modifier DNS, secrets ou ressources
   partagées au titre d’une simple publication applicative.
@@ -225,10 +245,11 @@ les vérifications exécutées et les limites ou prochaines étapes réellement 
 
 ## Surveillance des livraisons et Telegram (autorisation du propriétaire)
 
-Le propriétaire autorise, depuis le 11 septembre 2026, les contrôles renforcés
-et les notifications ci-dessous lors d'un déploiement déjà autorisé. Cette
-consigne complète les règles propres au projet ; elle n'autorise ni publication
-ni déploiement supplémentaire.
+Le propriétaire autorise les contrôles renforcés ci-dessous lors d'un déploiement
+déjà autorisé. Les messages via son bot Telegram concernant un déploiement ou une
+panne de production bénéficient d'une autorisation permanente, même hors d'une
+livraison en cours. Cette autorisation de notification ne vaut pas autorisation
+d'effectuer un déploiement supplémentaire.
 
 - Lire le [guide infra commun](/home/ubuntu/source/infra-sincere/documentation/deploiement-surveillance-notifications.md) avant de livrer.
 - Utiliser les sondes Prometheus récentes et les alertes pertinentes en complément
