@@ -4,6 +4,12 @@
 @source "./server.js";
 @source "./public/**/*.js";
 
+/* Mobile WebKit needs clipping on the root to contain the oversized hero logo. */
+html.landing-root {
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
 body.landing-page {
   --landing-paper: #f7f6f2;
   --landing-ink: #111214;

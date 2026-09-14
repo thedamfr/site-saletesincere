@@ -64,7 +64,7 @@ describe('GET / landing redesign', () => {
 
     assert.equal(response.statusCode, 200)
     assertContains(response.body, /class="landing-page"/)
-    assertContains(response.body, /<link rel="stylesheet" href="\/style\.css\?v=logo-ribbons-1">/)
+    assertContains(response.body, /<link rel="stylesheet" href="\/style\.css\?v=landing-mobile-overflow-1">/)
     assertContains(response.body, /logo-salete-sincere-horizontal\.png/)
     assertContains(response.body, /class="landing-hero-mark"[^>]*data-logo-replay[^>]*aria-label="Rejouer l’animation du logo"/)
     assertContains(response.body, /data-logo-animation[^>]*src="\/images\/logo-noname-web\.svg\?v=logo-ribbons-1"[^>]*alt=""[^>]*aria-hidden="true"/)
