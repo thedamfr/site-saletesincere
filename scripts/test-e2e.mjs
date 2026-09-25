@@ -28,7 +28,14 @@ try {
   const download = await downloadPromise
   assert.equal(download.suggestedFilename(), 'damien-cavailles-portrait-officiel.jpg')
   assert.deepEqual(await readFile(await download.path()), await readFile(new URL('../public/images/damien-podcast.jpg', import.meta.url)))
-  assert.equal(await page.locator('.author-prose li').count(), 11)
+  const editorialLinks = await page.locator('.author-editing li a').evaluateAll(links => links.map(link => link.href))
+  for (const articleId of ['daeab20db002', 'b6cfac4140cd', 'd197e9354854', 'd4e52966927d', '16e712199858', 'aad66a0b17f6']) {
+    assert.ok(editorialLinks.some(link => link.endsWith(articleId)), `Missing confirmed editorial reference: ${articleId}`)
+  }
+  assert.equal(new Set(editorialLinks).size, editorialLinks.length, 'Editorial references must not be duplicated')
+  for (const articleId of ['73c41b446880', 'eeff51c3bf42', '12eee042c47e']) {
+    assert.ok(!editorialLinks.some(link => link.endsWith(articleId)), 'Incorrect editorial attribution must be removed')
+  }
   for (const name of ['Travail d’éditeur', 'Articles signés', 'Webinars et tables rondes', 'Invité dans des podcasts']) {
     await page.getByRole('heading', { name, exact: true }).waitFor()
   }
