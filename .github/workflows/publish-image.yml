@@ -43,6 +43,16 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      - run: npm run test:e2e:install
+      - run: npm run test:e2e
+        env:
+          E2E_OUTPUT: /tmp/site-author-e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: golden-journeys-${{ github.job }}
+          path: /tmp/site-author-e2e
+          if-no-files-found: ignore
       - name: Verify migrations on disposable PostgreSQL, including repeat execution
         env:
           DATABASE_URL: postgresql://delivery_test:disposable_ci_only@127.0.0.1:5432/delivery_test

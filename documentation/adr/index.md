@@ -10,7 +10,19 @@ tags: [adr, index, architecture, decisions]
 
 # Index des ADRs - Saleté Sincère
 
-**Index complet des Architecture Decision Records du projet.**
+## Summary
+
+Index des décisions d’architecture du projet. L’ADR 0021 décrit la page auteur,
+son contenu Markdown compilé au build et le sitemap public. Consulter la décision
+concernée avant de modifier son comportement.
+
+## Synthèse
+
+Le tableau indique le périmètre et le statut de chaque décision. Les décisions
+historiques ne décrivent pas nécessairement la production actuelle. Les procédures
+de livraison et les résultats de recette restent dans les guides opérationnels.
+
+## Annexes
 
 ## 📋 Tous les ADRs
 
@@ -37,9 +49,11 @@ tags: [adr, index, architecture, decisions]
 | [ADR-0019](./adr_0019_preview_podcast_isolee.md) | Preview podcast temporaire | 📚 **Historique** | 2026-09 | Staging, Podcast | Infrastructure |
 | [ADR-0020](./adr_0020_livraison_continue_et_staging.md) | Livraison continue et staging complet | 🚀 **Implémenté** | 2026-09 | CI/CD, Kubernetes | Critique |
 
+| [ADR-0021](./adr_0021_page_auteur_et_sitemap.md) | Page auteur et sitemap | ✅ **Accepté** | 2026-09 | Contenu, SEO | Feature |
+
 ## 📊 Statistiques
 
-- **Total ADRs** : 20
+- **Total ADRs** : 21
 - **Actifs** : 1 (sécurité)
 - **Historiques** : 2 (ancienne production Clever Cloud et preview podcast)
 - **Implémentés** : 11 (audio + podcasting + templates + OVH + livraison continue)
