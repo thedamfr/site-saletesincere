@@ -36,9 +36,19 @@ try {
   for (const articleId of ['73c41b446880', 'eeff51c3bf42', '12eee042c47e']) {
     assert.ok(!editorialLinks.some(link => link.endsWith(articleId)), 'Incorrect editorial attribution must be removed')
   }
-  for (const name of ['Travail d’éditeur', 'Articles signés', 'Webinars et tables rondes', 'Invité dans des podcasts']) {
-    await page.getByRole('heading', { name, exact: true }).waitFor()
-  }
+  assert.deepEqual(await page.locator('.author-section h2').allTextContents(), [
+    'Travail d’éditeur', 'Articles signés', 'Interviews et mentions', 'Webinars et tables rondes'
+  ])
+  const interviews = page.locator('.author-section').filter({ has: page.getByRole('heading', { name: 'Interviews et mentions', exact: true }) })
+  assert.deepEqual(await interviews.locator('li a').evaluateAll(links => links.map(link => link.href)), [
+    'https://taleez.com/guide/e-book-le-futur-du-travail-secrit-aujourdhui-sylvain-colas',
+    'https://estamitech.fr/episode/4907ac1d-aaf2-4078-8a69-6a406548c5eb',
+    'https://www.youtube.com/watch?v=LPsWR4d4TKg',
+    'https://alliance-emploi.org/podcast-ressources#ep17',
+    'https://shows.acast.com/au-refuge/episodes/damien-cavailles-welovedevs-au-refuge',
+    'https://podcast.ausha.co/tech-rocks/et-si-les-developpeurs-avaient-le-droit-au-bonheur-damien-cavailles-welovedevs-youen-chene-webvert-s05ep18'
+  ])
+  assert.match(await interviews.locator('li').first().textContent(), /Interviewé.*Sylvain Colas.*À paraître/s)
   // Follow a real editorial link; only the external publisher is simulated.
   const article = page.locator('.author-prose a[href^="https://medium.com/"]').first()
   const destination = await article.getAttribute('href')

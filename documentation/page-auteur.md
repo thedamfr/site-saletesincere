@@ -20,8 +20,10 @@ Le contenu éditorial reste un fichier texte sans front matter ni composants.
 La première rubrique accompagne la photo de discussion chez leboncoin. Les textes
 Medium sont présentés comme travail d’éditeur sur instruction du propriétaire,
 avec crédit aux auteurs. La sélection WeLoveDevs rassemble une dizaine d’articles de fond
-sur le métier et les choix techniques, complétée par un lien d’archive. Les webinars et invitations en podcast
-occupent des rubriques distinctes. Les liens pointent vers les sources, sans
+sur le métier et les choix techniques, complétée par un lien d’archive. Le livre et les invitations en podcast
+sont regroupés sous « Interviews et mentions », après les articles signés. Le
+livre apparaît en premier, puis les podcasts. Les webinars suivent dans leur
+rubrique distincte. Les liens pointent vers les sources, sans
 recopier les articles ni télécharger les vidéos.
 
 `npm run build:views` produit `server/generated/author.json`, exclu de Git.
