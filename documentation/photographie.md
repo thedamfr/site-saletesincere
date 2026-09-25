@@ -15,7 +15,8 @@ La maquette approuvée est implémentée dans
 [`photography.hbs`](../server/views/photography.hbs), avec une
 [feuille de style dédiée](../public/photography.css). La route utilise le
 limiteur de pages et les en-têtes de sécurité du serveur. Le lien de contact
-ouvre un email à Damien. La galerie complémentaire repose sur `details/summary` ;
+ouvre un email à Damien, dès l’introduction avant les photographies, puis en fin
+de page. Le bouton initial reste visible sans défilement sur mobile et ordinateur. La galerie complémentaire repose sur `details/summary` ;
 son ouverture n’est pas persistée et aucun cookie n’est ajouté par cette page.
 
 Les photographies sont groupées par référence : dotAI / dotJS est un événement
