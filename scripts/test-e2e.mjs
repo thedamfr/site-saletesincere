@@ -10,11 +10,13 @@ const app = await buildApp({ databaseConfigured: false, initializeStorage: false
   podcastEpisodesFetcher: async () => [] })
 const local = await app.listen({ port: 0, host: '127.0.0.1' })
 const base = process.env.E2E_BASE_URL || local
-const browser = await chromium.launch({ chromiumSandbox: true,
-  executablePath: process.env.E2E_BROWSER_EXECUTABLE || undefined })
+let browser
 const output = process.env.E2E_OUTPUT || '/tmp/site-author-e2e'
 await mkdir(output, { recursive: true })
 try {
+  browser = await chromium.launch({ chromiumSandbox: true,
+    channel: process.env.E2E_BROWSER_CHANNEL || undefined,
+    executablePath: process.env.E2E_BROWSER_EXECUTABLE || undefined })
   const context = await browser.newContext({ acceptDownloads: true })
   const page = await context.newPage()
   await page.goto(base)
@@ -72,6 +74,6 @@ try {
   console.log('Golden Journey — lecture sans JavaScript, mobile, redirection canonique et découverte robots/sitemap : OK')
   await noJs.close()
 } finally {
-  await browser.close()
+  await browser?.close()
   await app.close()
 }

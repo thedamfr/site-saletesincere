@@ -60,7 +60,9 @@ externes. Aucun formulaire n’est envoyé. Les tests de service vérifient pann
 cache et reprise. Aucune persistance ou permission d’écriture n’est ajoutée.
 Les captures sont écrites dans `/tmp/site-author-e2e` ou `E2E_OUTPUT` et conservées
 par la CI. `E2E_BASE_URL` permet une recette publique en lecture seule ;
-`E2E_BROWSER_EXECUTABLE` permet un Chromium déjà installé.
+`E2E_BROWSER_EXECUTABLE` permet un Chromium déjà installé. La CI utilise
+`E2E_BROWSER_CHANNEL=chrome`, le Chrome préinstallé du runner compatible avec
+AppArmor ; la sandbox Chromium reste active.
 
 ### Sources et assets
 

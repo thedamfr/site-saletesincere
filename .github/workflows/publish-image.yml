@@ -43,10 +43,10 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
-      - run: npm run test:e2e:install
       - run: npm run test:e2e
         env:
           E2E_OUTPUT: /tmp/site-author-e2e
+          E2E_BROWSER_CHANNEL: chrome
       - uses: actions/upload-artifact@v4
         if: always()
         with:
