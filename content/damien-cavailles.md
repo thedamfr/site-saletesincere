@@ -40,6 +40,12 @@ Une sélection de textes publiés sur le Medium leboncoin tech, sur lesquels j�
 
 [Voir mes autres articles sur WeLoveDevs](https://welovedevs.com/author/damien/)
 
+## Entretien dans un livre
+
+- [Le futur du travail s’écrit aujourd’hui](https://taleez.com/guide/e-book-le-futur-du-travail-secrit-aujourdhui-sylvain-colas)\
+  Interviewé · Livre de Sylvain Colas · À paraître\
+  Publication annoncée sur Taleez, puis sur Amazon.
+
 ## Webinars et tables rondes
 
 - [GEO : Comment être référencé par ChatGPT ?](https://app.livestorm.co/p/bf678e23-b016-4c5e-994a-663b6cfa1e90)\
@@ -57,6 +63,12 @@ Une sélection de textes publiés sur le Medium leboncoin tech, sur lesquels j�
 
 ## Invité dans des podcasts
 
+- [Météo de l’emploi #2](https://estamitech.fr/episode/4907ac1d-aaf2-4078-8a69-6a406548c5eb)\
+  Invité · L’EstamiTech · 19 août 2026
+- [Réenchanter le recrutement et la marque employeur](https://www.youtube.com/watch?v=LPsWR4d4TKg)\
+  Invité · On n’a jamais fait comme ça · Épisode 42
+- [Piloter l’urgence : les clés de la gestion de crise](https://alliance-emploi.org/podcast-ressources#ep17)\
+  Invité · Ressources, le podcast d’Alliance Emploi · Épisode 17
 - [Damien Cavaillès (WeLoveDevs) — Au Refuge](https://shows.acast.com/au-refuge/episodes/damien-cavailles-welovedevs-au-refuge)\
   Invité · Au Refuge · 22 août 2024
 - [Et si les développeurs avaient le droit au bonheur ?](https://podcast.ausha.co/tech-rocks/et-si-les-developpeurs-avaient-le-droit-au-bonheur-damien-cavailles-welovedevs-youen-chene-webvert-s05ep18)\
