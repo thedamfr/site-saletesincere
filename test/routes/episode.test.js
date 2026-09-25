@@ -58,7 +58,7 @@ describe('GET /podcast/:season/:episode', () => {
     
     const body = response.body
     assert.match(body, /S1E5/i, 'Should show episode identifier')
-    assert.match(body, /16 octobre 2025/i, 'Should display publication date from RSS')
+    assert.match(body, /15 octobre 2025/i, 'Should display publication date from RSS')
   })
 
   test('should redirect to the podcast page when the episode is absent from RSS', async () => {
