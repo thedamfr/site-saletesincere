@@ -10,14 +10,23 @@ Je réalise le podcast [Charbon & Wafer](/podcast) et j’accompagne des équipe
 
 Une sélection de textes publiés sur le Medium leboncoin tech, sur lesquels j’ai travaillé comme éditeur.
 
-- [How leboncoin paved the way for the deployment of large-scale accessibility](https://medium.com/leboncoin-tech-blog/how-leboncoin-paved-the-way-for-the-deployment-of-large-scale-accessibility-73c41b446880)\
-  Par Laura Gautheron · 24 juin 2025\
+- [Scaling the change surface with Spark: inside leboncoin’s design system](https://medium.com/leboncoin-tech-blog/scaling-the-change-surface-with-spark-inside-leboncoins-design-system-daeab20db002)\
+  leboncoin tech · 16 juillet 2026\
   **Travail d’éditeur** · leboncoin tech
-- [From blank page to perfect pitch: how AI is transforming ads at leboncoin](https://medium.com/leboncoin-tech-blog/from-blank-page-to-perfect-pitch-how-ai-is-transforming-ads-at-leboncoin-eeff51c3bf42)\
-  Par Julia Langlois · 31 mars 2025\
+- [Beyond the hype: how a custom multimodal transformer beat our fine-tuned LLM](https://medium.com/leboncoin-tech-blog/beyond-the-hype-how-a-custom-multimodal-transformer-beat-our-fine-tuned-llm-b6cfac4140cd)\
+  Par Louis-Victor Pasquier · 29 avril 2026\
   **Travail d’éditeur** · leboncoin tech
-- [Code, Chaos, and Collaboration: The humans behind the visual search feature](https://medium.com/leboncoin-tech-blog/code-chaos-and-collaboration-the-humans-behind-the-visual-search-feature-12eee042c47e)\
-  Par Yann Lemonnier · 10 mars 2025\
+- [Confidence by Spotify: how A/B testing enriches product conversations at leboncoin](https://medium.com/leboncoin-tech-blog/confidence-by-spotify-bringing-a-b-testing-into-the-product-conversation-at-leboncoin-d197e9354854)\
+  leboncoin tech · 24 mars 2026\
+  **Travail d’éditeur** · leboncoin tech
+- [From observer to production: how leboncoin adopted MCP to architect the agentic era](https://medium.com/leboncoin-tech-blog/from-observer-to-production-how-leboncoin-adopted-mcp-to-architect-the-agentic-era-d4e52966927d)\
+  Par Kevin Platel · 11 février 2026\
+  **Travail d’éditeur** · leboncoin tech
+- [Fraud as a misuse case: when the user journey is used against the product](https://medium.com/leboncoin-tech-blog/fraud-as-a-misuse-case-when-the-user-journey-is-used-against-the-product-16e712199858)\
+  Par Maxence Audibert, Aymeric Milcent, Steeven Cabouret et Mickaël Pois-Castiglioni · 28 janvier 2026\
+  **Travail d’éditeur** · leboncoin tech
+- [Deep dive in Open Telemetry metrics with two stories at leboncoin tech 1/2](https://medium.com/leboncoin-tech-blog/deep-dive-in-open-telemetry-metrics-with-two-stories-at-leboncoin-tech-1-2-aad66a0b17f6)\
+  Avec Paul Drappier et Alexis Destrez · 23 décembre 2025\
   **Travail d’éditeur** · leboncoin tech
 
 ## Articles signés
