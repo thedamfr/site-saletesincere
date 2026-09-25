@@ -112,3 +112,6 @@ v8-compile-cache-*
 # Fichiers de debug
 debug.log
 error.log
+
+# Author HTML compiled from content Markdown
+server/generated/

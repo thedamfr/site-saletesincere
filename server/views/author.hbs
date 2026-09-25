@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{title}}</title>
+  <meta name="description" content="{{description}}">
+  <meta name="author" content="{{name}}">
+  <link rel="canonical" href="{{canonical}}">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <meta property="og:type" content="profile">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:site_name" content="Saleté Sincère">
+  <meta property="og:title" content="{{title}}">
+  <meta property="og:description" content="{{description}}">
+  <meta property="og:url" content="{{canonical}}">
+  <meta property="og:image" content="https://saletesincere.fr/images/damien-podcast.jpg">
+  <meta property="og:image:alt" content="Portrait officiel de Damien Cavaillès au micro">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{title}}">
+  <meta name="twitter:description" content="{{description}}">
+  <meta name="twitter:image" content="https://saletesincere.fr/images/damien-podcast.jpg">
+  <link rel="stylesheet" href="/author.css?v=1">
+  <script type="application/ld+json">{{{structuredData}}}</script>
+</head>
+<body class="author-page">
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <div class="author-shell">
+    <header class="author-header">
+      <a href="/">Saleté Sincère</a>
+      <nav aria-label="Navigation principale"><a href="/podcast">Podcast</a><a href="#contact">Contact</a></nav>
+    </header>
+    <main id="contenu">
+      <section class="author-intro" aria-label="Présentation">
+        <div class="author-heading"><h1>{{name}}</h1><p class="author-role">{{role}}</p></div>
+        <figure class="author-portrait">
+          <img src="/images/damien-podcast.jpg" width="2304" height="1536" alt="Portrait officiel de Damien Cavaillès au micro">
+          <figcaption>Portrait officiel
+            <a class="author-download" href="/damien-cavailles/portrait.jpg" download="damien-cavailles-portrait-officiel.jpg">Télécharger le portrait HD</a>
+            <span>JPG · 2 304 × 1 536 px</span>
+          </figcaption>
+        </figure>
+        <div class="author-bio">{{{introHtml}}}</div>
+      </section>
+      {{#each sections}}
+      <section class="author-section">
+        <h2>{{title}}</h2>
+        <div class="author-section-body{{#if @first}} author-editing{{/if}}">
+          <div class="author-prose">{{{html}}}</div>
+          {{#if @first}}
+          <figure class="author-work-photo">
+            <img src="/images/damien-leboncoin-discussion.jpg" width="800" height="600" loading="lazy" alt="Damien Cavaillès en discussion chez leboncoin">
+            <figcaption>Une discussion chez leboncoin.</figcaption>
+          </figure>
+          {{/if}}
+        </div>
+      </section>
+      {{/each}}
+      <section class="author-contact" id="contact" aria-label="Contact">
+        <p>Pour un texte, un entretien ou un projet éditorial.</p>
+        <div><a href="/#contact">Me contacter</a><a href="https://www.linkedin.com/in/damiencavailles/">LinkedIn</a></div>
+      </section>
+    </main>
+    <footer class="author-footer">Damien Cavaillès · Saleté Sincère</footer>
+  </div>
+</body>
+</html>

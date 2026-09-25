@@ -5,6 +5,9 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY server.js style.css postcss.config.js ./
+COPY content ./content
+COPY scripts/build-author.mjs ./scripts/build-author.mjs
+COPY scripts/lib ./scripts/lib
 COPY server ./server
 COPY public ./public
 COPY sql ./sql

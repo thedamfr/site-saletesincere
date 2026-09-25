@@ -15,6 +15,7 @@ import { uploadLimiter, voteLimiter, pageLimiter, apiLimiter, newsletterLimiter,
 import { validateAudio, audioValidationMiddleware } from "./server/validators/audioValidator.js";
 import { setupSecurityHeaders, setupErrorHandler } from "./server/middleware/security.js";
 import newsletterRoutes from "./server/newsletter/routes.js";
+import { registerAuthorSeo } from "./server/routes/author-seo.js";
 import {
   fetchEpisodeFromRSS,
   fetchPublishedEpisodesFromRSS,
@@ -406,6 +407,8 @@ if (!isProduction) {
     decorateReply: false
   });
 }
+
+registerAuthorSeo(app, { fetchEpisodes: podcastEpisodesFetcher, pageLimiter });
 
 // Newsletter Routes
 await app.register(newsletterRoutes, { prefix: '/newsletter' });

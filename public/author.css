@@ -1,0 +1,66 @@
+.author-page {
+  margin: 0;
+  background: #fafaf8;
+  color: #272d2b;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  padding: 0 34px;
+  overflow-wrap: anywhere;
+}
+.author-page * { box-sizing: border-box; }
+.author-shell { max-width: 790px; margin: auto; }
+.author-page a { color: #325f67; text-decoration: underline; text-decoration-color: #325f6766; text-underline-offset: 3px; }
+.author-page a:hover { text-decoration-color: currentColor; }
+.author-page a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+.author-page .skip-link { position: absolute; top: -100px; left: 20px; background: #fff; padding: 10px; }
+.author-page .skip-link:focus { top: 5px; z-index: 1; }
+.author-header { padding: 25px 0 20px; border-bottom: 1px solid #dcdfd9; display: flex; justify-content: space-between; gap: 20px; font-size: 12px; }
+.author-header a { color: #272d2b; text-decoration: none; }
+.author-header nav { display: flex; gap: 21px; }
+.author-intro { display: grid; grid-template-columns: minmax(0, 1fr) 164px; column-gap: 35px; padding: 37px 0 32px; align-items: start; }
+.author-heading { grid-column: 1; }
+.author-page h1 { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-size: 37px; letter-spacing: -.025em; line-height: 1.2; margin: 0 0 6px; }
+.author-page p { margin: 0 0 13px; }
+.author-page .author-role { margin: 0 0 21px; color: #626a65; }
+.author-bio { grid-column: 1; }
+.author-bio p:last-child { margin-bottom: 0; }
+.author-page figure { margin: 0; }
+.author-portrait { grid-column: 2; grid-row: 1 / span 2; }
+.author-page img { width: 100%; height: auto; display: block; border-radius: 3px; }
+.author-page figcaption { color: #626a65; font-size: 11px; margin-top: 6px; }
+.author-download { display: block; margin-top: 7px; font-size: 12px; line-height: 1.5; padding: 4px 0; }
+.author-portrait figcaption span { display: block; }
+.author-section { border-top: 1px solid #dcdfd9; padding: 26px 0; }
+.author-page h2 { font-family: Georgia, 'Times New Roman', serif; font-size: 24px; font-weight: 400; line-height: 1.3; margin: 0 0 15px; letter-spacing: -.015em; }
+.author-editing { display: grid; grid-template-columns: minmax(0, 1fr) 205px; gap: 30px; align-items: start; }
+.author-work-photo { padding-top: 8px; }
+.author-prose > p { font-size: 14px; color: #626a65; }
+.author-prose ul { list-style: none; padding: 0; margin: 20px 0 0; }
+.author-prose li { font-size: 12px; color: #626a65; margin: 0 0 20px; }
+.author-prose li:last-child { margin-bottom: 0; }
+.author-prose li a { font-size: 15px; line-height: 1.5; }
+.author-prose li strong { display: inline-block; border-radius: 3px; background: #f7ebe1; color: #89522e; padding: 1px 6px; margin-top: 4px; font-size: 11px; font-weight: 400; }
+.author-prose ul + p { margin-top: 16px; margin-bottom: 0; font-size: 12px; }
+.author-contact { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 23px 0; border-top: 1px solid #dcdfd9; font-size: 13px; }
+.author-contact p { margin: 0; }
+.author-contact > div { display: flex; gap: 20px; }
+.author-contact a { display: inline-block; padding: 8px 0; }
+.author-footer { font-size: 11px; color: #626a65; padding: 0 0 23px; }
+@media (max-width: 620px) {
+  .author-page { padding: 0 21px; }
+  .author-intro { gap: 19px; grid-template-columns: minmax(0, 1fr) 104px; padding-top: 27px; }
+  .author-page h1 { font-size: 29px; }
+  .author-portrait { grid-row: 1; }
+  .author-bio { grid-column: 1 / -1; }
+  .author-editing { grid-template-columns: 1fr; gap: 22px; }
+  .author-work-photo { max-width: 320px; }
+  .author-contact { align-items: flex-start; flex-direction: column; gap: 4px; }
+  .author-header { gap: 12px; }
+  .author-header nav { gap: 14px; }
+  .author-page .author-role { margin-bottom: 0; }
+}
+@media (pointer: coarse) {
+  .author-header a, .author-contact a, .author-download { min-height: 44px; display: inline-flex; align-items: center; }
+  .author-prose li a { display: inline-block; padding-block: 4px; }
+}

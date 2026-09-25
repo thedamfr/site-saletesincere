@@ -46,3 +46,7 @@ test('a newer failed or running staging request supersedes an older successful r
   assert.equal(selectCandidate([makeRun(3, 'failure'), makeRun(2, 'success')], 'staging').id, 3);
   assert.equal(selectCandidate([makeRun(3, null), makeRun(2, 'success')], 'staging').id, 3);
 });
+
+test("author Markdown changes require a new application artifact", () => {
+  assert.notEqual(fingerprint(["100644 blob old\tcontent/damien-cavailles.md"]), fingerprint(["100644 blob new\tcontent/damien-cavailles.md"]));
+});

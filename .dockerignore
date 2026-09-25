@@ -13,3 +13,6 @@ test
 uploads
 **/*.md
 npm-debug.log*
+
+!content/*.md
+server/generated

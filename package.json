@@ -7,13 +7,16 @@
     "dev:css": "postcss ./style.css -o ./public/style.css --watch",
     "build": "npm run build:css && npm run build:views",
     "build:css": "postcss ./style.css -o ./public/style.css",
-    "build:views": "echo 'No-op for Pug views'",
+    "build:views": "node scripts/build-author.mjs",
     "check:logo-animation": "node scripts/check-logo-animation.mjs",
     "check:landing-layout": "node scripts/check-landing-layout.mjs",
     "start": "node server.js",
     "migrate": "node scripts/migrate.js",
     "test": "node --expose-gc --test --test-concurrency=1 test/**/*.test.js",
-    "test:watch": "node --test --test-concurrency=1 --watch test/**/*.test.js"
+    "test:watch": "node --test --test-concurrency=1 --watch test/**/*.test.js",
+    "test:e2e": "node scripts/test-e2e.mjs",
+    "pretest": "npm run build:views",
+    "test:e2e:install": "playwright install --with-deps chromium"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.844.0",
@@ -39,6 +42,7 @@
     "node": ">=24"
   },
   "devDependencies": {
+    "markdown-it": "15.0.2",
     "nodemon": "^3.1.10",
     "playwright": "^1.62.1"
   }
