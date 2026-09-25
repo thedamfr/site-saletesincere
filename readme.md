@@ -17,6 +17,8 @@ subsiste, mais le mur vocal et ses uploads sont désactivés sur la production O
 
 ## ✨ Fonctionnalités
 
+- **📷 Photographie** : Offre et références événementielles sur `/photographie`,
+  avec [guide et Golden Journeys](documentation/photographie.md)
 - **🎙️ Podcast** : Smartlinks multiplateformes, lecture et métadonnées RSS
 - **🎨 Identité** : Landing éditoriale et laboratoire public du geste du logo
 - **📧 Newsletter intégrée** : Inscription double opt-in via API Brevo (backend-only)

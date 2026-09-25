@@ -652,6 +652,8 @@ body.landing-page {
 
   .landing-header {
     min-height: 70px;
+    flex-wrap: wrap;
+    padding-block: 12px;
   }
 
   .landing-logo {
@@ -661,6 +663,7 @@ body.landing-page {
   .landing-navigation,
   .landing-footer-links {
     gap: 16px;
+    flex-wrap: wrap;
   }
 
   .landing-hero {

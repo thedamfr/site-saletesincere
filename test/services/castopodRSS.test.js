@@ -5,6 +5,9 @@ import {
   fetchPublishedEpisodesFromRSS
 } from '../../server/services/castopodRSS.js';
 
+// Match the UTC timezone of production; keep the test independent of the host.
+process.env.TZ = 'UTC';
+
 const RSS_LIST_FIXTURE = `<?xml version="1.0"?>
 <rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:podcast="https://podcastindex.org/namespace/1.0" version="2.0">
   <channel>
@@ -44,7 +47,7 @@ const RSS_LIST_FIXTURE = `<?xml version="1.0"?>
     </item>
     <item>
       <title>BOUCLIER 🛡️</title><description>Un épisode de la première saison.</description>
-      <pubDate>Thu, 16 Oct 2025 08:00:00 GMT</pubDate>
+      <pubDate>Wed, 15 Oct 2025 22:57:26 GMT</pubDate>
       <itunes:season>1</itunes:season><itunes:episode>5</itunes:episode>
       <itunes:duration>1800</itunes:duration><enclosure url="https://media.example/s1e5.mp3"/>
       <link>https://podcasts.example/s1e5</link><guid>guid-s1e5</guid>
@@ -118,6 +121,13 @@ describe('Castopod RSS Parser', () => {
       assert.strictEqual(episode.season, 1);
       assert.strictEqual(episode.episode, 5);
       assert.strictEqual(episode.title, 'BOUCLIER 🛡️');
+    });
+
+    it('formats the S1E5 publication instant as 15 October in the production UTC timezone', async () => {
+      const episode = await fetchEpisodeFromRSS(1, 5, 5000, rssFetch);
+
+      assert.equal(episode.pubDate, '15 octobre 2025');
+      assert.equal(episode.rawPubDate, '2025-10-15');
     });
 
     it('preserves full episode paragraphs while keeping the truncated metadata description', async () => {
