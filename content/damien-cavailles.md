@@ -31,10 +31,12 @@ Une sélection de textes publiés sur le Medium leboncoin tech, sur lesquels j�
 
 ## Articles signés
 
-- [Préparer sa recherche d’emploi de développeur en 2025](https://welovedevs.com/articles/rechercher-un-emploi-de-developpeur-en-2025/)\
-  Damien Cavaillès · WeLoveDevs · 16 septembre 2025
-- [WeLoveDevs.com rejoint Insitoo Group — La tribune de Damien](https://welovedevs.com/articles/welovedevs-com-rejoint-insitoo-group-la-tribune-de-damien/)\
-  Damien Cavaillès · WeLoveDevs · 12 mars 2025
+- [Marque employeur silencieuse : pourquoi les candidats ont déjà un avis sur vous.](https://welovedevs.com/articles/marque-employeur-silencieuse/)\
+  Damien Cavaillès · WeLoveDevs · 16 juin 2026
+- [World Models : comprendre l’approche qui pourrait changer l’IA](https://welovedevs.com/articles/world-models-comprendre-lapproche-qui-pourrait-changer-lia/)\
+  Damien Cavaillès · WeLoveDevs · 26 mai 2026
+- [Tutoriel Strapi : ajouter un CMS à son site perso.](https://welovedevs.com/articles/tutoriel-strapi-ajouter-un-cms-a-son-site-perso/)\
+  Damien Cavaillès · WeLoveDevs · 5 mai 2026
 
 [Voir mes autres articles sur WeLoveDevs](https://welovedevs.com/author/damien/)
 
