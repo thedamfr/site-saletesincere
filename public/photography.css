@@ -503,3 +503,15 @@
     padding-inline: 60px;
   }
 }
+
+.photography-page .photo-intro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+  margin-top: 24px;
+}
+.photography-page .photo-intro-actions .photo-cta,
+.photography-page .photo-intro-actions .photo-text-link {
+  margin-top: 0;
+}

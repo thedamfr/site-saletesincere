@@ -62,6 +62,16 @@ test('Golden Journeys — photographie', { timeout: 120_000 }, async t => {
       await page.getByRole('navigation').getByRole('link', { name: 'Photographie' }).click()
       await page.waitForURL('**/photographie')
       assert.match(await page.title(), /Photographie événementielle/)
+      const earlyContact = page.locator('.photo-intro').getByRole('link', { name: 'Parlons de votre événement' })
+      assert.equal(await earlyContact.count(), 1, 'Contact must be offered in the introduction')
+      assert.equal(await earlyContact.getAttribute('href'), 'mailto:damien@saletesincere.fr')
+      for (const width of [1440, 390, 320]) {
+        await page.setViewportSize({ width, height: 667 })
+        await page.evaluate(() => scrollTo(0, 0))
+        const bounds = await earlyContact.boundingBox()
+        assert.ok(bounds && bounds.y >= 0 && bounds.y + bounds.height <= 667, `Contact must be visible without scrolling at ${width}px`)
+      }
+      await page.setViewportSize({ width: 1440, height: 1000 })
       for (const name of ['dotAI / dotJS', 'Hodéfi Awards', 'Les Masters de Feu']) {
         assert.equal(await page.getByRole('heading', { name, exact: true }).count(), 1)
       }
