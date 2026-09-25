@@ -19,8 +19,8 @@ Le contenu éditorial reste un fichier texte sans front matter ni composants.
 
 La première rubrique accompagne la photo de discussion chez leboncoin. Les textes
 Medium sont présentés comme travail d’éditeur sur instruction du propriétaire,
-avec crédit aux auteurs. La sélection WeLoveDevs reste limitée à trois articles
-au maximum, complétée par un lien d’archive. Les webinars et invitations en podcast
+avec crédit aux auteurs. La sélection WeLoveDevs rassemble une dizaine d’articles de fond
+sur le métier et les choix techniques, complétée par un lien d’archive. Les webinars et invitations en podcast
 occupent des rubriques distinctes. Les liens pointent vers les sources, sans
 recopier les articles ni télécharger les vidéos.
 

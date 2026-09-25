@@ -31,12 +31,26 @@ Une sélection de textes publiés sur le Medium leboncoin tech, sur lesquels j�
 
 ## Articles signés
 
-- [Marque employeur silencieuse : pourquoi les candidats ont déjà un avis sur vous.](https://welovedevs.com/articles/marque-employeur-silencieuse/)\
-  Damien Cavaillès · WeLoveDevs · 16 juin 2026
 - [World Models : comprendre l’approche qui pourrait changer l’IA](https://welovedevs.com/articles/world-models-comprendre-lapproche-qui-pourrait-changer-lia/)\
   Damien Cavaillès · WeLoveDevs · 26 mai 2026
 - [Tutoriel Strapi : ajouter un CMS à son site perso.](https://welovedevs.com/articles/tutoriel-strapi-ajouter-un-cms-a-son-site-perso/)\
   Damien Cavaillès · WeLoveDevs · 5 mai 2026
+- [Devenir expert IT : comprendre le rôle avant d’en faire un objectif de carrière.](https://welovedevs.com/articles/devenir-expert-it-comprendre-le-role-avant-den-faire-un-objectif-de-carriere/)\
+  Damien Cavaillès · WeLoveDevs · 21 avril 2026
+- [Framework Fatigue : pourquoi les devs continuent d’utiliser une stack qu’ils critiquent ?](https://welovedevs.com/articles/framework-fatigue-pourquoi-les-devs-continue-dutiliser-une-stack-quils-critiquent/)\
+  Damien Cavaillès · WeLoveDevs · 14 avril 2026
+- [Pourquoi la tendance DevOps est encore plus forte en 2026 ?](https://welovedevs.com/articles/tendance-devops-2026-pourquoi-le-devops-redevient-strategique/)\
+  Damien Cavaillès · WeLoveDevs · 26 février 2026
+- [Pourquoi Next.js est-il adopté si massivement ?](https://welovedevs.com/articles/pourquoi-next-js-est-il-adopte-si-massivement/)\
+  Damien Cavaillès · WeLoveDevs · 26 janvier 2026
+- [Les chiffres qui montrent l’adoption de PostgreSQL](https://welovedevs.com/articles/les-chiffres-qui-montrent-ladoption-de-postgresql/)\
+  Damien Cavaillès · WeLoveDevs · 21 janvier 2026
+- [Les 3 tendances tech qui vont redéfinir le rôle du développeur dans les 5 prochaines années](https://welovedevs.com/articles/les-3-tendances-tech-qui-vont-redefinir-le-role-du-developpeur-dans-les-5-prochaines-annees/)\
+  Damien Cavaillès · WeLoveDevs · 6 janvier 2026
+- [Monolithe vs Microservices : comment choisir la bonne architecture pour votre application ?](https://welovedevs.com/articles/monolithe-vs-microservices-comment-choisir-la-bonne-architecture-pour-votre-application/)\
+  Damien Cavaillès · WeLoveDevs · 28 octobre 2025
+- [TDD et IA : pourquoi le Test Driven Development est plus pertinent que jamais](https://welovedevs.com/articles/tdd-et-ia-pourquoi-le-test-driven-development-est-plus-pertinent-que-jamais/)\
+  Damien Cavaillès · WeLoveDevs · 7 octobre 2025
 
 [Voir mes autres articles sur WeLoveDevs](https://welovedevs.com/author/damien/)
 
