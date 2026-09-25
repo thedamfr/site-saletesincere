@@ -1,5 +1,5 @@
 const ORIGIN = 'https://saletesincere.fr'
-const STATIC_PATHS = ['/', '/damien-cavailles', '/podcast', '/laboratoire-du-geste']
+const STATIC_PATHS = ['/', '/damien-cavailles', '/photographie', '/podcast', '/laboratoire-du-geste']
 const TTL = 60 * 60 * 1000
 const RETRY = 5 * 60 * 1000
 

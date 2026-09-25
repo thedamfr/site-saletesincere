@@ -931,6 +931,13 @@ app.get("/", {
   });
 });
 
+// Photography portfolio: server-rendered without database, RSS or storage access.
+app.get("/photographie", {
+  config: { rateLimit: pageLimiter }
+}, async (req, reply) => {
+  return reply.view("photography.hbs");
+});
+
 // Public brand experience: independent of database and worker availability.
 app.get("/laboratoire-du-geste", {
   config: {
