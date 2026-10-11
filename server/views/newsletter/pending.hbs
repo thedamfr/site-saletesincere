@@ -8,7 +8,7 @@
   <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">
   <meta name="theme-color" content="#F2F2EF">
-  <title>Vérifiez votre email – Saleté Sincère</title>
+  <title>{{title}} – Saleté Sincère</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@400;500;600;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
@@ -37,17 +37,18 @@
           </svg>
         </div>
         
-        <h1 class="text-3xl lg:text-4xl xl:text-5xl font-brush font-bold text-[#F2F2EF] mb-6">Vérifiez votre boîte mail</h1>
+        <h1 class="text-3xl lg:text-4xl xl:text-5xl font-brush font-bold text-[#F2F2EF] mb-6">{{title}}</h1>
         <p class="text-lg lg:text-xl text-[#D6B977] font-medium italic max-w-md mx-auto">{{tagline}}</p>
       </div>
       
       {{!-- Instructions --}}
       <div class="bg-[#0B0B0B] border border-gray-800 rounded-lg p-6 text-center">
         <p class="text-base text-[#F2F2EF] mb-4">
-          Un email de confirmation a été envoyé à :
+          {{message}}
         </p>
         <p class="text-lg font-medium text-[#D6B977] mb-6">{{email}}</p>
         
+        {{#if submitted}}
         <div class="space-y-4 text-sm text-gray-400">
           <p>
             Cliquez sur le lien dans l'email pour 
@@ -56,6 +57,7 @@
           <p>Pensez à vérifier vos spams si vous ne voyez rien.</p>
           <p>L'email peut prendre quelques minutes à arriver.</p>
         </div>
+        {{/if}}
       </div>
       
       {{!-- Actions --}}

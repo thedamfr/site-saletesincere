@@ -114,12 +114,12 @@ export function getEpisodeDownloadProof(stats, now = new Date()) {
 
 export const formatStatsForDisplay = formatDownloadsForDisplay
 
-async function fetchJson(fetchImpl, url, token) {
+async function fetchJson(fetchImpl, url, token, signal) {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), OP3_TIMEOUT_MS)
   try {
     const response = await fetchImpl(url, {
-      signal: controller.signal,
+      signal: signal ? AbortSignal.any([signal, controller.signal]) : controller.signal,
       headers: {
         Authorization: `Bearer ${token}`,
         'User-Agent': 'SaleteSincere/1.0'
@@ -170,13 +170,14 @@ function validateAggregate(data, showUuid) {
   return validEpisodes
 }
 
-async function fetchRecentDownloads({ fetchImpl, token, showUuid, now }) {
+async function fetchRecentDownloads({ fetchImpl, token, showUuid, now, signal }) {
   const start = new Date(now.getTime() - THIRTY_DAYS_MS)
   let continuationToken = null
   const seenTokens = new Set()
   const rows = []
 
   do {
+    signal?.throwIfAborted()
     const url = new URL(`${OP3_API_BASE_URL}/downloads/show/${showUuid}`)
     url.searchParams.set('start', start.toISOString())
     url.searchParams.set('end', now.toISOString())
@@ -185,7 +186,7 @@ async function fetchRecentDownloads({ fetchImpl, token, showUuid, now }) {
     url.searchParams.set('bots', 'exclude')
     if (continuationToken) url.searchParams.set('continuationToken', continuationToken)
 
-    const data = await fetchJson(fetchImpl, url, token)
+    const data = await fetchJson(fetchImpl, url, token, signal)
     if (!data || !Array.isArray(data.rows)) {
       throw new Error('OP3 downloads response is invalid')
     }
@@ -213,7 +214,8 @@ export async function fetchOp3Snapshot({
   fetchImpl = fetch,
   token = process.env.OP3_API_TOKEN,
   podcastGuid = process.env.OP3_GUID,
-  now = new Date()
+  now = new Date(),
+  signal
 } = {}) {
   if (!token || !podcastGuid) throw new Error('OP3 configuration is incomplete')
   const nowDate = asValidDate(now)
@@ -224,13 +226,13 @@ export async function fetchOp3Snapshot({
     showInfo = await fetchJson(
       fetchImpl,
       `${OP3_API_BASE_URL}/shows/${encodeURIComponent(cachedShowUuid)}?episodes=include`,
-      token
+      token, signal
     )
   } else {
     showInfo = await fetchJson(
       fetchImpl,
       `${OP3_API_BASE_URL}/shows/${encodeURIComponent(podcastGuid)}?episodes=include`,
-      token
+      token, signal
     )
   }
   const validatedShow = validateShowInfo(showInfo)
@@ -240,13 +242,14 @@ export async function fetchOp3Snapshot({
   const aggregate = validateAggregate(await fetchJson(
     fetchImpl,
     `${OP3_API_BASE_URL}/queries/episode-download-counts?showUuid=${validatedShow.showUuid}`,
-    token
+    token, signal
   ), validatedShow.showUuid)
   const recentDownloads = await fetchRecentDownloads({
     fetchImpl,
     token,
     showUuid: validatedShow.showUuid,
-    now: nowDate
+    now: nowDate,
+    signal
   })
 
   const showEpisodesByKey = new Map()
@@ -287,7 +290,8 @@ export async function refreshOp3StatsCache({
   fetchImpl = fetch,
   token = process.env.OP3_API_TOKEN,
   podcastGuid = process.env.OP3_GUID,
-  now = new Date()
+  now = new Date(),
+  signal
 } = {}) {
   if (!token || !podcastGuid) return { status: 'disabled' }
   if (databaseState !== DatabaseState.READ_WRITE) {
@@ -297,13 +301,16 @@ export async function refreshOp3StatsCache({
     throw new TypeError('OP3 refresh requires a PostgreSQL pool')
   }
 
-  const snapshot = await fetchOp3Snapshot({ fetchImpl, token, podcastGuid, now })
+  const snapshot = await fetchOp3Snapshot({ fetchImpl, token, podcastGuid, now, signal })
+  signal?.throwIfAborted()
   const client = await pool.connect()
   let transactionStarted = false
+  let transactionError
   try {
     await client.query('BEGIN')
     transactionStarted = true
     for (const item of snapshot.episodes) {
+      signal?.throwIfAborted()
       await client.query(`
         INSERT INTO op3_stats (
           item_guid, downloads_7, downloads_30, downloads_all, fetched_at
@@ -321,13 +328,15 @@ export async function refreshOp3StatsCache({
         snapshot.fetchedAt
       ])
     }
+    signal?.throwIfAborted()
     await client.query('COMMIT')
     return { status: 'updated', updatedCount: snapshot.episodes.length }
   } catch (error) {
+    transactionError = error
     if (transactionStarted) await client.query('ROLLBACK').catch(() => {})
     throw error
   } finally {
-    client.release()
+    client.release(transactionError)
   }
 }
 

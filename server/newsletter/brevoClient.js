@@ -1,173 +1,79 @@
-/**
- * Client Brevo API v3 pour newsletter Saleté Sincère
- * Ajout direct à liste temporaire + automation Brevo pour DOI
- * Approche conforme à la documentation officielle Brevo
- */
-
-const BREVO_BASEURL = process.env.BREVO_BASEURL || 'https://api.brevo.com/v3';
-const BREVO_API_KEY = process.env.BREVO_API_KEY;
-const BREVO_TEMP_LIST_ID = Number(process.env.BREVO_TEMP_LIST_ID || process.env.BREVO_LIST_ID); // Fallback pour migration
-const BREVO_FINAL_LIST_ID = Number(process.env.BREVO_FINAL_LIST_ID || process.env.BREVO_LIST_ID); // Fallback pour migration
-
-/**
- * Validation des variables d'environnement requises
- */
-function validateConfig() {
-  if (!BREVO_API_KEY) {
-    throw new Error('BREVO_API_KEY environment variable is required');
-  }
-  if (!BREVO_TEMP_LIST_ID || isNaN(BREVO_TEMP_LIST_ID)) {
-    throw new Error('BREVO_TEMP_LIST_ID (or BREVO_LIST_ID) must be a valid number');
-  }
-}
-
-/**
- * Client HTTP générique pour les appels API Brevo
- */
-async function brevoApiCall(endpoint, method = 'GET', body = null) {
-  validateConfig();
-
-  const url = `${BREVO_BASEURL}${endpoint}`;
-  const options = {
-    method,
-    headers: {
-      'api-key': BREVO_API_KEY,
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    }
-  };
-
-  if (body && (method === 'POST' || method === 'PATCH')) {
-    options.body = JSON.stringify(body);
+/** Backend-only Brevo adapter. Never log payloads, contact URLs or responses. */
+export function createBrevoClient({
+  baseUrl = process.env.BREVO_BASEURL || 'https://api.brevo.com/v3',
+  apiKey = process.env.BREVO_API_KEY,
+  listId = Number(process.env.BREVO_TEMP_LIST_ID || process.env.BREVO_LIST_ID),
+  finalListId = Number(process.env.BREVO_FINAL_LIST_ID || process.env.BREVO_LIST_ID),
+  fetchFn = fetch
+} = {}) {
+  function checkConfig() {
+    return { valid: Boolean(apiKey) && Number.isSafeInteger(listId) && listId > 0 }
   }
 
-  try {
-    console.log(`🌐 Brevo API Call: ${method} ${url}`);
-    if (body) {
-      console.log('📤 Payload:', JSON.stringify(body, null, 2));
-    }
-    
-    const response = await fetch(url, options);
-    
-    console.log(`📡 Brevo Response: ${response.status} ${response.statusText}`);
-    
-    // Brevo peut retourner 200/201 pour succès, 400+ pour erreurs
-    if (response.ok) {
-      // Certains endpoints retournent du contenu, d'autres pas
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        const data = await response.json();
-        console.log('📥 Success Data:', JSON.stringify(data, null, 2));
-        return {
-          success: true,
-          data: data,
-          status: response.status
-        };
+  async function call(endpoint, { method = 'GET', body, signal } = {}) {
+    if (!checkConfig().valid) return { unavailable: true, code: 'configuration_unavailable' }
+    try {
+      const response = await fetchFn(`${baseUrl.replace(/\/$/, '')}${endpoint}`, {
+        method,
+        signal: signal || AbortSignal.timeout(10_000),
+        headers: { 'api-key': apiKey, 'Content-Type': 'application/json', Accept: 'application/json' },
+        ...(body ? { body: JSON.stringify(body) } : {})
+      })
+      let data = null
+      if (response.status !== 204) {
+        try { data = await response.json() } catch { /* Reconcile mutations with unreadable responses. */ }
       }
-      console.log('✅ Success (no content)');
-      return { success: true, status: response.status };
-    } else {
-      // Tentative de récupération du message d'erreur Brevo
-      let errorMessage = `HTTP ${response.status}`;
-      let errorData = null;
-      try {
-        errorData = await response.json();
-        errorMessage = errorData.message || errorData.error || errorMessage;
-        console.log('❌ Error Data:', JSON.stringify(errorData, null, 2));
-      } catch {
-        // Si pas de JSON, garder le message HTTP
-        console.log('❌ Error (no JSON):', errorMessage);
+      return { status: response.status, ok: response.ok, data }
+    } catch {
+      return { unavailable: true, code: signal?.aborted ? 'request_timeout' : 'network_error' }
+    }
+  }
+
+  async function lookup(email, { signal } = {}) {
+    const result = await call(`/contacts/${encodeURIComponent(email)}`, { signal })
+    if (result.status === 404) return { kind: 'not_found' }
+    if (result.ok && Array.isArray(result.data?.listIds) && typeof result.data.emailBlacklisted === 'boolean') {
+      return {
+        kind: 'found',
+        inTempList: result.data.listIds.includes(listId),
+        inFinalList: Number.isSafeInteger(finalListId) && result.data.listIds.includes(finalListId),
+        blocked: result.data.emailBlacklisted
       }
-      
-      return {
-        success: false,
-        error: errorMessage,
-        status: response.status,
-        data: errorData
-      };
     }
-  } catch (error) {
-    // Erreurs réseau ou autres
-    return {
-      success: false,
-      error: error.message || 'Network error'
-    };
+    return { kind: 'unavailable', code: result.code || 'contact_lookup_failed' }
   }
+
+  function mutationResult(result) {
+    if (result.unavailable) return { kind: 'uncertain', code: result.code }
+    if (result.status === 400 && result.data?.code === 'duplicate_parameter') return { kind: 'duplicate', code: 'contact_exists' }
+    if (result.status === 429) return { kind: 'deferred', code: 'remote_rate_limited' }
+    if ([400, 401, 403, 404, 422].includes(result.status)) return { kind: 'rejected', code: `remote_${result.status}` }
+    return { kind: 'uncertain', code: 'remote_result_unknown' }
+  }
+
+  async function create(email, { signal } = {}) {
+    const result = await call('/contacts', {
+      method: 'POST', signal,
+      body: { email, listIds: [listId], attributes: { SOURCE: 'Salewall', SUBSCRIPTION_DATE: new Date().toISOString() } }
+    })
+    if (result.status === 201) return { kind: 'submitted' }
+    return mutationResult(result)
+  }
+
+  async function addToList(email, { signal } = {}) {
+    const result = await call(`/contacts/lists/${listId}/contacts/add`, { method: 'POST', signal, body: { emails: [email] } })
+    const details = result.data?.contacts || result.data
+    const failures = details?.failure || result.data?.failure || []
+    const successes = details?.success || result.data?.success || []
+    if (result.ok && Array.isArray(successes) && successes.includes(email) && Array.isArray(failures) && !failures.includes(email)) {
+      return { kind: 'submitted' }
+    }
+    return mutationResult(result)
+  }
+
+  return { listId, checkConfig, lookup, create, addToList }
 }
 
-/**
- * Inscription à la newsletter - Ajout direct à liste temporaire
- * Le processus DOI est géré par une automation Brevo configurée séparément
- * @param {string} email - Email à inscrire (déjà validé par les routes)
- * @returns {Promise<{success: boolean, contactId?: number, message?: string, error?: string}>}
- */
-export async function subscribeToNewsletter(email) {
-  if (!email || typeof email !== 'string') {
-    return { success: false, error: 'Email is required' };
-  }
-
-  const body = {
-    email: email.toLowerCase().trim(),
-    listIds: [BREVO_TEMP_LIST_ID], // Liste temporaire pour DOI
-    attributes: {
-      SOURCE: 'Salewall',
-      SUBSCRIPTION_DATE: new Date().toISOString()
-    }
-  };
-
-  const result = await brevoApiCall('/contacts', 'POST', body);
-  
-  if (result.success) {
-    // Contact ajouté à la liste temporaire
-    // L'automation Brevo se déclenche automatiquement pour envoyer le DOI
-    return {
-      success: true,
-      contactId: result.data?.id, // ID du contact créé
-      message: 'Contact added to temporary list. DOI process started by Brevo automation.'
-    };
-  } else if (result.data?.code === 'duplicate_parameter') {
-    // Contact existe déjà, essayer de l'ajouter à la liste temporaire
-    console.log('📋 Contact exists, adding to temp list...');
-    
-    const addToListResult = await brevoApiCall(`/contacts/lists/${BREVO_TEMP_LIST_ID}/contacts/add`, 'POST', {
-      emails: [email.toLowerCase().trim()]
-    });
-    
-    if (addToListResult.success) {
-      return {
-        success: true,
-        message: 'Existing contact added to temporary list. DOI process started by Brevo automation.'
-      };
-    } else {
-      // Si échec d'ajout à la liste, peut-être déjà dans la liste
-      console.log('⚠️ Failed to add to list, contact might already be in DOI process');
-      return {
-        success: true,
-        message: 'Contact already in system. Please check your email for confirmation if not already confirmed.'
-      };
-    }
-  } else {
-    return {
-      success: false,
-      error: result.error || 'Failed to add contact to temporary list'
-    };
-  }
-}
-
-/**
- * Désinscription d'un email de la liste newsletter
- * @param {string} email - Email à désinscrire
- * @returns {Promise<{success: boolean, message?: string, error?: string}>}
- */
-
-/**
- * Fonction utilitaire pour vérifier la configuration
- */
 export function checkConfig() {
-  try {
-    validateConfig();
-    return { valid: true };
-  } catch (error) {
-    return { valid: false, error: error.message };
-  }
+  return createBrevoClient().checkConfig()
 }

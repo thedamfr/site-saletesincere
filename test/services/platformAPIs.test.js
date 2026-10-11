@@ -52,6 +52,22 @@ const skipExternal = { skip: !runExternalTests }
 const skipSpotify = { skip: !runExternalTests || !hasSpotifyCredentials }
 
 describe('platformAPIs', () => {
+  test('propagates cancellation to Deezer instead of leaving a stalled request alive', async () => {
+    const controller = new AbortController()
+    let requestStarted
+    const started = new Promise(resolve => { requestStarted = resolve })
+    const pending = searchDeezerEpisode('2026-10-11', {
+      signal: controller.signal,
+      fetchImpl: async (_url, options) => new Promise((_resolve, reject) => {
+        assert.ok(options.signal)
+        requestStarted()
+        options.signal.addEventListener('abort', () => reject(options.signal.reason), { once: true })
+      })
+    })
+    await started
+    controller.abort(new Error('worker deadline'))
+    await assert.rejects(pending, /worker deadline/)
+  })
   describe('getSpotifyToken', () => {
     test('should authenticate with Spotify and return access token', skipSpotify, async () => {
       const token = await getSpotifyToken()

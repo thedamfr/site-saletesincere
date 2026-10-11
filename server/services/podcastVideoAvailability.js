@@ -78,7 +78,9 @@ function iframeReferencesSpotifyVideo(iframeUrl, episodeId) {
  */
 export async function inspectSpotifyEpisodeVideo(spotifyEpisodeUrl, {
   fetchImpl = fetch,
-  timeoutMs = 5000
+  timeoutMs = 5000,
+  signal,
+  throwOnError = false
 } = {}) {
   const episodeUrl = parseSpotifyEpisodeUrl(spotifyEpisodeUrl)
   if (!episodeUrl) return null
@@ -89,17 +91,24 @@ export async function inspectSpotifyEpisodeVideo(spotifyEpisodeUrl, {
   let response
   try {
     response = await fetchImpl(oEmbedUrl, {
-      signal: AbortSignal.timeout(timeoutMs)
+      signal: signal
+        ? AbortSignal.any([signal, AbortSignal.timeout(timeoutMs)])
+        : AbortSignal.timeout(timeoutMs)
     })
-  } catch {
+  } catch (error) {
+    if (throwOnError) throw error
     return null
   }
-  if (!response?.ok) return null
+  if (!response?.ok) {
+    if (throwOnError) throw new Error(`Spotify video request failed: ${response?.status}`)
+    return null
+  }
 
   let data
   try {
     data = await response.json()
-  } catch {
+  } catch (error) {
+    if (throwOnError) throw error
     return null
   }
 

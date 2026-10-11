@@ -1,0 +1,1259 @@
+{
+  "issue": "https://github.com/thedamfr/site-saletesincere/issues/56",
+  "status": "qualified-on-isolated-vm-not-deployed",
+  "assembledAt": "2026-10-11T11:06:04.263258+00:00",
+  "startedAt": "2026-10-11T10:10:22.831Z",
+  "completion": {
+    "finishedAt": "2026-10-11T11:05:08.379078+00:00",
+    "exitCode": 0,
+    "exitCodeEvidence": "exec session 52609 returned exit_code 0 for targeted navigation; full campaign session 79084 returned exit_code 1",
+    "fullCampaignExitCode": 1,
+    "qualificationMethod": "19 campaign scenarios plus separately requalified navigation",
+    "vmRunning": false,
+    "qaPorts": {
+      "22856": "connection-refused",
+      "31856": "connection-refused",
+      "25456": "connection-refused",
+      "31857": "connection-refused"
+    },
+    "cleanupVerified": true
+  },
+  "candidate": {
+    "baseCommit": "df4cf4ba56b2d48130c2bbf54473abef482f5b5d",
+    "sourceCommit": null,
+    "kind": "site-issue56-uncommitted-candidate",
+    "sourceScope": "docker-runtime-inputs",
+    "sourceTreeSha256": "7438b33f8a9f3effe312e8079fc0f0e7e7ab757a7052547c4e1d6146ee7d13b7",
+    "patchSha256": "5017755fef3a8794e9039220724b317f0cc757cd4aef96fb0af9b7c85c3a501c",
+    "image": "docker.io/library/site-issue56@sha256:f69f8f7c0e9fb6293238b7e2dd65a6247c79d7b000d6a8e01be4c5ea4d0a5959",
+    "platformDigest": "sha256:f69f8f7c0e9fb6293238b7e2dd65a6247c79d7b000d6a8e01be4c5ea4d0a5959",
+    "indexDigest": "sha256:db1e84655c7634a973bcd3703cf0bc00d7364902f4641689a86254ef7e9a889d",
+    "imageArchiveSha256": "13e2d18ded9f8da2ac45869e917a0d476bb06b426c46cd4114cdb8984552268f"
+  },
+  "harnessSha256": {
+    "test/e2e/resilience.test.mjs": "36a7e0d829dc68974b9f5107841603f66b74260381ef3987d6c80c1243cab62e",
+    "test/e2e/resilience-fixture.mjs": "506843cf641a4eaa8a047451ae57f99f2ddb3255dded8c21835463756c94ff68",
+    "test/e2e/resilience-harness.mjs": "fa253ff96e5264c11e64b9bd9e70a58a798f96b1d4252dde225489b13fd7675e",
+    "test/e2e/resilience-setup.mjs": "b3cd4b75bb0bcef8ba8e1979134f4c687bad75840904047bb6c3917d4be91b6f",
+    "test/e2e/durable-boundaries.mjs": "0c1213d8f14c8e0c5fd231924bf506eb6074f714f488605a8a5194e6727df4c6",
+    "test/e2e/newsletter-resilience.mjs": "c4f347e906881b284df9e493bec86f4fdb2737e3185a46d1bfe5a4be7de91b91",
+    "scripts/qualification/recovery-vm.py": "c878b42e85f93d55cf3b3a793edff0c428226acb67d099c7597bfb82975d6453",
+    "scripts/qualification/observe-boundary.py": "c07664149b673508c72c11ff7771cc4f594948580b7e828c33670704966c2b6f"
+  },
+  "qualificationToolsSha256": {
+    "scripts/qualification/bootstrap-guest.sh": "bd220ec016f623de67daf3535e29a0f31ac47550764c7b06d087d55aff2236fe",
+    "scripts/qualification/build-candidate.py": "1b684bf27ef0a6c93a29637d7bb2fe74261094c58de0474012bee1819cd8ee1a",
+    "scripts/qualification/observe-boundary.py": "c07664149b673508c72c11ff7771cc4f594948580b7e828c33670704966c2b6f",
+    "scripts/qualification/postgres-guest.py": "4832f74f686c0e04f5dd997830620ff952269da15185bbb6a93f810661996422",
+    "scripts/qualification/recovery-vm.py": "c878b42e85f93d55cf3b3a793edff0c428226acb67d099c7597bfb82975d6453",
+    "scripts/qualification/test_observe_boundary.py": "11ac86dc1a2a76347f83c3c25944719177bd05d7f710c5903d5be82ff2828334",
+    "scripts/qualification/test_recovery_vm_safety.py": "6ed89320288a5a6b504bd332eb2ec45c6a112ec382da5aceb388501cae60d119"
+  },
+  "environment": {
+    "node": "v24.21.0",
+    "guest": "Ubuntu Noble 24.04.5",
+    "qemu": "TCG, 2 vCPU, 6 GiB, dedicated 30 GB overlay",
+    "k3s": "v1.34.1+k3s1",
+    "postgresql": "17.6",
+    "database": "site_qualification_candidate7",
+    "browser": "Chromium 153.0.8010.12 with sandbox",
+    "wavesurferSha256": "1bca765cc75bc4af079ecd1b2edd659b155e5d1715e75a29d68272d9f141f951",
+    "providers": "synthetic, external to guest",
+    "recoveryDeadlineMs": 300000
+  },
+  "command": "PATH=/tmp/site-issue56-tools/node-v24.21.0-linux-x64/bin:$PATH RESILIENCE_VM_STATE=/tmp/site-issue56-qualification RESILIENCE_DATABASE=site_qualification_candidate7 RESILIENCE_OUTPUT=/tmp/site-issue56-evidence/resilience-run-6 E2E_BROWSER_EXECUTABLE=/home/ubuntu/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome npm run test:e2e:resilience",
+  "scenarios": [
+    {
+      "name": "Candidat par digest, migrations rejouées et droits restreints",
+      "startedAt": "2026-10-11T10:10:28.260Z",
+      "durationMs": 92276,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "RSS reconstruit sans visite les caches vides et le trailer avec itemGuid",
+      "startedAt": "2026-10-11T10:12:00.536Z",
+      "durationMs": 7522,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "Navigation publique → épisode → lecture audio → lien plateforme",
+      "startedAt": "2026-10-11T10:12:08.166Z",
+      "durationMs": 6747,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "PostgreSQL absent puis disponible : HTTP dégradé, refus newsletter et reprise automatique",
+      "startedAt": "2026-10-11T10:12:58.568Z",
+      "durationMs": 116005,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "Panne fournisseurs prolongée puis retour : intentions acceptées et OP3 réarmés sans visite",
+      "startedAt": "2026-10-11T10:15:51.053Z",
+      "durationMs": 119895,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "Crash pendant traitement après acquittement durable : même intention reprise",
+      "startedAt": "2026-10-11T10:18:30.125Z",
+      "durationMs": 128315,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "Crash après commit métier avant acquittement pg-boss : résultat unique",
+      "startedAt": "2026-10-11T10:21:24.312Z",
+      "durationMs": 90575,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "Crash avant commit du journal : aucun acquittement ni effet, nouvelle soumission sûre",
+      "startedAt": "2026-10-11T10:23:41.262Z",
+      "durationMs": 50710,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "Golden Journey newsletter : double soumission concurrente et identité unique",
+      "startedAt": "2026-10-11T10:25:19.927Z",
+      "durationMs": 1094,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "Golden Journey newsletter : demande durable et retour tardif de Brevo",
+      "startedAt": "2026-10-11T10:26:06.681Z",
+      "durationMs": 56759,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "Golden Journey newsletter : contact bloqué sans réactivation ni tentative",
+      "startedAt": "2026-10-11T10:27:39.694Z",
+      "durationMs": 1434,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "Golden Journey newsletter : crash après effet avant réponse et déduplication",
+      "startedAt": "2026-10-11T10:28:15.540Z",
+      "durationMs": 33189,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "Golden Journey newsletter : résultat absent, second crash et aucun renvoi",
+      "startedAt": "2026-10-11T10:29:26.184Z",
+      "durationMs": 89907,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "Golden Journey newsletter : échec individuel dans une réponse HTTP 201",
+      "startedAt": "2026-10-11T10:31:40.052Z",
+      "durationMs": 927,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "Golden Journey newsletter : PostgreSQL en lecture seule refuse tout effet",
+      "startedAt": "2026-10-11T10:32:29.014Z",
+      "durationMs": 98726,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "SIGTERM applicatif : arrêt gracieux terminé sans destruction forcée",
+      "startedAt": "2026-10-11T10:34:51.317Z",
+      "durationMs": 38068,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "shutdown VM : données acquittées, droits et temporaires",
+      "startedAt": "2026-10-11T10:36:13.072Z",
+      "durationMs": 240459,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "crash VM : données acquittées, droits et temporaires",
+      "startedAt": "2026-10-11T10:41:01.628Z",
+      "durationMs": 228536,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "Deuxième coupure VM pendant récupération puis résultat métier sous 300 secondes",
+      "startedAt": "2026-10-11T10:45:40.141Z",
+      "durationMs": 653417,
+      "result": "passed",
+      "source": "full-campaign"
+    },
+    {
+      "name": "Navigation et lecture audio après coupures réelles",
+      "result": "passed",
+      "episode": 7,
+      "durationMs": 9532,
+      "source": "targeted-navigation-requalification"
+    }
+  ],
+  "timingEvents": [
+    {
+      "operation": "qualification database selected",
+      "database": "site_qualification_candidate7",
+      "created": true,
+      "at": "2026-10-11T10:10:27.388Z"
+    },
+    {
+      "operation": "business result",
+      "episode": 0,
+      "elapsedMs": 77
+    },
+    {
+      "operation": "business result",
+      "episode": 1,
+      "elapsedMs": 8
+    },
+    {
+      "operation": "business result",
+      "episode": 2,
+      "elapsedMs": 10
+    },
+    {
+      "operation": "scenario precondition: fresh application pod",
+      "durationMs": 41332,
+      "at": "2026-10-11T10:12:58.567Z"
+    },
+    {
+      "operation": "SIGKILL application",
+      "httpMs": 27504,
+      "workerMs": null,
+      "exitCode": 137,
+      "replacementContainerId": "17a1bb59783b1a04f4e93fe03f423930c15fe1a035d16e27cd6767c96bf5e880",
+      "termination": {
+        "containerID": "containerd://8876a48d9e010a0e2db50665d5da1bf1db4c5681b5544e7eb621af6f0079357b",
+        "exitCode": 137,
+        "finishedAt": "2026-10-11T10:13:07Z",
+        "reason": "Error",
+        "startedAt": "2026-10-11T10:12:30Z"
+      },
+      "at": "2026-10-11T10:13:33.207Z"
+    },
+    {
+      "operation": "business result",
+      "episode": 3,
+      "elapsedMs": 60405
+    },
+    {
+      "operation": "scenario precondition: fresh application pod",
+      "durationMs": 51351,
+      "at": "2026-10-11T10:15:51.053Z"
+    },
+    {
+      "operation": "business result",
+      "episode": 4,
+      "elapsedMs": 72982
+    },
+    {
+      "operation": "scenario precondition: fresh application pod",
+      "durationMs": 33137,
+      "at": "2026-10-11T10:18:30.125Z"
+    },
+    {
+      "operation": "SIGKILL at observed boundary",
+      "condition": {
+        "kind": "job-active",
+        "jobId": "53b95c9e-7eb0-461c-9746-9417f0cccdd6",
+        "minRetryCount": 0
+      },
+      "recoveryMs": 38473,
+      "exitCode": 137,
+      "termination": {
+        "containerID": "containerd://3aa0323cf15616438dcce9bbf6f78f19a83ee65e9cd1b4a741a2765a13457db8",
+        "exitCode": 137,
+        "finishedAt": "2026-10-11T10:19:24Z",
+        "reason": "Error",
+        "startedAt": "2026-10-11T10:18:10Z"
+      },
+      "replacementContainerId": "4dbdb4e1b7c4f84e0946111146c45d61b0b1a67e56d7ad3bfebf17430acee7d9",
+      "processExited": true,
+      "signal": "SIGKILL",
+      "terminationSource": "kernel-pidfd+kubernetes",
+      "at": "2026-10-11T10:19:49.120Z",
+      "timing": "includes conservative observer arm time"
+    },
+    {
+      "operation": "business result",
+      "episode": 5,
+      "elapsedMs": 49307
+    },
+    {
+      "operation": "scenario precondition: fresh application pod",
+      "durationMs": 40729,
+      "at": "2026-10-11T10:21:24.312Z"
+    },
+    {
+      "operation": "SIGKILL at observed boundary",
+      "condition": {
+        "kind": "sql-lock",
+        "key": 560091
+      },
+      "recoveryMs": 43934,
+      "exitCode": 137,
+      "termination": {
+        "containerID": "containerd://4f9057b9819076d90ec6a8965d6c6086dcf28db1ec423e14fd71436ae0fa45ff",
+        "exitCode": 137,
+        "finishedAt": "2026-10-11T10:21:48Z",
+        "reason": "Error",
+        "startedAt": "2026-10-11T10:20:56Z"
+      },
+      "replacementContainerId": "1a97c309f8b659fe565cd205844d3c0a6e0593fdb0ce9b6894ed6f054171f945",
+      "processExited": true,
+      "signal": "SIGKILL",
+      "terminationSource": "kernel-pidfd+kubernetes",
+      "at": "2026-10-11T10:22:12.984Z",
+      "timing": "includes conservative observer arm time"
+    },
+    {
+      "operation": "business result",
+      "episode": 6,
+      "elapsedMs": 85832
+    },
+    {
+      "operation": "scenario precondition: fresh application pod",
+      "durationMs": 41263,
+      "at": "2026-10-11T10:23:41.262Z"
+    },
+    {
+      "operation": "SIGKILL at observed boundary",
+      "condition": {
+        "kind": "sql-lock",
+        "key": 560092
+      },
+      "recoveryMs": 40187,
+      "exitCode": 137,
+      "termination": {
+        "containerID": "containerd://91a7eb22fe9d28d6dc615210da82f34dc61bd67fee2739745d2b21b61b7211b8",
+        "exitCode": 137,
+        "finishedAt": "2026-10-11T10:23:54Z",
+        "reason": "Error",
+        "startedAt": "2026-10-11T10:23:12Z"
+      },
+      "replacementContainerId": "27059cf44c71db4a3f7db84dd59f95593c56c92284b4ace4503fdd8a04a3a636",
+      "processExited": true,
+      "signal": "SIGKILL",
+      "terminationSource": "kernel-pidfd+kubernetes",
+      "at": "2026-10-11T10:24:28.161Z",
+      "timing": "includes conservative observer arm time"
+    },
+    {
+      "operation": "before acceptance: safe resubmission",
+      "elapsedMs": 43998
+    },
+    {
+      "operation": "scenario precondition: fresh application pod",
+      "durationMs": 45299,
+      "at": "2026-10-11T10:25:19.927Z"
+    },
+    {
+      "operation": "scenario precondition: fresh application pod",
+      "durationMs": 40311,
+      "at": "2026-10-11T10:26:06.680Z"
+    },
+    {
+      "operation": "SIGKILL application",
+      "httpMs": 31138,
+      "workerMs": 31149,
+      "exitCode": 137,
+      "replacementContainerId": "e84e4e38b12e9522b6b5c86536cc79d65ca3ba104157ae3c79e4795070ee671f",
+      "termination": {
+        "containerID": "containerd://fc61f238e68d896a1d8d9354560f077b3f8da6ba7c7213ff9f3e7a25ea3c735a",
+        "exitCode": 137,
+        "finishedAt": "2026-10-11T10:26:12Z",
+        "reason": "Error",
+        "startedAt": "2026-10-11T10:25:39Z"
+      },
+      "at": "2026-10-11T10:26:42.141Z"
+    },
+    {
+      "operation": "newsletter business result",
+      "journey": "ready",
+      "trigger": "Brevo available",
+      "state": "submitted",
+      "elapsedMs": 21299
+    },
+    {
+      "operation": "scenario precondition: fresh application pod",
+      "durationMs": 33848,
+      "at": "2026-10-11T10:27:39.694Z"
+    },
+    {
+      "operation": "scenario precondition: fresh application pod",
+      "durationMs": 31724,
+      "at": "2026-10-11T10:28:15.540Z"
+    },
+    {
+      "operation": "SIGKILL application",
+      "httpMs": 25690,
+      "workerMs": 25786,
+      "exitCode": 137,
+      "replacementContainerId": "5921a94486d02e5cab080fa4385a601e3643a46cfcf72d1f323609ffd5e79e60",
+      "termination": {
+        "containerID": "containerd://882452391c4ad96c23b65bf72607d743a427825c2440b8290bbcc4455aa8e4a4",
+        "exitCode": 137,
+        "finishedAt": "2026-10-11T10:28:23Z",
+        "reason": "Error",
+        "startedAt": "2026-10-11T10:27:56Z"
+      },
+      "at": "2026-10-11T10:28:47.144Z"
+    },
+    {
+      "operation": "newsletter business result",
+      "journey": "after-effect",
+      "trigger": "application crash requested",
+      "state": "submitted",
+      "elapsedMs": 31529
+    },
+    {
+      "operation": "scenario precondition: fresh application pod",
+      "durationMs": 34763,
+      "at": "2026-10-11T10:29:26.184Z"
+    },
+    {
+      "operation": "SIGKILL application",
+      "httpMs": 31013,
+      "workerMs": 33409,
+      "exitCode": 137,
+      "replacementContainerId": "b495bdf63341711813e2a53dfc59118a3b177b0736a77b488804a0b32debde9a",
+      "termination": {
+        "containerID": "containerd://a8e33193202d26cbe3135ef529419dd1ca50027b31ef089d76dbbebec39ca40b",
+        "exitCode": 137,
+        "finishedAt": "2026-10-11T10:29:33Z",
+        "reason": "Error",
+        "startedAt": "2026-10-11T10:29:05Z"
+      },
+      "at": "2026-10-11T10:30:04.629Z"
+    },
+    {
+      "operation": "SIGKILL application",
+      "httpMs": 44636,
+      "workerMs": 44728,
+      "exitCode": 137,
+      "replacementContainerId": "9ace3b75748654ed7c6351841e742ceb1afa16bf0d82fea31e67755a5f10fe08",
+      "termination": {
+        "containerID": "containerd://b495bdf63341711813e2a53dfc59118a3b177b0736a77b488804a0b32debde9a",
+        "exitCode": 137,
+        "finishedAt": "2026-10-11T10:30:11Z",
+        "reason": "Error",
+        "startedAt": "2026-10-11T10:29:37Z"
+      },
+      "at": "2026-10-11T10:30:54.774Z"
+    },
+    {
+      "operation": "newsletter business result",
+      "journey": "uncertain",
+      "trigger": "first application crash requested",
+      "state": "uncertain",
+      "elapsedMs": 88277
+    },
+    {
+      "operation": "scenario precondition: fresh application pod",
+      "durationMs": 41647,
+      "at": "2026-10-11T10:31:40.052Z"
+    },
+    {
+      "operation": "scenario precondition: fresh application pod",
+      "durationMs": 45625,
+      "at": "2026-10-11T10:32:29.013Z"
+    },
+    {
+      "operation": "SIGKILL application",
+      "httpMs": 30643,
+      "workerMs": null,
+      "exitCode": 137,
+      "replacementContainerId": "fcc2f0e4206827ee2283cf4b90e7c0d78493c88fd3087f0cdcd1435166bf9eaf",
+      "termination": {
+        "containerID": "containerd://fbb0b3630b5879e695f65224e631088075fb9f7defaf4ec88c89f46ca6f7303d",
+        "exitCode": 137,
+        "finishedAt": "2026-10-11T10:32:34Z",
+        "reason": "Error",
+        "startedAt": "2026-10-11T10:31:59Z"
+      },
+      "at": "2026-10-11T10:33:03.369Z"
+    },
+    {
+      "operation": "SIGKILL application",
+      "httpMs": 45141,
+      "workerMs": 48804,
+      "exitCode": 137,
+      "replacementContainerId": "59ea57d7dd0a1cac844902e759ec8acb5a071804a1d355dd08097522b3b9d99c",
+      "termination": {
+        "containerID": "containerd://fcc2f0e4206827ee2283cf4b90e7c0d78493c88fd3087f0cdcd1435166bf9eaf",
+        "exitCode": 137,
+        "finishedAt": "2026-10-11T10:33:19Z",
+        "reason": "Error",
+        "startedAt": "2026-10-11T10:32:38Z"
+      },
+      "at": "2026-10-11T10:34:06.916Z"
+    },
+    {
+      "operation": "newsletter business result",
+      "journey": "readonly",
+      "trigger": "PostgreSQL writes restored",
+      "state": "submitted",
+      "elapsedMs": 53590
+    },
+    {
+      "operation": "scenario precondition: fresh application pod",
+      "durationMs": 41200,
+      "at": "2026-10-11T10:34:51.317Z"
+    },
+    {
+      "operation": "SIGTERM application",
+      "httpMs": 31665,
+      "workerMs": 33801,
+      "exitCode": 0,
+      "replacementContainerId": "d4b5f44bc7c4e680cead61df0776fb691872c5070fd13d90d1273e7a8a87fac8",
+      "termination": {
+        "containerID": "containerd://d6b869c0b1387d3dcf041eb90933a14ef60e8b495fc407e2a01f4eb493f3a394",
+        "exitCode": 0,
+        "finishedAt": "2026-10-11T10:34:57Z",
+        "reason": "Completed",
+        "startedAt": "2026-10-11T10:34:23Z"
+      },
+      "at": "2026-10-11T10:35:29.219Z"
+    },
+    {
+      "operation": "business result",
+      "episode": 2,
+      "elapsedMs": 33957
+    },
+    {
+      "operation": "scenario precondition: fresh application pod",
+      "durationMs": 41252,
+      "at": "2026-10-11T10:36:13.072Z"
+    },
+    {
+      "operation": "shutdown",
+      "previousBootId": "5d38e414-7ec0-4045-b3d5-f2b970f9460f",
+      "faultInjectionMs": 15533,
+      "bootMs": 57453,
+      "dependenciesMs": 158248,
+      "httpMs": 22,
+      "recoveryMs": 50564,
+      "at": "2026-10-11T10:40:04.932Z"
+    },
+    {
+      "operation": "business result",
+      "episode": 2,
+      "elapsedMs": 50880
+    },
+    {
+      "operation": "scenario precondition: fresh application pod",
+      "durationMs": 45770,
+      "at": "2026-10-11T10:41:01.628Z"
+    },
+    {
+      "operation": "crash",
+      "previousBootId": "a7afc977-803d-427b-9ff6-e9796ffb6541",
+      "faultInjectionMs": 1053,
+      "bootMs": 56758,
+      "dependenciesMs": 158954,
+      "httpMs": 43,
+      "recoveryMs": 48318,
+      "at": "2026-10-11T10:44:41.404Z"
+    },
+    {
+      "operation": "business result",
+      "episode": 2,
+      "elapsedMs": 48586
+    },
+    {
+      "operation": "scenario precondition: fresh application pod",
+      "durationMs": 47658,
+      "at": "2026-10-11T10:45:40.141Z"
+    },
+    {
+      "operation": "crash",
+      "previousBootId": "1cda06a6-2877-498c-934d-f8ccd63093cf",
+      "faultInjectionMs": 17167,
+      "bootMs": 57551,
+      "dependenciesMs": 166120,
+      "httpMs": 26,
+      "recoveryMs": 44710,
+      "at": "2026-10-11T10:50:05.081Z"
+    },
+    {
+      "operation": "crash",
+      "previousBootId": "754294d8-1706-4f48-b81f-23f0ecbf6ba7",
+      "faultInjectionMs": 89385,
+      "bootMs": 56177,
+      "dependenciesMs": 158175,
+      "httpMs": 20,
+      "recoveryMs": 46399,
+      "at": "2026-10-11T10:55:00.588Z"
+    },
+    {
+      "operation": "business result",
+      "episode": 7,
+      "elapsedMs": 92955
+    }
+  ],
+  "fullCampaign": {
+    "exitCode": 1,
+    "results": [
+      {
+        "name": "Candidat par digest, migrations rejouées et droits restreints",
+        "startedAt": "2026-10-11T10:10:28.260Z",
+        "durationMs": 92276,
+        "result": "passed"
+      },
+      {
+        "name": "RSS reconstruit sans visite les caches vides et le trailer avec itemGuid",
+        "startedAt": "2026-10-11T10:12:00.536Z",
+        "durationMs": 7522,
+        "result": "passed"
+      },
+      {
+        "name": "Navigation publique → épisode → lecture audio → lien plateforme",
+        "startedAt": "2026-10-11T10:12:08.166Z",
+        "durationMs": 6747,
+        "result": "passed"
+      },
+      {
+        "name": "PostgreSQL absent puis disponible : HTTP dégradé, refus newsletter et reprise automatique",
+        "startedAt": "2026-10-11T10:12:58.568Z",
+        "durationMs": 116005,
+        "result": "passed"
+      },
+      {
+        "name": "Panne fournisseurs prolongée puis retour : intentions acceptées et OP3 réarmés sans visite",
+        "startedAt": "2026-10-11T10:15:51.053Z",
+        "durationMs": 119895,
+        "result": "passed"
+      },
+      {
+        "name": "Crash pendant traitement après acquittement durable : même intention reprise",
+        "startedAt": "2026-10-11T10:18:30.125Z",
+        "durationMs": 128315,
+        "result": "passed"
+      },
+      {
+        "name": "Crash après commit métier avant acquittement pg-boss : résultat unique",
+        "startedAt": "2026-10-11T10:21:24.312Z",
+        "durationMs": 90575,
+        "result": "passed"
+      },
+      {
+        "name": "Crash avant commit du journal : aucun acquittement ni effet, nouvelle soumission sûre",
+        "startedAt": "2026-10-11T10:23:41.262Z",
+        "durationMs": 50710,
+        "result": "passed"
+      },
+      {
+        "name": "Golden Journey newsletter : double soumission concurrente et identité unique",
+        "startedAt": "2026-10-11T10:25:19.927Z",
+        "durationMs": 1094,
+        "result": "passed"
+      },
+      {
+        "name": "Golden Journey newsletter : demande durable et retour tardif de Brevo",
+        "startedAt": "2026-10-11T10:26:06.681Z",
+        "durationMs": 56759,
+        "result": "passed"
+      },
+      {
+        "name": "Golden Journey newsletter : contact bloqué sans réactivation ni tentative",
+        "startedAt": "2026-10-11T10:27:39.694Z",
+        "durationMs": 1434,
+        "result": "passed"
+      },
+      {
+        "name": "Golden Journey newsletter : crash après effet avant réponse et déduplication",
+        "startedAt": "2026-10-11T10:28:15.540Z",
+        "durationMs": 33189,
+        "result": "passed"
+      },
+      {
+        "name": "Golden Journey newsletter : résultat absent, second crash et aucun renvoi",
+        "startedAt": "2026-10-11T10:29:26.184Z",
+        "durationMs": 89907,
+        "result": "passed"
+      },
+      {
+        "name": "Golden Journey newsletter : échec individuel dans une réponse HTTP 201",
+        "startedAt": "2026-10-11T10:31:40.052Z",
+        "durationMs": 927,
+        "result": "passed"
+      },
+      {
+        "name": "Golden Journey newsletter : PostgreSQL en lecture seule refuse tout effet",
+        "startedAt": "2026-10-11T10:32:29.014Z",
+        "durationMs": 98726,
+        "result": "passed"
+      },
+      {
+        "name": "SIGTERM applicatif : arrêt gracieux terminé sans destruction forcée",
+        "startedAt": "2026-10-11T10:34:51.317Z",
+        "durationMs": 38068,
+        "result": "passed"
+      },
+      {
+        "name": "shutdown VM : données acquittées, droits et temporaires",
+        "startedAt": "2026-10-11T10:36:13.072Z",
+        "durationMs": 240459,
+        "result": "passed"
+      },
+      {
+        "name": "crash VM : données acquittées, droits et temporaires",
+        "startedAt": "2026-10-11T10:41:01.628Z",
+        "durationMs": 228536,
+        "result": "passed"
+      },
+      {
+        "name": "Deuxième coupure VM pendant récupération puis résultat métier sous 300 secondes",
+        "startedAt": "2026-10-11T10:45:40.141Z",
+        "durationMs": 653417,
+        "result": "passed"
+      },
+      {
+        "name": "Navigation et lecture audio après coupures réelles",
+        "startedAt": "2026-10-11T10:56:33.559Z",
+        "durationMs": 34538,
+        "result": "failed",
+        "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('a[href=\"/podcast/91/2\"]').first()\u001b[22m\n"
+      }
+    ],
+    "durationScope": "19 passed; final navigation failed on stale episode selector"
+  },
+  "navigationRequalification": {
+    "startedAt": "2026-10-11T11:03:07.876Z",
+    "command": "npm run test:e2e:resilience -- --navigation-only",
+    "phase": "navigation-only",
+    "candidate": {
+      "baseCommit": "df4cf4ba56b2d48130c2bbf54473abef482f5b5d",
+      "buildDirectory": "/tmp/site-issue56-qualification/builds/20261011T083255Z-7438b33f8a9f",
+      "buildStartedAt": "20261011T083255Z",
+      "builderMetadata": "/tmp/site-issue56-qualification/builds/20261011T083255Z-7438b33f8a9f/buildx-metadata.json",
+      "completedAt": "2026-10-11T08:36:43.925218+00:00",
+      "guestBootId": "8a62a645-aa11-4cb9-b87c-e0e023cca213",
+      "image": "docker.io/library/site-issue56@sha256:f69f8f7c0e9fb6293238b7e2dd65a6247c79d7b000d6a8e01be4c5ea4d0a5959",
+      "imageArchiveSha256": "13e2d18ded9f8da2ac45869e917a0d476bb06b426c46cd4114cdb8984552268f",
+      "indexDigest": "sha256:db1e84655c7634a973bcd3703cf0bc00d7364902f4641689a86254ef7e9a889d",
+      "kind": "site-issue56-uncommitted-candidate",
+      "patchSha256": "5017755fef3a8794e9039220724b317f0cc757cd4aef96fb0af9b7c85c3a501c",
+      "platformDigest": "sha256:f69f8f7c0e9fb6293238b7e2dd65a6247c79d7b000d6a8e01be4c5ea4d0a5959",
+      "sourceCommit": null,
+      "sourceDateEpoch": 1790757725,
+      "sourcePaths": [
+        "Dockerfile",
+        ".dockerignore",
+        "package.json",
+        "package-lock.json",
+        "server.js",
+        "style.css",
+        "postcss.config.js",
+        "content",
+        "server",
+        "public",
+        "sql",
+        "scripts/build-author.mjs",
+        "scripts/lib",
+        "scripts/migrate.js",
+        "scripts/delivery/readiness.mjs"
+      ],
+      "sourceScope": "docker-runtime-inputs",
+      "sourceTreeSha256": "7438b33f8a9f3effe312e8079fc0f0e7e7ab757a7052547c4e1d6146ee7d13b7",
+      "workingTreeDirty": true
+    },
+    "database": "site_qualification_candidate7",
+    "bootId": "d200b8b3-c438-405f-9219-4ff1b21afdb6",
+    "previousEnvironmentSha256": "a2c5da3b78bb4c9fcab0b3b55f1a899f62de8865c03f16261387028de1c7e796",
+    "previousResultsSha256": "ac274de16a045ff895d201efab1f2953fa6588ca2d71e3b5b16a0685b525076b",
+    "previousPassedScenarios": 19,
+    "harness": {
+      "test/e2e/resilience.test.mjs": "f1edc5c159b0a6029bd1512321eadde038bfda0fd940ff10d46139183e985b16",
+      "test/e2e/resilience-navigation-check.mjs": "582c67fe1c0619d7ff2cd3a136dbba7f693d8e7c9d3031bef4cac5858189b88e",
+      "test/e2e/resilience-navigation.mjs": "3e10bbe590c8eed9587445a0cc0dab1ad71a62f0af21890dbf7d142b8e87aacd",
+      "test/e2e/resilience-fixture.mjs": "506843cf641a4eaa8a047451ae57f99f2ddb3255dded8c21835463756c94ff68"
+    },
+    "results": [
+      {
+        "name": "Navigation et lecture audio après coupures réelles",
+        "result": "passed",
+        "episode": 7,
+        "durationMs": 9532
+      }
+    ],
+    "containerId": "containerd://d1fc3195b028fcb0dbcde74fb35b8d67b3933ba935b98191ecaec4203ec29ee9",
+    "catalogueEpisodes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "newsletterJournalUnchanged": true,
+    "newsletterEffectsUnchanged": true,
+    "cleanupSucceeded": true,
+    "durationMs": 26090,
+    "finishedAt": "2026-10-11T11:03:33.967Z"
+  },
+  "vmControllerEvents": [
+    {
+      "timestamp": 1791714981.622264,
+      "monotonicSeconds": 56001.993111779,
+      "operation": "shutdown-request",
+      "previousBootId": "5d38e414-7ec0-4045-b3d5-f2b970f9460f",
+      "pid": 3153979
+    },
+    {
+      "timestamp": 1791714982.994828,
+      "monotonicSeconds": 56003.365675811,
+      "operation": "shutdown-sent",
+      "previousBootId": "5d38e414-7ec0-4045-b3d5-f2b970f9460f",
+      "sshExit": 0
+    },
+    {
+      "timestamp": 1791714996.1630619,
+      "monotonicSeconds": 56016.533909956,
+      "operation": "start",
+      "uuid": "c5bd30a1-af55-48f6-8d3a-6ce3db334e51",
+      "accelerator": "tcg"
+    },
+    {
+      "timestamp": 1791715274.079889,
+      "monotonicSeconds": 56294.450737035,
+      "operation": "crash-request",
+      "previousBootId": "a7afc977-803d-427b-9ff6-e9796ffb6541",
+      "pid": 3608041
+    },
+    {
+      "timestamp": 1791715274.0800407,
+      "monotonicSeconds": 56294.45088839,
+      "operation": "crash-sent",
+      "previousBootId": "a7afc977-803d-427b-9ff6-e9796ffb6541",
+      "pid": 3608041
+    },
+    {
+      "timestamp": 1791715274.1718042,
+      "monotonicSeconds": 56294.54265213,
+      "operation": "start",
+      "uuid": "c5bd30a1-af55-48f6-8d3a-6ce3db334e51",
+      "accelerator": "tcg"
+    },
+    {
+      "timestamp": 1791715580.4203494,
+      "monotonicSeconds": 56600.791197421,
+      "operation": "crash-when-armed",
+      "previousBootId": "1cda06a6-2877-498c-934d-f8ccd63093cf",
+      "pid": 3655909,
+      "uuid": "c5bd30a1-af55-48f6-8d3a-6ce3db334e51",
+      "condition": {
+        "kind": "job-active",
+        "jobId": "02d001ae-85b0-4484-8610-08109fd4930a",
+        "minRetryCount": 0
+      }
+    },
+    {
+      "timestamp": 1791715594.199063,
+      "monotonicSeconds": 56614.56991062,
+      "operation": "crash-when-sent",
+      "previousBootId": "1cda06a6-2877-498c-934d-f8ccd63093cf",
+      "pid": 3655909,
+      "condition": {
+        "kind": "job-active",
+        "jobId": "02d001ae-85b0-4484-8610-08109fd4930a",
+        "minRetryCount": 0
+      },
+      "confirmedAtMonotonic": 56614.56958676,
+      "signalAtMonotonic": 56614.56989988,
+      "localSignalDelayMs": 0.313
+    },
+    {
+      "timestamp": 1791715594.293285,
+      "monotonicSeconds": 56614.664132686,
+      "operation": "start",
+      "uuid": "c5bd30a1-af55-48f6-8d3a-6ce3db334e51",
+      "accelerator": "tcg"
+    },
+    {
+      "timestamp": 1791715811.2662938,
+      "monotonicSeconds": 56831.637141655,
+      "operation": "crash-when-armed",
+      "previousBootId": "754294d8-1706-4f48-b81f-23f0ecbf6ba7",
+      "pid": 3710290,
+      "uuid": "c5bd30a1-af55-48f6-8d3a-6ce3db334e51",
+      "condition": {
+        "kind": "job-active",
+        "jobId": "02d001ae-85b0-4484-8610-08109fd4930a",
+        "minRetryCount": 1
+      }
+    },
+    {
+      "timestamp": 1791715895.9576185,
+      "monotonicSeconds": 56916.32846613,
+      "operation": "crash-when-sent",
+      "previousBootId": "754294d8-1706-4f48-b81f-23f0ecbf6ba7",
+      "pid": 3710290,
+      "condition": {
+        "kind": "job-active",
+        "jobId": "02d001ae-85b0-4484-8610-08109fd4930a",
+        "minRetryCount": 1
+      },
+      "confirmedAtMonotonic": 56916.328138934,
+      "signalAtMonotonic": 56916.328453877,
+      "localSignalDelayMs": 0.315
+    },
+    {
+      "timestamp": 1791715896.0590312,
+      "monotonicSeconds": 56916.429878987,
+      "operation": "start",
+      "uuid": "c5bd30a1-af55-48f6-8d3a-6ce3db334e51",
+      "accelerator": "tcg"
+    },
+    {
+      "timestamp": 1791716233.3302467,
+      "monotonicSeconds": 57253.701095041,
+      "operation": "shutdown-request",
+      "previousBootId": "d553e16a-4fb0-4bbf-be17-4011e640c079",
+      "pid": 3761943
+    },
+    {
+      "timestamp": 1791716234.637956,
+      "monotonicSeconds": 57255.008803426,
+      "operation": "shutdown-sent",
+      "previousBootId": "d553e16a-4fb0-4bbf-be17-4011e640c079",
+      "sshExit": 0
+    },
+    {
+      "timestamp": 1791716401.6945746,
+      "monotonicSeconds": 57422.06542236,
+      "operation": "start",
+      "uuid": "c5bd30a1-af55-48f6-8d3a-6ce3db334e51",
+      "accelerator": "tcg"
+    },
+    {
+      "timestamp": 1791716660.9463234,
+      "monotonicSeconds": 57681.317171256,
+      "operation": "shutdown-request",
+      "previousBootId": "d200b8b3-c438-405f-9219-4ff1b21afdb6",
+      "pid": 3846357
+    },
+    {
+      "timestamp": 1791716662.1481137,
+      "monotonicSeconds": 57682.518961326,
+      "operation": "shutdown-sent",
+      "previousBootId": "d200b8b3-c438-405f-9219-4ff1b21afdb6",
+      "sshExit": 0
+    }
+  ],
+  "otherCommands": [
+    {
+      "label": "npm-build",
+      "command": "npm run build",
+      "exitCode": 0,
+      "durationSeconds": 0.815
+    },
+    {
+      "label": "author",
+      "command": "npm run test:e2e",
+      "exitCode": 0,
+      "durationSeconds": 2.568
+    },
+    {
+      "label": "photography",
+      "command": "npm run test:e2e:photography",
+      "exitCode": 0,
+      "durationSeconds": 3.67
+    },
+    {
+      "label": "npm-test-final",
+      "command": "npm test",
+      "exitCode": 0,
+      "durationSeconds": 28.063,
+      "finishedAt": "2026-10-11T08:55:57.958282+00:00"
+    },
+    {
+      "label": "npm-test-qualification-final",
+      "command": "env -u DATABASE_URL -u PGHOST -u PGPORT -u PGDATABASE -u PGUSER -u PGPASSWORD -u PGSERVICE -u PGSERVICEFILE -u PGPASSFILE -u PGSSLMODE -u NEWSLETTER_TEST_DATABASE_OPTIONS -u RESILIENCE_TEST_DATABASE_OPTIONS -u RESILIENCE_POSTGRES_OPTIONS DOTENV_CONFIG_PATH=/dev/null RUN_EXTERNAL_INTEGRATION_TESTS=false RUN_DATABASE_INTEGRATION_TESTS=false PATH=\"/tmp/site-issue56-tools/node-v24.21.0-linux-x64/bin:$PATH\" npm test",
+      "workingDirectory": "/tmp/site-issue56",
+      "exitCode": 0,
+      "durationSeconds": 27.367,
+      "startedAt": "2026-10-11T09:54:30.917510+00:00",
+      "finishedAt": "2026-10-11T09:54:58.284104+00:00",
+      "nodeVersion": "v24.21.0",
+      "log": "npm-test-qualification-final.log",
+      "counts": {
+        "tests": 302,
+        "suites": 48,
+        "pass": 287,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 15,
+        "todo": 0
+      },
+      "runtimeUnchanged": true,
+      "candidateSourceTreeBefore": "7438b33f8a9f3effe312e8079fc0f0e7e7ab757a7052547c4e1d6146ee7d13b7",
+      "candidateSourceTreeAfter": "7438b33f8a9f3effe312e8079fc0f0e7e7ab757a7052547c4e1d6146ee7d13b7",
+      "candidateSourceTreeUnchanged": true,
+      "externalIntegrationEnabled": false,
+      "databaseOptionsProvided": false,
+      "detailsFile": "npm-test-qualification-final.json"
+    },
+    {
+      "label": "npm-test-process-proof-final",
+      "command": "env -u DATABASE_URL -u PGHOST -u PGPORT -u PGDATABASE -u PGUSER -u PGPASSWORD -u PGSERVICE -u PGSERVICEFILE -u PGPASSFILE -u PGSSLMODE -u NEWSLETTER_TEST_DATABASE_OPTIONS -u RESILIENCE_TEST_DATABASE_OPTIONS -u RESILIENCE_POSTGRES_OPTIONS DOTENV_CONFIG_PATH=/dev/null RUN_EXTERNAL_INTEGRATION_TESTS=false RUN_DATABASE_INTEGRATION_TESTS=false PATH=\"/tmp/site-issue56-tools/node-v24.21.0-linux-x64/bin:$PATH\" npm test",
+      "workingDirectory": "/tmp/site-issue56",
+      "exitCode": 0,
+      "durationSeconds": 27.412,
+      "startedAt": "2026-10-11T10:11:08.159502+00:00",
+      "finishedAt": "2026-10-11T10:11:35.571701+00:00",
+      "nodeVersion": "v24.21.0",
+      "log": "npm-test-process-proof-final.log",
+      "counts": {
+        "tests": 308,
+        "suites": 48,
+        "pass": 293,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 15,
+        "todo": 0
+      },
+      "runtimeUnchanged": true,
+      "candidateSourceTreeBefore": "7438b33f8a9f3effe312e8079fc0f0e7e7ab757a7052547c4e1d6146ee7d13b7",
+      "candidateSourceTreeAfter": "7438b33f8a9f3effe312e8079fc0f0e7e7ab757a7052547c4e1d6146ee7d13b7",
+      "candidateSourceTreeUnchanged": true,
+      "externalIntegrationEnabled": false,
+      "databaseOptionsProvided": false,
+      "detailsFile": "npm-test-process-proof-final.json"
+    },
+    {
+      "label": "npm-test-navigation-final",
+      "command": "env -u DATABASE_URL -u PGHOST -u PGPORT -u PGDATABASE -u PGUSER -u PGPASSWORD -u PGSERVICE -u PGSERVICEFILE -u PGPASSFILE -u PGSSLMODE -u NEWSLETTER_TEST_DATABASE_OPTIONS -u RESILIENCE_TEST_DATABASE_OPTIONS -u RESILIENCE_POSTGRES_OPTIONS DOTENV_CONFIG_PATH=/dev/null RUN_EXTERNAL_INTEGRATION_TESTS=false RUN_DATABASE_INTEGRATION_TESTS=false PATH=\"/tmp/site-issue56-tools/node-v24.21.0-linux-x64/bin:$PATH\" npm test",
+      "workingDirectory": "/tmp/site-issue56",
+      "exitCode": 0,
+      "durationSeconds": 27.667,
+      "startedAt": "2026-10-11T11:03:54.422658+00:00",
+      "finishedAt": "2026-10-11T11:04:22.089735+00:00",
+      "nodeVersion": "v24.21.0",
+      "log": "npm-test-navigation-final.log",
+      "counts": {
+        "tests": 308,
+        "suites": 48,
+        "pass": 293,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 15,
+        "todo": 0
+      },
+      "runtimeUnchanged": true,
+      "candidateSourceTreeBefore": "7438b33f8a9f3effe312e8079fc0f0e7e7ab757a7052547c4e1d6146ee7d13b7",
+      "candidateSourceTreeAfter": "7438b33f8a9f3effe312e8079fc0f0e7e7ab757a7052547c4e1d6146ee7d13b7",
+      "candidateSourceTreeUnchanged": true,
+      "externalIntegrationEnabled": false,
+      "databaseOptionsProvided": false,
+      "navigationFilesUnchanged": true,
+      "navigationSyntaxChecks": [
+        {
+          "command": "node --check test/e2e/resilience-navigation.mjs",
+          "exitCode": 0,
+          "durationSeconds": 0.019,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": "node --check test/e2e/resilience-navigation-check.mjs",
+          "exitCode": 0,
+          "durationSeconds": 0.021,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "command": "node --check test/e2e/resilience.test.mjs",
+          "exitCode": 0,
+          "durationSeconds": 0.021,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "nodeTestDurationMs": 27397.046185,
+      "detailsFile": "npm-test-navigation-final.json"
+    }
+  ],
+  "unitTests": {
+    "total": 308,
+    "passed": 293,
+    "skipped": 15,
+    "failed": 0
+  },
+  "unitValidation": {
+    "command": "env -u DATABASE_URL -u PGHOST -u PGPORT -u PGDATABASE -u PGUSER -u PGPASSWORD -u PGSERVICE -u PGSERVICEFILE -u PGPASSFILE -u PGSSLMODE -u NEWSLETTER_TEST_DATABASE_OPTIONS -u RESILIENCE_TEST_DATABASE_OPTIONS -u RESILIENCE_POSTGRES_OPTIONS DOTENV_CONFIG_PATH=/dev/null RUN_EXTERNAL_INTEGRATION_TESTS=false RUN_DATABASE_INTEGRATION_TESTS=false PATH=\"/tmp/site-issue56-tools/node-v24.21.0-linux-x64/bin:$PATH\" npm test",
+    "startedAt": "2026-10-11T11:03:54.422658+00:00",
+    "finishedAt": "2026-10-11T11:04:22.089735+00:00",
+    "durationSeconds": 27.667,
+    "counts": {
+      "tests": 308,
+      "suites": 48,
+      "pass": 293,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 15,
+      "todo": 0
+    },
+    "testFiles": {
+      "test/assets/favicon.test.js": "b0eaab63b703ffdc743b8e2a68a14b4fa0079f581b2360a37765217d47896f29",
+      "test/assets/logoAnimation.test.js": "0708c945f66e1e897d41d3adf27cbc11a1005c5eaace97be157d93d6781836ea",
+      "test/content/author-content.test.js": "0ac5e45f3421fb3e6066b4c5ec981988046bae3cf3eba8896a3a228092212931",
+      "test/delivery/notifications.test.js": "5dc79afa6f3d6a6bf50283f12631bf24ebcd19b5d9f50f376419714e3061e8c7",
+      "test/delivery/policy.test.js": "38774390b77e43a3f2334bb72a5cbd028f12490750bd832726818aed18f2891e",
+      "test/delivery/readiness.test.js": "3be25c7062c00016ac5f9f338c61ba8db5d2d354f6fc0f9c24dd9eb6d989826e",
+      "test/e2e/durableBoundaries.test.js": "17fda72a197b9860db8ef6ff51a64864ef66f970f2444524ef5388dbea258667",
+      "test/e2e/resilienceHarness.test.js": "fa43b869ac28a297d467d572da5f7fe380ea8f9bfc4dfd2e8fb05ee1561bf57a",
+      "test/newsletter/brevoClient.test.js": "cbd3c1e3ffe709c8f40e374f0960e3d577589dbbc73b8e2f696ae4dcccb58ca5",
+      "test/newsletter/postgres.test.js": "32678e3e2f0c85877196c0babdc0e25d9d729b051f56eb7e4b84722dc24d9d39",
+      "test/newsletter/recovery.test.js": "52b22c38d260e61e826f1fceb5e89b754eb342fd183874ae8cfa01f92a758f4a",
+      "test/newsletter/routes.test.js": "2d2e080ed4a89cf7852c88a082a972659b2be78513727e2fff4ff15bd6d43486",
+      "test/queues/episodeIntentBuffer.test.js": "7d606837b2126d070d1b658955f6761841a00751dcafacc31cd3fde97592b4d5",
+      "test/queues/episodeQueue.lifecycle.test.js": "b75127fd29545ebd848415697db6cc0812585f6bf7d3a67c4b74054dfebe6fec",
+      "test/queues/episodeQueue.test.js": "db661ca261dc431f9ab975540110331c3435c42f555f15dead61d110e32380a7",
+      "test/queues/episodeWorkerManager.test.js": "4878eba37af5d8e582d305ac6fbcf840f2c3de12c32cfeb0488e01f0f5c2af8c",
+      "test/queues/op3StatsQueue.test.js": "bc7024ea8f70cc9cf344b86069a4b8172eb660261f913daf35507e0f9b5193f9",
+      "test/queues/recovery.postgres.test.js": "7834cb0d057b29892ce86b8954dbd876b00d2ffd1e4aec006c6bcbee5762b0a6",
+      "test/queues/recoveryPolicy.test.js": "a4753c829f74565bf0ed16f629a52e043ffeb3c6be98bfbc227bc73ec727dd3b",
+      "test/queues/recoveryReconciler.test.js": "05586aab43451361c69d6cc2ace679cfeadf6390ff7ec3089311d7502511477b",
+      "test/resilience/databaseAvailability.test.js": "15ba45db48a99d0976e8a526f46087968a49ec21c47abc685a0e5b22a4803de0",
+      "test/resilience/sql-timeout.postgres.test.js": "91025f5a71fcd3cb3ca83312b97c37f6681ec24182ed2ca998827c8035bd5189",
+      "test/routes/author-seo.test.js": "87f9e04ce5124cc8a07580f9bfcb81bc0a6746ce9031bef55e113c96483e8225",
+      "test/routes/degraded-mode-complete.test.js": "6afafa4fcc90fd16c228374da2e928ef7de47e28ccf8e32b305e92790c2aa8b2",
+      "test/routes/degraded-mode.test.js": "c5e65a4351e5dc74dcf75d4912e1a46f39ed0818fdbc458e105d50a861a4bd81",
+      "test/routes/episode.test.js": "d0894399cd3ba87f5255e1cf2816c29c61869308d0d57fdab91b5b8954c29522",
+      "test/routes/landing.test.js": "9b94bf9cf3562ded1233ba205930f26242134a106ec2dab1c8acb7791ac76f7a",
+      "test/routes/logoLab.test.js": "e9b6c2916e5c3a3e5d71d2faa6119d577b953c00036906cc7af9a4239aa001c7",
+      "test/routes/photography.test.js": "03220c76bf25a06e12002c3cff69bc92fdcbd988368205313ef290376adb2305",
+      "test/routes/podcast-availability.test.js": "b259526becfcf19e57cb06c75520d3c4b54731a172e9efe9451234c5244c3945",
+      "test/routes/podcast-og-cache.test.js": "a12a3ee66f2d5405230db5c66733b0ca766a4f7cdd7ccaadd22282344bb763be",
+      "test/routes/podcast-og-tags.test.js": "1efba5beb560845ba5c033278e736f91982d082f191d5e4d17c9b37f899c96cd",
+      "test/routes/podcast-seo.test.js": "214ba2326dc548dbb74b342cc3b87c18c1fec9fce314ea1ff6ae15a89f1189e0",
+      "test/routes/podcast-traction.test.js": "9c758c7b1c16eb41edecfb21e738cb6a931c96f0239f403cd93787864e110639",
+      "test/routes/podcast-youtube.test.js": "c81370cc05c0a8afa7f5f94f7389dae4147cc2b49fb63959255dba6f7dec93dd",
+      "test/routes/podcast.test.js": "aa1c390516bd30cb0829bdae82e867166fc078a2eea8ee4d75eb7256c4dd9304",
+      "test/routes/pool-recovery.test.js": "349cdd7d769d914e554117860082e2ec0c328e7c15ca0f6b15e4b17820d4c08b",
+      "test/routes/release-health.test.js": "46a272de22284123062ee1fa7052c6cfc2d3eaf7691650e3f0ccae9f23dc93c5",
+      "test/security/op3-secrets.test.js": "14e92cfd5613b10879d1cae929e040810b5924243e58bab61190556bf3755d41",
+      "test/services/appleEpisodes.test.js": "06333207d2085bec283a25f42ff6a3ab18838f821f55ab6db19f41e7bee49e9d",
+      "test/services/castopodRSS.test.js": "d4f31d27f06811520a2bd36fe516ae8cc82b7fb6f0fe33f1d91218eed45eba3c",
+      "test/services/ogImageCache.test.js": "9f50f29c9505c050d75870ad0dbc9969085fdd1d4c55046f19fa007e5edbe6d6",
+      "test/services/ogImageGenerator.memory.test.js": "3df144d0867d389a19320c7977ee47fa0008fa477155383b4d320ae1eec16c97",
+      "test/services/ogImageGenerator.test.js": "f4ab3ae35fbe5a953f3595b0adb754d4eeee0ba5d7dd1466c43abeab750f8986",
+      "test/services/ogImageLayout.test.js": "e2ea6ff53d9622995c1515832645dd396725093f1740b1a08ad5d1f9c529b0ed",
+      "test/services/op3Service.test.js": "dea183f9a00870060d427ac92b4cceec0ac8a2a6b98f6babdd65f058019377b7",
+      "test/services/platformAPIs.test.js": "1560bf82c659da0a4d818aa0260fb65558f959bb50d4a6c903026b13f4876a20",
+      "test/services/podcast-feed.test.js": "6d8f4a2cbad08d0fb1d99ac6caf8ea4df4b4ca16abebe86537b604757867a06b",
+      "test/services/podcastDescription.test.js": "093d01509e7eb147b68e1be44aa4f643bb845892dd8ad46e1138c4c0c2e1b63d",
+      "test/services/podcastVideoAvailability.test.js": "bf7db3268419f4088d6afa7daac3aa5fcf553d657465e72a35bc2be6e4d893a3",
+      "test/services/recovery-feed.test.js": "5c0156f72917a47fa5008c2b946ba158c30c30bca67359b4d8788fffe4818b6a",
+      "test/services/releaseIdentity.test.js": "9ee93e78d69e0275a76d7720526840b889452b84b452cbcf52663fa8ef94d91d",
+      "test/services/s3Service.test.js": "8549e9f9a1f105c7207948bec890bed9b7bf3b731d4c64aef987837ea3ca8088",
+      "test/services/sitemap.test.js": "b34e2cff6d417ccb2029d6af3f1f83d57b4928e4c1cd00ac2f11035c0a92e2dc",
+      "test/views/podcast-design.test.js": "6ee9509587661aa75b33e6a6d04f2b299bb6c47107fdef4644e488ccd15107cf"
+    },
+    "candidateSourceTreeAfter": "7438b33f8a9f3effe312e8079fc0f0e7e7ab757a7052547c4e1d6146ee7d13b7"
+  },
+  "additionalPostgresTests": {
+    "newsletter": 8,
+    "queueRecovery": 1,
+    "statementTimeout": 1
+  },
+  "controllerTests": {
+    "driver": 8,
+    "driverOptimized": 8,
+    "boundaryObserver": 10,
+    "armRaceRegression": 12,
+    "harness": 11
+  },
+  "limits": [
+    "Synthetic external providers; no real email delivery or receipt claim.",
+    "No physical host loss or restore qualification.",
+    "Measured recovery applies to this catalogue and backlog, not arbitrary production load.",
+    "VM golden journeys retain real retry/expiration times; separate SQL selection tests also use aged fixture rows.",
+    "Apple HTTP 200 without results array remains a partial result; not all malformed provider payloads are covered.",
+    "Uncertain newsletter outcomes are identified, not counted as successful external effects.",
+    "No production publication, migration or deployment."
+  ],
+  "rawEvidenceDirectory": "/tmp/site-issue56-evidence/resilience-run-6",
+  "targetedCommand": "PATH=/tmp/site-issue56-tools/node-v24.21.0-linux-x64/bin:$PATH RESILIENCE_VM_STATE=/tmp/site-issue56-qualification RESILIENCE_DATABASE=site_qualification_candidate7 RESILIENCE_PREVIOUS_OUTPUT=/tmp/site-issue56-evidence/resilience-run-6 RESILIENCE_OUTPUT=/tmp/site-issue56-evidence/resilience-navigation-final E2E_BROWSER_EXECUTABLE=/home/ubuntu/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome npm run test:e2e:resilience -- --navigation-only",
+  "supplementalNewsletterHistory": {
+    "rawFileSha256": "63196da0202469fd94d3d4b80e81a62071f2e34b2dec44711b9a95f60358a99c",
+    "status": "qualified-hard-cuts-only",
+    "selectedColumns": [
+      "id",
+      "request_id",
+      "attempted_at"
+    ],
+    "normalShutdownCoverage": {
+      "status": "not-qualified",
+      "reason": "No reliable snapshot before normal shutdown",
+      "previousAttempt": {
+        "kind": "newsletter-ledger-vm-preservation",
+        "status": "not-qualified",
+        "reason": "VM scenario already started before the initial capture",
+        "observedAt": "2026-10-11T10:36:55.678Z",
+        "database": "site_qualification_candidate7"
+      }
+    },
+    "readOnly": true,
+    "database": "site_qualification_candidate7",
+    "role": "site_issue56_app",
+    "timestampResolution": {
+      "column": "attempted_at",
+      "precision": "milliseconds",
+      "representation": "UTC ISO 8601 through the default node-postgres timestamptz parser and JavaScript Date",
+      "limitation": "Sub-millisecond timestamp fractions and all unselected newsletter_attempts columns were not compared."
+    },
+    "baseline": {
+      "startedAt": "2026-10-11T10:40:39.246Z",
+      "completedAt": "2026-10-11T10:40:39.394Z",
+      "rowCount": 7,
+      "rowsSha256": "405b40f47072f53cd7b04688b093cf0d8685c940fc6c04f57bd5a8ed10c659d2",
+      "completedScenarios": 17
+    },
+    "comparisons": [
+      {
+        "label": "after scenario 18",
+        "startedAt": "2026-10-11T10:44:50.541Z",
+        "completedAt": "2026-10-11T10:44:50.725Z",
+        "rowCount": 7,
+        "rowsSha256": "405b40f47072f53cd7b04688b093cf0d8685c940fc6c04f57bd5a8ed10c659d2",
+        "completedScenarios": 18,
+        "baselineRowsPreserved": true,
+        "allRowsIdentical": true,
+        "addedRowCount": 0,
+        "hardCutsCovered": 1
+      },
+      {
+        "label": "after scenario 19",
+        "startedAt": "2026-10-11T10:56:33.650Z",
+        "completedAt": "2026-10-11T10:56:33.814Z",
+        "rowCount": 7,
+        "rowsSha256": "405b40f47072f53cd7b04688b093cf0d8685c940fc6c04f57bd5a8ed10c659d2",
+        "completedScenarios": 19,
+        "baselineRowsPreserved": true,
+        "allRowsIdentical": true,
+        "addedRowCount": 0,
+        "hardCutsCovered": 3
+      }
+    ],
+    "failures": []
+  }
+}

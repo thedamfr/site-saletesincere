@@ -12,8 +12,9 @@ tags: [adr, index, architecture, decisions]
 
 ## Summary
 
-Index des décisions d’architecture du projet. L’ADR 0021 décrit la page auteur,
-son contenu Markdown compilé au build et le sitemap public. Consulter la décision
+Index des décisions d’architecture du projet. L’ADR 0024 décrit les intentions
+durables et la reprise après coupure ; le candidat est qualifié sur VM dédiée,
+sans déploiement de production. Consulter les [preuves](../qualification-issue-56.md). Consulter la décision
 concernée avant de modifier son comportement.
 
 ## Synthèse
@@ -51,14 +52,16 @@ de livraison et les résultats de recette restent dans les guides opérationnels
 
 | [ADR-0021](./adr_0021_page_auteur_et_sitemap.md) | Page auteur et sitemap | ✅ **Accepté** | 2026-09 | Contenu, SEO | Feature |
 | [ADR-0023](./adr_0023_dimensionnement_stockage_postgresql.md) | Dimensionnement du stockage PostgreSQL | **Mis en œuvre sur OVH** | 2026-09 | Kubernetes, PostgreSQL | Infrastructure |
+| [ADR-0024](./adr_0024_resilience_aux_coupures.md) | Intentions durables et reprise après coupure | **Candidat qualifié sur VM** | 2026-10 | PostgreSQL, pg-boss, Newsletter | Critique |
 
 ## 📊 Statistiques
 
-- **Total ADRs** : 21
+- **Total ADRs** : 23
 - **Actifs** : 1 (sécurité)
 - **Historiques** : 2 (ancienne production Clever Cloud et preview podcast)
-- **Implémentés** : 11 (audio + podcasting + templates + OVH + livraison continue)
-- **Acceptés** : 4 (newsletter DOI + frontend)
+- **Implémentés** : 12 (audio + podcasting + templates + OVH + livraison continue + stockage PostgreSQL)
+- **Acceptés** : 5 (newsletter DOI + frontend + page auteur)
+- **Candidat qualifié sur VM** : 1 (résilience aux coupures)
 - **En cours** : 1 (newsletter intégration)
 - **Attente** : 1 (podcasting DNS)
 - **Draft** : 0

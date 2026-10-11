@@ -19,7 +19,8 @@
     "test:e2e": "node scripts/test-e2e.mjs",
     "pretest": "npm run build:views",
     "test:e2e:install": "playwright install --with-deps chromium",
-    "test:storage": "ssh -o BatchMode=yes -o StrictHostKeyChecking=yes penthouse 'sudo -n python3 -' < scripts/test-storage.py"
+    "test:storage": "ssh -o BatchMode=yes -o StrictHostKeyChecking=yes penthouse 'sudo -n python3 -' < scripts/test-storage.py",
+    "test:e2e:resilience": "node test/e2e/resilience.test.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.844.0",

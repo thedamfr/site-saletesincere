@@ -18,6 +18,7 @@ import newsletterRoutes from "./server/newsletter/routes.js";
 import { registerAuthorSeo } from "./server/routes/author-seo.js";
 import {
   fetchEpisodeFromRSS,
+  fetchAllEpisodesFromRSS,
   fetchPublishedEpisodesFromRSS,
   fetchPodcastFromRSS
 } from "./server/services/castopodRSS.js";
@@ -42,6 +43,7 @@ import {
   stopQueue
 } from "./server/queues/episodeQueue.js";
 import { createEpisodeIntentBuffer } from "./server/queues/episodeIntentBuffer.js";
+import { createRecoveryReconciler } from "./server/queues/recoveryReconciler.js";
 import {
   createEpisodeWorkerManager,
   EpisodeWorkerState
@@ -169,6 +171,8 @@ export async function buildApp({
   databaseAvailability: databaseAvailabilityOverride,
   episodeFetcher = fetchEpisodeFromRSS,
   podcastEpisodesFetcher = fetchPublishedEpisodesFromRSS,
+  recoveryEpisodesFetcher = podcastEpisodesFetcher === fetchPublishedEpisodesFromRSS
+    ? fetchAllEpisodesFromRSS : podcastEpisodesFetcher,
   podcastFeedFetcher = podcastEpisodesFetcher === fetchPublishedEpisodesFromRSS
     ? fetchPodcastFromRSS
     : async (timeout) => ({ episodes: await podcastEpisodesFetcher(timeout), description: '' }),
@@ -182,6 +186,7 @@ export async function buildApp({
   episodeIntentBuffer: episodeIntentBufferOverride,
   episodeWorkerStarter,
   episodeWorkerStopper,
+  newsletterService,
   workerManagerOptions = {},
   storageClient: storageClientOverride,
   audioValidator = validateAudio
@@ -306,6 +311,7 @@ if (!database) {
       connectionString: databaseUrl,
       max: 1, // Une seule connexion suffit (pas de requêtes longues)
       connectionTimeoutMillis: 1500,
+      statement_timeout: 1500,
       query_timeout: 2000
     });
     ownsDatabaseAdapter = true;
@@ -346,6 +352,19 @@ const episodeIntentBuffer = episodeIntentBufferOverride || createEpisodeIntentBu
 
 app.decorate('databaseAvailability', databaseAvailability);
 app.decorate('episodeIntentBuffer', episodeIntentBuffer);
+
+// pg emits idle-client failures outside query promises. Keep HTTP available and
+// record the dependency failure instead of allowing an unhandled EventEmitter error.
+if (typeof database?.pool?.on === 'function') {
+  const onPoolError = (error) => {
+    databaseAvailability.recordError(error, 'idle_connection_error');
+    app.log.warn({ event: 'database_pool_error', errorCode: error?.code || 'UNKNOWN' }, 'database_pool_error');
+  };
+  database.pool.on('error', onPoolError);
+  if (!ownsDatabaseAdapter) {
+    app.addHook('onClose', async () => database.pool.off('error', onPoolError));
+  }
+}
 
 // Multipart forms
 await app.register(fastifyMultipart, {
@@ -411,7 +430,7 @@ if (!isProduction) {
 registerAuthorSeo(app, { fetchEpisodes: podcastEpisodesFetcher, pageLimiter });
 
 // Newsletter Routes
-await app.register(newsletterRoutes, { prefix: '/newsletter' });
+await app.register(newsletterRoutes, { prefix: '/newsletter', service: newsletterService });
 
 function reportDatabaseError(error, route) {
   if (!isDatabaseAvailabilityError(error)) return false;
@@ -1570,12 +1589,23 @@ const WORKER_ENABLED = process.env.DISABLE_WORKER !== 'true'
   && database !== null;
 
 if (WORKER_ENABLED) {
+  const recovery = createRecoveryReconciler({
+    fetchEpisodes: recoveryEpisodesFetcher,
+    database,
+    enqueue: enqueueEpisodeIntent,
+    storageEnabled,
+    youtubeResolutionEnabled: youtubeEpisodeResolutionEnabled,
+    logger: app.log,
+    canRun: () => episodeWorkerManager?.getStatus().state === EpisodeWorkerState.READY
+      && databaseAvailability.getState() === DatabaseState.READ_WRITE
+  });
+  app.decorate('episodeRecovery', recovery);
   const startEpisodeWorker = episodeWorkerStarter
     || (() => initializeEpisodeWorker(app, {
       workerOptions: { storageEnabled }
     }));
   const stopEpisodeWorker = episodeWorkerStopper
-    || ((instance) => stopQueue(instance));
+    || ((instance, options) => stopQueue(instance, options));
   const {
     onReady: configuredOnReady,
     ...managerOptions
@@ -1589,6 +1619,8 @@ if (WORKER_ENABLED) {
     databaseAvailability,
     async onReady(instance) {
       await episodeIntentBuffer.drain(enqueueEpisodeIntent);
+      // RSS reconstruction runs independently of HTTP and worker readiness.
+      void recovery.reconcile();
       if (typeof configuredOnReady === 'function') {
         await configuredOnReady(instance);
       }
@@ -1625,7 +1657,7 @@ if (WORKER_ENABLED) {
 
   app.addHook('onClose', async () => {
     setEpisodeQueueShuttingDown(true);
-    await episodeWorkerManager.stop();
+    await Promise.all([recovery.stop(), episodeWorkerManager.stop()]);
     unsubscribeDatabase();
     unsubscribeWorker();
   });

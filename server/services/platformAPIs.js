@@ -5,7 +5,12 @@
 
 import { isAppleEpisodeUrl } from './podcastVideoAvailability.js'
 
-export async function getSpotifyToken() {
+function requestSignal(signal) {
+  const timeout = AbortSignal.timeout(5000)
+  return signal ? AbortSignal.any([signal, timeout]) : timeout
+}
+
+export async function getSpotifyToken({ signal, fetchImpl = fetch } = {}) {
   const clientId = process.env.SPOTIFY_CLIENT_ID
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET
 
@@ -15,7 +20,8 @@ export async function getSpotifyToken() {
 
   const authString = Buffer.from(`${clientId}:${clientSecret}`).toString('base64')
   
-  const response = await fetch('https://accounts.spotify.com/api/token', {
+  const response = await fetchImpl('https://accounts.spotify.com/api/token', {
+    signal: requestSignal(signal),
     method: 'POST',
     headers: {
       'Authorization': `Basic ${authString}`,
@@ -32,15 +38,17 @@ export async function getSpotifyToken() {
   return data.access_token
 }
 
-export async function searchSpotifyEpisode(episodeDate) {
-  const token = await getSpotifyToken()
+export async function searchSpotifyEpisode(episodeDate, { signal, fetchImpl = fetch, throwOnError = false } = {}) {
+  const token = await getSpotifyToken({ signal, fetchImpl })
   const showId = process.env.SPOTIFY_SHOW_ID
   
-  const response = await fetch(`https://api.spotify.com/v1/shows/${showId}/episodes?limit=50`, {
+  const response = await fetchImpl(`https://api.spotify.com/v1/shows/${showId}/episodes?limit=50`, {
+    signal: requestSignal(signal),
     headers: { 'Authorization': `Bearer ${token}` }
   })
   
   if (!response.ok) {
+    if (throwOnError) throw new Error(`Spotify request failed: ${response.status}`)
     return null
   }
   
@@ -53,16 +61,21 @@ export async function searchSpotifyEpisode(episodeDate) {
 export async function searchAppleEpisode(episodeDate, {
   itemGuid,
   podcastId = process.env.APPLE_PODCAST_ID,
-  fetchImpl = fetch
+  fetchImpl = fetch,
+  signal,
+  throwOnError = false
 } = {}) {
   if (!/^\d+$/.test(String(podcastId || ''))) return null
 
   try {
     const response = await fetchImpl(
       `https://itunes.apple.com/lookup?id=${podcastId}&entity=podcastEpisode&limit=200`,
-      { signal: AbortSignal.timeout(5000) }
+      { signal: requestSignal(signal) }
     )
-    if (!response.ok) return null
+    if (!response.ok) {
+      if (throwOnError) throw new Error(`Apple request failed: ${response.status}`)
+      return null
+    }
     const data = await response.json()
     if (!Array.isArray(data?.results)) return null
 
@@ -81,17 +94,21 @@ export async function searchAppleEpisode(episodeDate, {
     return isAppleEpisodeUrl(url) && new URL(url).pathname.endsWith(`/id${podcastId}`)
       ? url
       : null
-  } catch {
+  } catch (error) {
+    if (throwOnError) throw error
     return null
   }
 }
 
-export async function searchDeezerEpisode(episodeDate) {
+export async function searchDeezerEpisode(episodeDate, { signal, fetchImpl = fetch, throwOnError = false } = {}) {
   const showId = process.env.DEEZER_SHOW_ID
   
-  const response = await fetch(`https://api.deezer.com/podcast/${showId}/episodes?limit=50`)
+  const response = await fetchImpl(`https://api.deezer.com/podcast/${showId}/episodes?limit=50`, {
+    signal: requestSignal(signal)
+  })
   
   if (!response.ok) {
+    if (throwOnError) throw new Error(`Deezer request failed: ${response.status}`)
     return null
   }
   
@@ -147,7 +164,9 @@ export async function searchYouTubeEpisodeMedia(season, episode, {
   apiKey = process.env.YOUTUBE_API_KEY,
   uploadsPlaylistId = process.env.YOUTUBE_UPLOADS_PLAYLIST_ID,
   fetchImpl = fetch,
-  maxPages = 20
+  maxPages = 20,
+  signal,
+  throwOnError = false
 } = {}) {
   if (!apiKey || !uploadsPlaylistId) return null
   if (!Number.isInteger(season) || season < 1 || !Number.isInteger(episode) || episode < 0) {
@@ -167,16 +186,21 @@ export async function searchYouTubeEpisodeMedia(season, episode, {
 
     let response
     try {
-      response = await fetchImpl(url, { signal: AbortSignal.timeout(5000) })
-    } catch {
+      response = await fetchImpl(url, { signal: requestSignal(signal) })
+    } catch (error) {
+      if (throwOnError) throw error
       return null
     }
-    if (!response.ok) return null
+    if (!response.ok) {
+      if (throwOnError) throw new Error(`YouTube request failed: ${response.status}`)
+      return null
+    }
 
     let data
     try {
       data = await response.json()
-    } catch {
+    } catch (error) {
+      if (throwOnError) throw error
       return null
     }
 

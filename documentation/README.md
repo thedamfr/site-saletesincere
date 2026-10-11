@@ -10,7 +10,21 @@ tags: [documentation, navigation, adr, security, tdd]
 
 # Architecture Decision Records (ADRs)
 
+## Summary
+
 Documentation technique et décisions architecturales du projet Saleté Sincère.
+Les choix de résilience figurent dans l’ADR 0024 ; les résultats de qualification
+restent rattachés à leur candidat exact, séparément de la livraison en production.
+
+## Synthèse
+
+Consulter le guide d’hébergement pour la cible OVH et les ADR pour les décisions
+durables. La [qualification de l’issue 56](qualification-issue-56.md) décrit le
+banc, les Golden Journeys et leurs preuves ; le [guide newsletter](newsletter-recovery.md)
+précise les états persistants, l’incertitude et les précautions de retour arrière.
+Les documents historiques ne prouvent pas l’état de la production actuelle.
+
+## Annexes
 
 ## 📋 ADRs Essentiels
 

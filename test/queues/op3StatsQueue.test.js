@@ -10,6 +10,8 @@ function createBoss() {
     calls,
     get handler() { return handler },
     async createQueue(...args) { calls.push(['createQueue', ...args]) },
+    async updateQueue() {},
+    getDb: () => ({ executeSql: async () => ({ rows: [] }) }),
     async work(...args) {
       handler = args.at(-1)
       calls.push(['work', ...args.slice(0, -1)])
@@ -45,7 +47,9 @@ describe('registerOp3StatsQueue', () => {
     })
 
     assert.deepEqual(result, { status: 'ready' })
-    assert.deepEqual(boss.calls[0], ['createQueue', 'op3-stats-refresh'])
+    assert.equal(boss.calls[0][0], 'createQueue')
+    assert.equal(boss.calls[0][1], 'op3-stats-refresh')
+    assert.equal(boss.calls[0][2].expireInSeconds, 60)
     assert.deepEqual(boss.calls[1], ['work', 'op3-stats-refresh', { teamSize: 1 }])
     assert.equal(boss.calls[2][0], 'schedule')
     assert.equal(boss.calls[2][1], 'op3-stats-refresh')
@@ -54,13 +58,15 @@ describe('registerOp3StatsQueue', () => {
       key: 'daily-v1',
       tz: 'Europe/Paris',
       singletonKey: 'daily-v1',
-      singletonSeconds: 86400
+      singletonSeconds: 60,
+      expireInSeconds: 60, retryLimit: 3, retryDelay: 5, retryBackoff: false
     })
     assert.deepEqual(boss.calls[3], [
       'send',
       'op3-stats-refresh',
       {},
-      { singletonKey: 'daily-v1', singletonSeconds: 86400 }
+      { singletonKey: 'daily-v1', singletonSeconds: 60,
+        expireInSeconds: 60, retryLimit: 3, retryDelay: 5, retryBackoff: false }
     ])
   })
 
@@ -80,9 +86,7 @@ describe('registerOp3StatsQueue', () => {
         return { status: 'skipped', reason: 'database_not_writable' }
       }
     })
-    const result = await boss.handler([{ id: 'job-id', data: {} }])
-
-    assert.deepEqual(result, { status: 'skipped', reason: 'database_not_writable' })
+    await assert.rejects(boss.handler([{ id: 'job-id', data: {} }]), /not writable/)
     assert.equal(received[0].pool, pool)
     assert.equal(received[0].databaseState, DatabaseState.READ_ONLY)
     assert.equal(received[0].token, 'test-token')

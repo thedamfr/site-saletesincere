@@ -41,6 +41,140 @@ function createCandidate() {
 }
 
 describe('episodeWorkerManager', () => {
+  test('retries after a runtime failure while the ready hook is still draining', async () => {
+    const timers = createFakeTimers()
+    const first = createCandidate()
+    const second = createCandidate()
+    let finishReady
+    let starts = 0
+    const readyGate = new Promise(resolve => { finishReady = resolve })
+    const manager = createEpisodeWorkerManager({
+      start: async () => ++starts === 1 ? first : second,
+      stop: instance => instance.stop(),
+      onReady: instance => instance === first ? readyGate : undefined,
+      retryDelays: [5], jitterRatio: 0,
+      setTimeoutFn: timers.setTimeoutFn, clearTimeoutFn: timers.clearTimeoutFn
+    })
+    const starting = manager.ensureStarted()
+    await new Promise(resolve => setImmediate(resolve))
+    first.emit('error', Object.assign(new Error('offline during drain'), { code: 'ECONNRESET' }))
+    const retry = timers.runNext()
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(starts, 1, 'The ready hook remains part of the single startup')
+
+    finishReady()
+    await Promise.all([starting, retry])
+
+    assert.equal(starts, 2, 'The elapsed retry must not be consumed by the old startup')
+    assert.equal(first.stopCalls, 1)
+    assert.equal(manager.getInstance(), second)
+    assert.equal(manager.getStatus().state, EpisodeWorkerState.READY)
+    await manager.stop()
+    assert.equal(second.stopCalls, 1)
+  })
+
+  test('does not restart after shutdown while a retry awaits the ready hook', async () => {
+    const timers = createFakeTimers()
+    const candidate = createCandidate()
+    let finishReady
+    let starts = 0
+    const readyGate = new Promise(resolve => { finishReady = resolve })
+    const manager = createEpisodeWorkerManager({
+      start: async () => { starts += 1; return candidate },
+      stop: instance => instance.stop(),
+      onReady: () => readyGate,
+      retryDelays: [5], jitterRatio: 0,
+      setTimeoutFn: timers.setTimeoutFn, clearTimeoutFn: timers.clearTimeoutFn
+    })
+    const starting = manager.ensureStarted()
+    await new Promise(resolve => setImmediate(resolve))
+    candidate.emit('error', Object.assign(new Error('offline during drain'), { code: 'ECONNRESET' }))
+    const retry = timers.runNext()
+    const closing = manager.stop()
+    finishReady()
+    await Promise.all([starting, retry, closing])
+
+    assert.equal(starts, 1)
+    assert.equal(candidate.stopCalls, 1)
+    assert.equal(manager.getInstance(), null)
+    assert.equal(manager.getStatus().state, EpisodeWorkerState.STOPPED)
+    assert.equal(timers.scheduled.filter(timer => !timer.cleared && !timer.executed).length, 0)
+  })
+
+  test('keeps the retiring instance until stop succeeds instead of overlapping workers', async () => {
+    const timers = createFakeTimers()
+    const candidate = createCandidate()
+    let starts = 0
+    let stops = 0
+    const manager = createEpisodeWorkerManager({
+      start: async () => { starts += 1; return candidate },
+      stop: async () => { if (++stops < 3) throw new Error('stop unavailable') },
+      retryDelays: [5], jitterRatio: 0,
+      setTimeoutFn: timers.setTimeoutFn, clearTimeoutFn: timers.clearTimeoutFn
+    })
+    await manager.ensureStarted()
+    candidate.emit('error', Object.assign(new Error('offline'), { code: 'ECONNRESET' }))
+    await new Promise(resolve => setImmediate(resolve))
+    await timers.runNext()
+    assert.equal(starts, 1)
+    await timers.runNext()
+    assert.equal(starts, 2)
+    await manager.stop()
+  })
+
+  test('rejects shutdown after its budget when startup never settles', async () => {
+    const manager = createEpisodeWorkerManager({
+      start: () => new Promise(() => {}), stop: async () => {}, shutdownTimeoutMs: 10
+    })
+    void manager.ensureStarted()
+    await new Promise(resolve => setImmediate(resolve))
+    await assert.rejects(manager.stop(), error => error.code === 'WORKER_SHUTDOWN_TIMEOUT')
+    assert.equal(manager.getStatus().state, EpisodeWorkerState.STOPPING)
+  })
+
+  test('does not start a replacement until the failed instance has stopped', async () => {
+    const timers = createFakeTimers()
+    const first = createCandidate()
+    const second = createCandidate()
+    let finishStop
+    let starts = 0
+    const stopped = new Promise(resolve => { finishStop = resolve })
+    const manager = createEpisodeWorkerManager({
+      start: async () => ++starts === 1 ? first : second,
+      stop: async instance => { if (instance === first) await stopped },
+      retryDelays: [5], jitterRatio: 0,
+      setTimeoutFn: timers.setTimeoutFn, clearTimeoutFn: timers.clearTimeoutFn
+    })
+    await manager.ensureStarted()
+    first.emit('error', Object.assign(new Error('offline'), { code: 'ECONNRESET' }))
+    const retry = timers.runNext()
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(starts, 1)
+    finishStop()
+    await retry
+    assert.equal(starts, 2)
+    await manager.stop()
+  })
+
+  test('waits for a starting candidate to be cleaned before completing shutdown', async () => {
+    const candidate = createCandidate()
+    let finishStart
+    const manager = createEpisodeWorkerManager({
+      start: () => new Promise(resolve => { finishStart = resolve }),
+      stop: instance => instance.stop()
+    })
+    const starting = manager.ensureStarted()
+    await new Promise(resolve => setImmediate(resolve))
+    let stopped = false
+    const closing = manager.stop().then(() => { stopped = true })
+    await new Promise(resolve => setImmediate(resolve))
+    assert.equal(stopped, false)
+    finishStart(candidate)
+    await Promise.all([starting, closing])
+    assert.equal(candidate.stopCalls, 1)
+    assert.equal(manager.getStatus().state, EpisodeWorkerState.STOPPED)
+  })
+
   test('shares a single startup promise across concurrent calls', async () => {
     const candidate = createCandidate()
     let resolveStart

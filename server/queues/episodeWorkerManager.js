@@ -33,7 +33,8 @@ export function createEpisodeWorkerManager({
   random = Math.random,
   now = Date.now,
   setTimeoutFn = setTimeout,
-  clearTimeoutFn = clearTimeout
+  clearTimeoutFn = clearTimeout,
+  shutdownTimeoutMs = 12_000
 }) {
   if (typeof start !== 'function' || typeof stop !== 'function') {
     throw new TypeError('Episode worker manager requires start and stop functions')
@@ -48,6 +49,9 @@ export function createEpisodeWorkerManager({
   let nextRetryAt = null
   let shuttingDown = false
   let runtimeErrorHandler = null
+  let stoppingPromise = null
+  let shutdownPromise = null
+  let retiringInstance = null
   const statusListeners = new Set()
 
   const normalizedDelays = retryDelays.length > 0 ? retryDelays : DEFAULT_RETRY_DELAYS
@@ -92,7 +96,7 @@ export function createEpisodeWorkerManager({
     runtimeErrorHandler = null
   }
 
-  async function stopInstance(target) {
+  async function stopInstance(target, options = { graceful: false }) {
     if (!target) return
 
     detachRuntimeError(target)
@@ -108,9 +112,10 @@ export function createEpisodeWorkerManager({
     }
 
     try {
-      await stop(target)
+      await stop(target, options)
     } catch (error) {
       stopErrorHandler(error)
+      throw error
     } finally {
       if (typeof target.off === 'function') {
         target.off('error', stopErrorHandler)
@@ -129,9 +134,12 @@ export function createEpisodeWorkerManager({
     nextRetryAt = new Date(now() + delay).toISOString()
     setWorkerState(EpisodeWorkerState.RETRY_SCHEDULED, 'retry_scheduled')
 
-    retryTimer = setTimeoutFn(() => {
+    retryTimer = setTimeoutFn(async () => {
       retryTimer = null
       nextRetryAt = null
+      // A runtime failure can happen while onReady still drains intentions.
+      // Let that startup release its single-flight guard before retrying.
+      if (startPromise) await startPromise
       return ensureStarted()
     }, delay)
 
@@ -158,7 +166,11 @@ export function createEpisodeWorkerManager({
       errorCode: error?.code || error?.name || 'UNKNOWN'
     })
 
-    void stopInstance(target)
+    retiringInstance = target
+    stoppingPromise = stopInstance(target)
+      .then(() => { retiringInstance = null })
+      .catch(() => { /* Retain the instance so the next attempt retries cleanup. */ })
+      .finally(() => { stoppingPromise = null })
     scheduleRetry(error)
   }
 
@@ -182,6 +194,13 @@ export function createEpisodeWorkerManager({
 
     const promise = Promise.resolve().then(async () => {
       try {
+        // An old worker must release its jobs/connections before replacement.
+        if (stoppingPromise) await stoppingPromise
+        if (retiringInstance) {
+          await stopInstance(retiringInstance)
+          retiringInstance = null
+        }
+        if (shuttingDown) return null
         const candidate = await start()
 
         if (!candidate) {
@@ -240,9 +259,8 @@ export function createEpisodeWorkerManager({
     return promise
   }
 
-  async function shutdown() {
-    if (shuttingDown && state === EpisodeWorkerState.STOPPED) return
-
+  function shutdown() {
+    if (shutdownPromise) return shutdownPromise
     shuttingDown = true
     setWorkerState(EpisodeWorkerState.STOPPING, 'shutdown')
 
@@ -254,10 +272,27 @@ export function createEpisodeWorkerManager({
 
     const activeInstance = instance
     instance = null
-    await stopInstance(activeInstance)
-
-    setWorkerState(EpisodeWorkerState.STOPPED, 'shutdown_complete')
-    logEvent(logger, 'info', 'episode_worker_stopped')
+    const cleanup = (async () => {
+      if (stoppingPromise) await stoppingPromise
+      if (retiringInstance) {
+        await stopInstance(retiringInstance)
+        retiringInstance = null
+      }
+      await stopInstance(activeInstance, { graceful: true })
+      // A bounded PostgreSQL connection attempt may finish during shutdown.
+      // ensureStarted owns cleanup of that unpublished candidate.
+      if (startPromise) await startPromise
+      setWorkerState(EpisodeWorkerState.STOPPED, 'shutdown_complete')
+      logEvent(logger, 'info', 'episode_worker_stopped')
+    })()
+    let deadline
+    const timeout = new Promise((_resolve, reject) => {
+      deadline = setTimeout(() => reject(Object.assign(
+        new Error('Worker shutdown exceeded its budget'), { code: 'WORKER_SHUTDOWN_TIMEOUT' }
+      )), shutdownTimeoutMs)
+    })
+    shutdownPromise = Promise.race([cleanup, timeout]).finally(() => clearTimeout(deadline))
+    return shutdownPromise
   }
 
   return {

@@ -122,8 +122,9 @@ describe('degraded startup', () => {
       episodeIntents: { pending: 0 }
     })
 
-    await app.close()
+    const closing = app.close()
     resolveStart(candidate)
+    await closing
     await new Promise((resolve) => setImmediate(resolve))
     assert.equal(candidate.stopCalls, 1)
   })
