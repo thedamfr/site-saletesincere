@@ -7,7 +7,7 @@ export function createBrevoClient({
   fetchFn = fetch
 } = {}) {
   function checkConfig() {
-    return { valid: Boolean(apiKey) && Number.isSafeInteger(listId) && listId > 0 }
+    return { valid: Boolean(apiKey) && Number.isSafeInteger(listId) && listId > 0 && Number.isSafeInteger(finalListId) && finalListId > 0 }
   }
 
   async function call(endpoint, { method = 'GET', body, signal } = {}) {
@@ -47,7 +47,8 @@ export function createBrevoClient({
     if (result.unavailable) return { kind: 'uncertain', code: result.code }
     if (result.status === 400 && result.data?.code === 'duplicate_parameter') return { kind: 'duplicate', code: 'contact_exists' }
     if (result.status === 429) return { kind: 'deferred', code: 'remote_rate_limited' }
-    if ([400, 401, 403, 404, 422].includes(result.status)) return { kind: 'rejected', code: `remote_${result.status}` }
+    if ([401, 403, 404].includes(result.status)) return { kind: 'deferred', code: `remote_${result.status}` }
+    if ([400, 422].includes(result.status)) return { kind: 'rejected', code: `remote_${result.status}` }
     return { kind: 'uncertain', code: 'remote_result_unknown' }
   }
 

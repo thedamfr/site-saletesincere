@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import { execFileSync } from 'node:child_process';
-import { namespace, imageRepository, environments, assertCurrentRelease, assertCapacity, selectCandidate, validateRelease } from './policy.mjs';
+import { namespace, imageRepository, environments, assertCurrentRelease, assertCapacity, selectCandidate, validateRelease, rolloutReady } from './policy.mjs';
 import { github } from './github.mjs';
 import { smoke } from './smoke.mjs';
 import { notifyDeliveries } from './notify.mjs';
@@ -72,11 +72,7 @@ async function reconcile(environment) {
     while (Date.now() < deadline) {
       deployment = get('deployment', target.deployment);
       const pods = get('pods', '-l=' + Object.entries(deployment.spec.selector.matchLabels).map(([key, value]) => `${key}=${value}`).join(',')).items;
-      const ready = deployment.status.observedGeneration >= deployment.metadata.generation
-        && deployment.status.updatedReplicas === deployment.spec.replicas
-        && deployment.status.readyReplicas === deployment.spec.replicas
-        && deployment.status.replicas === deployment.spec.replicas
-        && pods.filter(pod => !pod.metadata.deletionTimestamp).every(pod => pod.status.containerStatuses?.some(container => container.name === 'web' && container.ready && container.imageID?.endsWith(release.digest)));
+      const ready = rolloutReady(deployment, pods, release.digest);
       if (ready) {
         try { await smoke(target.url, release.cssHash, release); lastError = null; break; }
         catch (error) { lastError = error; }

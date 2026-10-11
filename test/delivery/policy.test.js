@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fingerprint, validateRelease, assertCapacity, assertCurrentRelease, selectCandidate } from '../../scripts/delivery/policy.mjs';
+import { fingerprint, validateRelease, assertCapacity, assertCurrentRelease, selectCandidate, rolloutReady } from '../../scripts/delivery/policy.mjs';
 
 const sha = 'a'.repeat(40);
 const release = { environment: 'production', assessedCommit: sha, imageCommit: sha,
@@ -49,4 +49,87 @@ test('a newer failed or running staging request supersedes an older successful r
 
 test("author Markdown changes require a new application artifact", () => {
   assert.notEqual(fingerprint(["100644 blob old\tcontent/damien-cavailles.md"]), fingerprint(["100644 blob new\tcontent/damien-cavailles.md"]));
+});
+
+
+function rolloutFixture() {
+  return {
+    deployment: { metadata: { generation: 9 }, spec: { replicas: 1 }, status: {
+      observedGeneration: 9, updatedReplicas: 1, readyReplicas: 1, availableReplicas: 1, replicas: 1
+    } },
+    pod: { metadata: { name: 'current' }, status: { phase: 'Running', containerStatuses: [
+      { name: 'web', ready: true, imageID: `ghcr.io/thedamfr/site-saletesincere@${release.digest}` }
+    ] } }
+  };
+}
+
+test('rollout accepts the available deployment with its ready pod at the expected digest', () => {
+  const { deployment, pod } = rolloutFixture();
+  assert.equal(rolloutReady(deployment, [pod], release.digest), true);
+});
+
+for (const phase of ['Succeeded', 'Failed']) {
+  test(`rollout ignores a retained ${phase} pod without a deletion timestamp`, () => {
+    const { deployment, pod } = rolloutFixture();
+    const terminal = { metadata: { name: 'previous' }, status: { phase, containerStatuses: [
+      { name: 'web', ready: false, imageID: `ghcr.io/thedamfr/site-saletesincere@sha256:${'e'.repeat(64)}` }
+    ] } };
+    assert.equal(rolloutReady(deployment, [terminal, pod], release.digest), true);
+  });
+}
+
+test('rollout continues excluding a deleting pod while checking the active replacement', () => {
+  const { deployment, pod } = rolloutFixture();
+  const deleting = { metadata: { name: 'draining', deletionTimestamp: '2026-10-11T14:00:00Z' },
+    status: { phase: 'Running', containerStatuses: [{ name: 'web', ready: false }] } };
+  assert.equal(rolloutReady(deployment, [deleting, pod], release.digest), true);
+});
+
+for (const phase of ['Pending', 'Unknown']) {
+  test(`rollout refuses an active ${phase} pod even with a stale ready container status`, () => {
+    const { deployment, pod } = rolloutFixture();
+    pod.status.phase = phase;
+    assert.equal(rolloutReady(deployment, [pod], release.digest), false);
+  });
+}
+
+test('rollout refuses an unready web container', () => {
+  const { deployment, pod } = rolloutFixture();
+  pod.status.containerStatuses[0].ready = false;
+  assert.equal(rolloutReady(deployment, [pod], release.digest), false);
+});
+
+test('rollout refuses a missing container status or only a ready sidecar', () => {
+  const { deployment, pod } = rolloutFixture();
+  delete pod.status.containerStatuses;
+  assert.equal(rolloutReady(deployment, [pod], release.digest), false);
+  pod.status.containerStatuses = [{ name: 'sidecar', ready: true, imageID: release.digest }];
+  assert.equal(rolloutReady(deployment, [pod], release.digest), false);
+});
+
+test('rollout refuses a ready pod running another digest', () => {
+  const { deployment, pod } = rolloutFixture();
+  pod.status.containerStatuses[0].imageID = `ghcr.io/thedamfr/site-saletesincere@sha256:${'f'.repeat(64)}`;
+  assert.equal(rolloutReady(deployment, [pod], release.digest), false);
+});
+
+test('rollout requires an exact nonempty active pod count', () => {
+  const { deployment, pod } = rolloutFixture();
+  assert.equal(rolloutReady(deployment, [], release.digest), false);
+  assert.equal(rolloutReady(deployment, [pod, { ...pod, metadata: { name: 'extra' } }], release.digest), false);
+  deployment.spec.replicas = 0;
+  Object.assign(deployment.status, { updatedReplicas: 0, readyReplicas: 0, availableReplicas: 0, replicas: 0 });
+  assert.equal(rolloutReady(deployment, [], release.digest), false);
+});
+
+test('rollout refuses stale deployment generation and incomplete replica counters', () => {
+  const { deployment, pod } = rolloutFixture();
+  deployment.status.observedGeneration = 8;
+  assert.equal(rolloutReady(deployment, [pod], release.digest), false);
+  deployment.status.observedGeneration = 9;
+  for (const key of ['updatedReplicas', 'readyReplicas', 'availableReplicas', 'replicas']) {
+    deployment.status[key] = 0;
+    assert.equal(rolloutReady(deployment, [pod], release.digest), false, key);
+    deployment.status[key] = 1;
+  }
 });

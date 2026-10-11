@@ -2,12 +2,13 @@
 
 ## Summary
 
-Candidat qualifié sur VM dédiée : **19 scénarios validés, puis navigation finale
+Campagne initiale sur VM dédiée : **19 scénarios validés, puis navigation finale
 requalifiée séparément** après correction d’un sélecteur du banc. Shutdown,
 SIGKILL et trois coupures brutales QEMU sont vérifiés. Données et droits sont
 conservés ; reprise métier maximale : 93 secondes. La newsletter incertaine
-reste identifiée sans renvoi aveugle. Candidat prêt à relire dans un checkout
-isolé ; publication, migration et déploiement de production restent distincts.
+reste identifiée sans renvoi aveugle. La revue de livraison ajoute des corrections
+ciblées SQL/Brevo et du contrôleur CD, avec une requalification distincte
+décrite en annexe ; les preuves de la VM conservent leur digest initial.
 
 ## Synthèse
 
@@ -312,3 +313,44 @@ d’hébergement, appliquer la migration additive avant le nouveau handler et
 qualifier le digest effectivement déployé. Préserver les journaux lors d’un
 retour arrière et empêcher le retour de l’ancien envoi aveugle. Les anciennes
 limites de jobs sont actualisées sans effacer leurs identifiants ni compteurs.
+
+
+### Complément de revue avant livraison — 11 octobre 2026
+
+La première publication du candidat `c1327170153e3507755c587a38f0179a0b3fcccf`
+a réussi les suites CI et la recette staging. La revue a ensuite confirmé trois
+cas absents de cette première qualification. Le candidat suivant les corrige :
+
+- Une erreur de connexion inactive du pool doit déclencher le retry du manager,
+  même si sa connexion pg-boss reste saine. Une ligne réutilise le gestionnaire
+  d’erreurs existant. RED : deux échecs ciblés ; GREEN : 19 tests pool/manager/RSS,
+  avec reprise sans requête HTTP, singleton et arrêt pendant retry.
+- Une configuration newsletter exige aussi une liste finale valide, pour éviter
+  de réinscrire un contact déjà confirmé. Les mutations refusées en 401/403/404
+  restent `ready` et reprennent après réparation ; 400/422 et l’incertitude des
+  5xx restent inchangés. RED : 12 échecs ; GREEN : 35 tests client/service/routes.
+- Sur PostgreSQL 17.6 jetable, 11 tests réussissent : chaque refus explicite est
+  conservé, puis une nouvelle instance reprend ; trois tentatives produisent
+  un seul effet confirmé, sans répétition lors d’une nouvelle soumission.
+
+Le staging a également révélé un défaut du contrôle CD : un ancien pod terminal,
+absent des endpoints, restait compté parmi les pods devant être prêts. Le calcul
+corrigé exige exactement le nombre de pods actifs attendu, tous Running/Ready
+avec le digest demandé, et conserve les contrôles du Deployment. Régression
+RED puis 20 tests de politique verts ; suite delivery complète : 37 tests verts.
+Suivi : [issue 60](https://github.com/thedamfr/site-saletesincere/issues/60).
+
+Les scénarios de coupure de cette page restent attachés à l’image initiale.
+Ils ne sont pas présentés comme une nouvelle campagne intégrale du correctif.
+Les chemins modifiés sont requalifiés par les tests ciblés ci-dessus, la suite
+npm complète, la nouvelle image CI et les Golden Journeys staging. Les SHA,
+digests, exécutions CI, installation du contrôleur et contrôles de production
+sont rattachés à la [PR 57](https://github.com/thedamfr/site-saletesincere/pull/57).
+Les logs RED/GREEN sont conservés dans le dossier privé de livraison.
+
+Non-régression locale après corrections : `npm test` réussit 318 tests, avec
+15 ignorés et aucun échec ; build, trois Golden Journeys `test:e2e` et quatre
+tests photography réussissent. Le premier lancement photography utilisait
+un binaire sans sandbox utilisable sur cet hôte ; son échec est conservé.
+Le rejeu définit `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` vers Chromium autorisé
+et garde `chromiumSandbox: true`. Aucun code applicatif n’a changé entre eux.

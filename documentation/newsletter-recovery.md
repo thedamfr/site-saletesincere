@@ -57,8 +57,11 @@ Journeys ajoutent l’arrêt réel du processus et le compteur externe d’effet
 | `uncertain` | Effet externe possible, preuve insuffisante | Lectures uniquement ; un résultat absent reste incertain |
 | `rejected` | Refus explicite ou contact bloqué | Restituer un refus sans divulguer le motif privé |
 
-Une erreur 429 ou un refus explicite de création pour contact existant démontre
-l’absence d’effet de cette tentative et permet un retour à `ready`. Une erreur
+Une erreur 429, un refus de mutation 401/403/404 lié aux droits ou à la
+configuration, ou un refus explicite de création pour contact existant démontre
+l’absence d’effet de cette tentative et permet un retour à `ready`. Les erreurs
+400/422 propres à la demande restent terminales. Les identifiants des listes
+temporaire et finale doivent être des entiers positifs sûrs avant tout appel. Une erreur
 5xx, une réponse inexploitable ou une rupture réseau reste incertaine. L’ajout à
 une liste n’est confirmé que si la réponse identifie l’adresse dans les succès,
 sans l’identifier dans les échecs, ou si une lecture confirme la liste.

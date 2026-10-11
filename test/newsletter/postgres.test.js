@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
 import pg from 'pg'
+import { createBrevoClient } from '../../server/newsletter/brevoClient.js'
 import { createNewsletterRepository } from '../../server/newsletter/newsletterRepository.js'
 import { createNewsletterService } from '../../server/newsletter/newsletterService.js'
 
@@ -107,4 +108,48 @@ test('newsletter journal on isolated PostgreSQL', { skip: !optionsFile }, async 
     assert.equal((await repository.get(row.id)).state, 'submitted')
     assert.equal(mutations, 0)
   })
+
+  for (const status of [401, 403, 404]) {
+    await t.test(`HTTP ${status} preserves refused attempts and resumes after repair with a new service`, async () => {
+      const listId = status + 100
+      const email = `http-${status}@example.test`
+      let mutations = 0
+      let effects = 0
+      const brevo = createBrevoClient({ apiKey: 'qualification-only', listId, finalListId: listId + 1000,
+        fetchFn: async (_url, { method }) => {
+          if (method === 'GET') return new Response('{}', { status: 404 })
+          mutations++
+          if (mutations <= 2) return new Response('{}', { status })
+          effects++
+          return Response.json({ id: 1 }, { status: 201 })
+        } })
+      const first = createNewsletterService({ database, brevo })
+      const result = await first.subscribe(email)
+      assert.equal(result.state, 'ready')
+      assert.equal((await repository.get(result.requestId)).last_error_code, `remote_${status}`)
+      await first.stop()
+      const makeDue = () => database.query('UPDATE newsletter_requests SET next_attempt_at = clock_timestamp() WHERE id = $1', [result.requestId])
+      await makeDue()
+      const second = createNewsletterService({ database, brevo })
+      await second.recover()
+      assert.equal((await repository.get(result.requestId)).state, 'ready')
+      const rejectedAttempts = await database.query('SELECT id FROM newsletter_attempts WHERE request_id = $1 ORDER BY attempted_at', [result.requestId])
+      assert.equal(rejectedAttempts.rows.length, 2)
+      assert.equal(effects, 0)
+      await second.stop()
+      await makeDue()
+      const repaired = createNewsletterService({ database, brevo })
+      await repaired.recover()
+      assert.equal((await repository.get(result.requestId)).state, 'submitted')
+      assert.equal((await repaired.subscribe(email.toUpperCase())).state, 'submitted')
+      await repaired.recover()
+      const attempts = await database.query('SELECT id FROM newsletter_attempts WHERE request_id = $1 ORDER BY attempted_at', [result.requestId])
+      assert.equal(attempts.rows.length, 3)
+      assert.deepEqual(attempts.rows.slice(0, 2), rejectedAttempts.rows)
+      assert.equal(mutations, 3)
+      assert.equal(effects, 1)
+      await repaired.stop()
+    })
+  }
+
 })

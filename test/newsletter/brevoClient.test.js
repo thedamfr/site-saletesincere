@@ -29,7 +29,7 @@ test('a transient server error and unreadable success remain uncertain', async (
 
 test('a deadline aborts the remote call without exposing its error details', async () => {
   const controller = new AbortController()
-  const client = createBrevoClient({ listId: 3, apiKey: 'qualification-only', fetchFn: async (_url, { signal }) => {
+  const client = createBrevoClient({ listId: 3, finalListId: 4, apiKey: 'qualification-only', fetchFn: async (_url, { signal }) => {
     assert.equal(signal, controller.signal)
     controller.abort()
     throw new Error('private details and contact address')
@@ -40,5 +40,37 @@ test('a deadline aborts the remote call without exposing its error details', asy
 test('only explicit mutation rejections allow another attempt', async () => {
   assert.deepEqual(await clientReturning({ code: 'duplicate_parameter' }, 400).create('reader@example.test'), { kind: 'duplicate', code: 'contact_exists' })
   assert.deepEqual(await clientReturning({}, 429).create('reader@example.test'), { kind: 'deferred', code: 'remote_rate_limited' })
-  assert.deepEqual(await clientReturning({}, 403).create('reader@example.test'), { kind: 'rejected', code: 'remote_403' })
+  assert.deepEqual(await clientReturning({}, 403).create('reader@example.test'), { kind: 'deferred', code: 'remote_403' })
+})
+
+
+test('an unusable final list disables subscriptions before every remote call', async () => {
+  for (const finalListId of [NaN, 0, -1, 1.5, Number.MAX_SAFE_INTEGER + 1]) {
+    let calls = 0
+    const client = createBrevoClient({ apiKey: 'qualification-only', listId: 3, finalListId,
+      fetchFn: async () => { calls++; return new Response('{}', { status: 201 }) } })
+    assert.equal(client.checkConfig().valid, false)
+    assert.deepEqual(await client.lookup('reader@example.test'), { kind: 'unavailable', code: 'configuration_unavailable' })
+    await client.create('reader@example.test')
+    await client.addToList('reader@example.test')
+    assert.equal(calls, 0)
+  }
+})
+
+for (const status of [401, 403, 404]) {
+  test(`mutation HTTP ${status} defers both create and list addition`, async () => {
+    const client = clientReturning({}, status)
+    for (const operation of ['create', 'addToList']) {
+      assert.deepEqual(await client[operation]('reader@example.test'), { kind: 'deferred', code: `remote_${status}` })
+    }
+  })
+}
+
+test('contact-specific 400 and 422 refusals remain terminal', async () => {
+  for (const status of [400, 422]) {
+    const client = clientReturning({}, status)
+    for (const operation of ['create', 'addToList']) {
+      assert.deepEqual(await client[operation]('reader@example.test'), { kind: 'rejected', code: `remote_${status}` })
+    }
+  }
 })

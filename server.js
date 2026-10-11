@@ -357,7 +357,7 @@ app.decorate('episodeIntentBuffer', episodeIntentBuffer);
 // record the dependency failure instead of allowing an unhandled EventEmitter error.
 if (typeof database?.pool?.on === 'function') {
   const onPoolError = (error) => {
-    databaseAvailability.recordError(error, 'idle_connection_error');
+    reportDatabaseError(error, 'idle_connection_error');
     app.log.warn({ event: 'database_pool_error', errorCode: error?.code || 'UNKNOWN' }, 'database_pool_error');
   };
   database.pool.on('error', onPoolError);

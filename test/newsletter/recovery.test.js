@@ -1,12 +1,15 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { createBrevoClient } from '../../server/newsletter/brevoClient.js'
 import { createNewsletterService } from '../../server/newsletter/newsletterService.js'
 
 function memoryRepository() {
   const records = new Map()
+  const attempts = []
   let sequence = 0
   return {
     records,
+    attempts,
     async register(email, listId) {
       let row = [...records.values()].find(row => row.email === email && row.list_id === listId)
       if (!row) {
@@ -20,6 +23,7 @@ function memoryRepository() {
       const row = records.get(id)
       if (row.state !== 'ready') return null
       Object.assign(row, { state: 'sending', phase })
+      attempts.push({ requestId: id, phase })
       return { ...row }
     },
     async transition(id, state, code, expectedStates = ['ready', 'sending', 'uncertain']) {
@@ -163,3 +167,59 @@ test('startup recovery is single-flight and shutdown aborts an in-flight lookup'
   assert.equal((await service.subscribe('reader@example.test')).state, 'unavailable')
   assert.equal([...repository.records.values()][0].state, 'ready')
 })
+
+
+test('invalid final-list configuration cannot register or mutate a subscription', async () => {
+  const repository = memoryRepository()
+  let calls = 0
+  const brevo = createBrevoClient({ apiKey: 'qualification-only', listId: 3, finalListId: NaN,
+    fetchFn: async () => { calls++; return new Response('{}', { status: 201 }) } })
+  const service = createNewsletterService({ repository, brevo })
+  assert.equal((await service.subscribe('reader@example.test')).state, 'unavailable')
+  await service.recover()
+  assert.equal(repository.records.size, 0)
+  assert.equal(repository.attempts.length, 0)
+  assert.equal(calls, 0)
+})
+
+for (const status of [401, 403, 404]) {
+  for (const phase of ['create_contact', 'add_to_list']) {
+    test(`HTTP ${status} during ${phase} survives two refused attempts and resumes once after repair`, async () => {
+      const repository = memoryRepository()
+      let mutations = 0
+      let effects = 0
+      const email = 'recovery@example.test'
+      const brevo = createBrevoClient({ apiKey: 'qualification-only', listId: 3, finalListId: 4,
+        fetchFn: async (_url, { method }) => {
+          if (method === 'GET') return phase === 'create_contact'
+            ? new Response('{}', { status: 404 })
+            : Response.json({ listIds: [], emailBlacklisted: false })
+          mutations++
+          if (mutations <= 2) return new Response('{}', { status })
+          effects++
+          return Response.json({ id: 1, contacts: { success: [email], failure: [] } }, { status: 201 })
+        } })
+      const first = createNewsletterService({ repository, brevo })
+      const result = await first.subscribe(email)
+      assert.equal(result.state, 'ready')
+      assert.equal((await repository.get(result.requestId)).last_error_code, `remote_${status}`)
+      await first.stop()
+      const second = createNewsletterService({ repository, brevo })
+      await second.recover()
+      assert.equal((await repository.get(result.requestId)).state, 'ready')
+      assert.equal(repository.attempts.length, 2)
+      assert.equal(effects, 0)
+      await second.stop()
+      const repaired = createNewsletterService({ repository, brevo })
+      await repaired.recover()
+      assert.equal((await repository.get(result.requestId)).state, 'submitted')
+      assert.equal((await repaired.subscribe('RECOVERY@example.test')).state, 'submitted')
+      await repaired.recover()
+      assert.equal(repository.records.size, 1)
+      assert.deepEqual(repository.attempts.map(attempt => attempt.phase), [phase, phase, phase])
+      assert.equal(mutations, 3)
+      assert.equal(effects, 1)
+      await repaired.stop()
+    })
+  }
+}
