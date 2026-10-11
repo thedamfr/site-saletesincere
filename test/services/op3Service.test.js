@@ -245,6 +245,41 @@ function createPool() {
 }
 
 describe('refreshOp3StatsCache', () => {
+  for (const rollbackFails of [false, true]) {
+    test(`discards a failed transaction client when rollback ${rollbackFails ? 'also fails' : 'succeeds'}`, async () => {
+      const { fetchImpl } = createFetchMock()
+      const failure = Object.assign(new Error('Query read timeout'), { code: 'ETIMEDOUT' })
+      const rollbackFailure = new Error('Rollback could not reach PostgreSQL')
+      const queries = []
+      const releases = []
+      let connections = 0
+      const pool = { connect: async () => {
+        const isFailedClient = ++connections === 1
+        return {
+          query: async sql => {
+            queries.push(sql)
+            if (isFailedClient && sql.includes('INSERT INTO op3_stats')) throw failure
+            if (isFailedClient && rollbackFails && sql === 'ROLLBACK') throw rollbackFailure
+            return { rows: [], rowCount: 1 }
+          },
+          release: error => releases.push(error)
+        }
+      } }
+      const options = { pool, databaseState: DatabaseState.READ_WRITE,
+        fetchImpl, token: 'test-token', podcastGuid: 'podcast-guid', now: NOW }
+
+      await assert.rejects(refreshOp3StatsCache(options), error => error === failure)
+      assert.equal(queries.at(-1), 'ROLLBACK')
+      assert.equal(queries.includes('COMMIT'), false)
+      assert.equal(releases[0], failure, 'No uncertain transaction may return to the pool')
+
+      assert.deepEqual(await refreshOp3StatsCache(options), { status: 'updated', updatedCount: 2 })
+      assert.equal(connections, 2)
+      assert.equal(releases[1], undefined)
+      assert.equal(queries.at(-1), 'COMMIT')
+    })
+  }
+
   test('writes rolling 7/30-day counts and all-time counts in one transaction', async () => {
     const { fetchImpl, calls } = createFetchMock()
     const database = createPool()

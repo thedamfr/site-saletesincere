@@ -3,7 +3,7 @@
  * Formulaire, inscription double opt-in, confirmation, désinscription
  */
 
-import { subscribeToNewsletter } from './brevoClient.js';
+import { createNewsletterService } from './newsletterService.js';
 import { newsletterLimiter, newsletterActionLimiter, pageLimiter } from '../middleware/rateLimiter.js';
 
 const TAGLINE = "Passe en cuisine. Rejoins Saleté Sincère.";
@@ -40,6 +40,10 @@ function validateEmail(email) {
  * Routes Plugin Fastify
  */
 export default async function newsletterRoutes(fastify, options) {
+  const service = options.service || createNewsletterService({ database: fastify.pg, logger: fastify.log });
+  const recoveryEnabled = options.recoveryEnabled ?? process.env.DISABLE_WORKER !== 'true';
+  if (recoveryEnabled) fastify.addHook('onReady', async () => { service.start(); });
+  fastify.addHook('onClose', async () => { await service.stop(); });
   
   // GET /newsletter - Page formulaire d'inscription
   fastify.get('/', {
@@ -62,7 +66,7 @@ export default async function newsletterRoutes(fastify, options) {
   }, async (request, reply) => {
     try {
       // Validation email
-      const { email } = request.body;
+      const { email } = request.body || {};
       const validation = validateEmail(email);
       
       if (!validation.valid) {
@@ -73,33 +77,39 @@ export default async function newsletterRoutes(fastify, options) {
         });
       }
 
-      // Appel API Brevo - Ajout à liste temporaire
-      const result = await subscribeToNewsletter(validation.email);
+      const result = await service.subscribe(validation.email);
       
-      if (result.success) {
+      if (result.state === 'submitted') {
         return reply.view('newsletter/pending', {
-          title: 'Vérifiez votre email',
+          title: 'Demande prise en compte',
           email: validation.email,
           tagline: TAGLINE,
-          message: 'Un email de confirmation vous a été envoyé. Cliquez sur le lien pour finaliser votre inscription.'
-        });
-      } else {
-        // Erreur API Brevo
-        fastify.log.warn('Newsletter subscription failed:', {
-          email: validation.email,
-          error: result.error,
-          brevoResponse: result
-        });
-        
-        return reply.status(500).view('newsletter/error', {
-          title: 'Erreur d\'inscription',
-          error: 'Service temporairement indisponible, réessayez plus tard.',
-          backLink: '/newsletter'
+          message: 'Votre demande a été prise en compte. Si une confirmation est nécessaire, consultez votre boîte mail.',
+          submitted: true
         });
       }
+      if (['ready', 'sending', 'uncertain'].includes(result.state)) {
+        const uncertain = result.state !== 'ready';
+        return reply.status(202).view('newsletter/pending', {
+          title: uncertain ? 'Demande en cours de vérification' : 'Demande enregistrée',
+          email: validation.email,
+          tagline: TAGLINE,
+          message: uncertain
+            ? 'Votre demande est enregistrée. Nous vérifions son traitement ; aucun nouvel envoi ne sera déclenché sans vérification.'
+            : 'Votre demande est enregistrée. Son traitement reprendra automatiquement dès le retour du service.',
+          submitted: false
+        });
+      }
+      return reply.status(result.state === 'rejected' ? 422 : 503).view('newsletter/error', {
+          title: 'Erreur d\'inscription',
+          error: result.state === 'rejected'
+            ? 'Cette demande ne peut pas être traitée. Aucun nouvel envoi n’a été déclenché.'
+            : 'Service temporairement indisponible. Votre demande n’a pas pu être enregistrée, réessayez plus tard.',
+          backLink: '/newsletter'
+        });
       
-    } catch (error) {
-      fastify.log.error('Newsletter subscription error:', error);
+    } catch {
+      fastify.log.error({ event: 'newsletter_request_failed' }, 'newsletter_request_failed');
       
       return reply.status(500).view('newsletter/error', {
         title: 'Erreur d\'inscription',

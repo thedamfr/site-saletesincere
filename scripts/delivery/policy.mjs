@@ -64,3 +64,20 @@ export function assertCapacity(quota, resources) {
     }
   }
 }
+
+export function rolloutReady(deployment, pods, digest) {
+  const replicas = deployment.spec.replicas;
+  // Completed pods can remain after a reboot even when their ReplicaSet is at zero.
+  const activePods = pods.filter(pod => !pod.metadata.deletionTimestamp
+    && !['Succeeded', 'Failed'].includes(pod.status?.phase));
+  return Number.isInteger(replicas) && replicas > 0
+    && deployment.status.observedGeneration >= deployment.metadata.generation
+    && deployment.status.updatedReplicas === replicas
+    && deployment.status.readyReplicas === replicas
+    && deployment.status.availableReplicas === replicas
+    && deployment.status.replicas === replicas
+    && activePods.length === replicas
+    && activePods.every(pod => pod.status?.phase === 'Running'
+      && pod.status.containerStatuses?.some(container => container.name === 'web'
+        && container.ready === true && container.imageID?.endsWith(digest)));
+}

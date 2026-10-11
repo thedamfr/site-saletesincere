@@ -19,6 +19,7 @@ import { generateOGImage } from '../services/ogImageGenerator.js'
 import { uploadToS3, deleteFromS3 } from '../services/s3Service.js'
 import { registerOp3StatsQueue } from './op3StatsQueue.js'
 import { inspectSpotifyEpisodeVideo } from '../services/podcastVideoAvailability.js'
+import { configureRecoveryQueue, RECOVERY_JOB_OPTIONS, createRecoveryAttempt, abortRecoveryAttempts } from './recoveryPolicy.js'
 
 let boss = null
 let queueShuttingDown = false
@@ -26,6 +27,7 @@ let queueShuttingDown = false
 export const EpisodeQueueReason = Object.freeze({
   QUEUED: 'QUEUED',
   ALREADY_QUEUED: 'ALREADY_QUEUED',
+  THROTTLED: 'THROTTLED',
   WORKER_UNAVAILABLE: 'WORKER_UNAVAILABLE',
   SHUTTING_DOWN: 'SHUTTING_DOWN',
   QUEUE_ERROR: 'QUEUE_ERROR'
@@ -77,13 +79,18 @@ function getConnectionString() {
     || 'postgresql://salete:salete@localhost:5432/salete'
 }
 
-async function stopCandidate(candidate) {
+async function stopCandidate(candidate, { graceful = false } = {}) {
   if (!candidate) return
 
   try {
-    await candidate.stop({ graceful: false })
+    await candidate.stop({ graceful, timeout: 10_000, wait: true })
   } catch {
     // Best effort: a failed start can leave pg-boss only partially initialized.
+  } finally {
+    // pg-boss 11 stop() returns early when start() never reached "started",
+    // even though its pool is already open. Dispose that owned pool explicitly.
+    const database = candidate.getDb?.()
+    if (database?._pgbdb && database.opened) await database.close()
   }
 }
 
@@ -98,13 +105,22 @@ async function createStartedQueue(options = {}) {
     connectionString: getConnectionString(),
     schema: 'pgboss',
     max: isTest ? 3 : 1,
-    newJobCheckInterval: isTest ? 200 : 2000,
+    connectionTimeoutMillis: 1500,
+    query_timeout: 2000,
+    statement_timeout: 2000,
+    pollingIntervalSeconds: 2,
+    superviseIntervalSeconds: 5,
+    monitorIntervalSeconds: 5,
     ...bossOptions
   })
 
+  // pg-boss may emit a connection error during start, before the manager can
+  // attach its runtime listener. The rejected initialization remains authoritative.
+  candidate.on?.('error', () => {})
+
   try {
     await candidate.start()
-    await candidate.createQueue('resolve-episode')
+    await configureRecoveryQueue(candidate, 'resolve-episode')
     return candidate
   } catch (error) {
     await stopCandidate(candidate)
@@ -138,10 +154,19 @@ export function setEpisodeQueueShuttingDown(shuttingDown) {
   queueShuttingDown = Boolean(shuttingDown)
 }
 
-export async function stopQueue(instance = boss) {
+export async function stopQueue(instance = boss, { graceful = true } = {}) {
   if (!instance) return
   if (boss === instance) boss = null
-  await stopCandidate(instance)
+  if (!graceful) abortRecoveryAttempts(instance)
+  const deadline = setTimeout(() => abortRecoveryAttempts(instance), 8_000)
+  try {
+    await instance.stop({ graceful, timeout: 10_000, wait: true })
+  } finally {
+    clearTimeout(deadline)
+    abortRecoveryAttempts(instance)
+    const database = instance.getDb?.()
+    if (database?._pgbdb && database.opened) await database.close()
+  }
 }
 
 /**
@@ -173,16 +198,21 @@ export async function queueEpisodeResolution(season, episode, episodeDate, title
     const jobId = await boss.send('resolve-episode',
       { season, episode, episodeDate, title, imageUrl, feedLastBuildDate, audioUrl, itemGuid },
       {
+        ...RECOVERY_JOB_OPTIONS,
         singletonKey: `episode-${season}-${episode}`,  // Idempotency key (throttling)
-        singletonSeconds: 300  // Throttle 5 min : 1 job max par slot temporel
-        // Note: Pas de retryLimit (pas de retry auto, worker doit être idempotent)
+        singletonSeconds: 60
       }
     )
 
     if (!jobId) {
+      const { rows } = await boss.getDb().executeSql(`
+        SELECT id FROM pgboss.job
+         WHERE name = $1 AND singleton_key = $2
+           AND state IN ('created', 'retry', 'active') LIMIT 1
+      `, ['resolve-episode', `episode-${season}-${episode}`])
       return {
         queued: false,
-        reason: EpisodeQueueReason.ALREADY_QUEUED
+        reason: rows.length ? EpisodeQueueReason.ALREADY_QUEUED : EpisodeQueueReason.THROTTLED
       }
     }
 
@@ -226,6 +256,9 @@ export async function startWorker(fastify, options = {}, queue = boss) {
   await queue.work('resolve-episode', workerOptions, async (jobs) => {
     // pg-boss v9 passe un array de jobs (batch mode par défaut)
     const job = jobs[0]
+    const attempt = createRecoveryAttempt(queue)
+    const { signal } = attempt
+    try {
     
     const { season, episode, episodeDate, title, imageUrl, feedLastBuildDate, audioUrl, itemGuid } = job.data
     
@@ -243,6 +276,7 @@ export async function startWorker(fastify, options = {}, queue = boss) {
     })
     let cachedEpisodeLinks = null
     const cacheClient = await fastify.pg.connect()
+    let cacheError
     try {
       const cacheResult = await cacheClient.query(
         `SELECT spotify_url, spotify_video_available, apple_url, deezer_url,
@@ -265,8 +299,11 @@ export async function startWorker(fastify, options = {}, queue = boss) {
         console.log(`[Worker ${job.id}] Cache already complete, skipping enrichment`)
         return { skipped: true, reason: 'CACHE_COMPLETE' }
       }
+    } catch (error) {
+      cacheError = error
+      throw error
     } finally {
-      cacheClient.release()
+      cacheClient.release(cacheError)
     }
     
     // Use episode date from RSS for platform API lookups
@@ -298,11 +335,17 @@ export async function startWorker(fastify, options = {}, queue = boss) {
     
     // Appeler les APIs en parallèle
     const [spotifyResult, appleResult, deezerResult, youtubeResult] = await Promise.allSettled([
-      searchSpotifyEpisode(episodeDate),
-      searchAppleEpisode(episodeDate, { itemGuid }),
-      searchDeezerEpisode(episodeDate),
-      youtubeResolutionEnabled ? searchYouTubeEpisodeMedia(season, episode) : Promise.resolve(null)
+      process.env.SPOTIFY_CLIENT_ID && process.env.SPOTIFY_CLIENT_SECRET && process.env.SPOTIFY_SHOW_ID
+        ? searchSpotifyEpisode(episodeDate, { signal, throwOnError: true }) : Promise.resolve(null),
+      searchAppleEpisode(episodeDate, { itemGuid, signal, throwOnError: true }),
+      process.env.DEEZER_SHOW_ID
+        ? searchDeezerEpisode(episodeDate, { signal, throwOnError: true }) : Promise.resolve(null),
+      youtubeResolutionEnabled ? searchYouTubeEpisodeMedia(season, episode, { signal, throwOnError: true }) : Promise.resolve(null)
     ])
+    signal.throwIfAborted()
+    const failedLookup = [spotifyResult, appleResult, deezerResult, youtubeResult]
+      .find(result => result.status === 'rejected')
+    if (failedLookup) throw failedLookup.reason
     
     // Podcast Addict: Pas d'API publique connue
     // Fallback vers le show au lieu de l'épisode spécifique
@@ -338,20 +381,18 @@ export async function startWorker(fastify, options = {}, queue = boss) {
       : null
 
     if (resolvedSpotifyUrl && spotifyVideoAvailable == null) {
-      try {
-        spotifyVideoAvailable = await spotifyVideoInspector(resolvedSpotifyUrl)
-      } catch {
-        spotifyVideoAvailable = null
-      }
+      spotifyVideoAvailable = await spotifyVideoInspector(resolvedSpotifyUrl, { signal, throwOnError: true })
     }
 
     links.spotifyVideoAvailable = spotifyVideoAvailable
     
     console.log(`[Worker ${job.id}] Resolved:`, links)
     
+    signal.throwIfAborted()
     // Phase 5: Sauvegarder en BDD (réutilise pool Fastify pour éviter too many connections)
     try {
       const client = await fastify.pg.connect()
+      let writeError
       
       try {
         // Phase 3.1: Cleanup - SELECT ancienne OG Image si existe, puis DELETE de S3
@@ -417,17 +458,22 @@ export async function startWorker(fastify, options = {}, queue = boss) {
         ])
         
         console.log(`[Worker ${job.id}] ✅ Saved to database (OG Image: ${ogImageUrl ? 'YES' : 'NO'})`)
+      } catch (error) {
+        writeError = error
+        throw error
       } finally {
-        client.release()
+        client.release(writeError)
       }
     } catch (dbError) {
-      console.error(`[Worker ${job.id}] ❌ Failed to save to database:`, dbError.message)
-      // Ne pas throw : le job est marqué completed même si save échoue
-      // Les liens seront re-résolus au prochain appel
+      console.error(`[Worker ${job.id}] Failed to persist episode`, dbError.code || dbError.name)
+      throw dbError
     }
     
     // IMPORTANT: pg-boss attend un return pour marquer le job comme completed
     return { links, ogImageUrl }
+    } finally {
+      attempt.finish()
+    }
   })
 }
 
@@ -457,4 +503,4 @@ export async function initializeEpisodeWorker(fastify, {
 }
 
 // Note : Worker DOIT être idempotent (vérifier si travail déjà fait avant d'appeler APIs)
-// OK de rejouer un job après expiration du slot (300s) si nécessaire
+// Replays may repeat read-only API calls; SQL upsert owns the durable result.

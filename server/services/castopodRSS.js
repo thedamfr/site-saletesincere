@@ -161,6 +161,14 @@ export async function fetchPublishedEpisodesFromRSS(timeout = 5000, fetchImpl = 
   return episodes
 }
 
+// Recovery must also cover supported trailers/episode zero, which are omitted
+// from the public list but remain reachable through their episode route.
+export async function fetchAllEpisodesFromRSS(timeout = 5000, fetchImpl = fetch) {
+  const { episodes } = await fetchRssFeed(timeout, fetchImpl)
+  return episodes.filter(item => item.season >= 1 && item.episode >= 0
+    && new Date(item.rawPubDate).getTime() <= Date.now())
+}
+
 export async function fetchPodcastFromRSS(timeout = 5000, fetchImpl = fetch) {
   const feed = await fetchRssFeed(timeout, fetchImpl)
   return { ...feed, episodes: feed.episodes
