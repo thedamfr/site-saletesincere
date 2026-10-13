@@ -63,8 +63,8 @@ test('Golden Journeys — photographie', { timeout: remote ? 180_000 : 120_000 }
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } })
     if (remote) {
       await context.route('**/*', route => {
-        if (['GET', 'HEAD'].includes(route.request().method())) return route.continue()
-        errors.push(`Unexpected browser write blocked: ${route.request().method()}`)
+        if (['GET', 'HEAD'].includes(route.request().method()) && !new URL(route.request().url()).pathname.startsWith('/podcast')) return route.continue()
+        errors.push(`Potentially stateful browser request blocked: ${route.request().method()} ${new URL(route.request().url()).pathname}`)
         return route.abort()
       })
       const response = await context.request.get(baseURL + '/photographie', { maxRedirects: 0 })
@@ -152,10 +152,16 @@ test('Golden Journeys — photographie', { timeout: remote ? 180_000 : 120_000 }
       await page.waitForURL(baseURL + '/')
       assert.match(await page.locator('h1').innerText(), /On gratte la surface/i)
       await page.goto(baseURL + '/photographie')
-      await page.getByRole('contentinfo').getByRole('link', { name: 'Podcast', exact: true }).click()
-      await page.waitForURL('**/podcast')
-      assert.match(await page.locator('h1').innerText(), /Charbon|Wafer/i)
-      outcomes.push('Accueil → photographie → Forum PHP 2026 et références existantes → offre et contact → accueil et podcast : OK')
+      const podcastLink = page.getByRole('contentinfo').getByRole('link', { name: 'Podcast', exact: true })
+      assert.equal(await podcastLink.getAttribute('href'), '/podcast')
+      // GET /podcast can enqueue episode work on deployed environments.
+      // Exercise that destination only against our isolated local server.
+      if (!remote) {
+        await podcastLink.click()
+        await page.waitForURL('**/podcast')
+        assert.match(await page.locator('h1').innerText(), /Charbon|Wafer/i)
+      }
+      outcomes.push(`Accueil → photographie → Forum PHP 2026 et références existantes → offre et contact → accueil ; ${remote ? 'lien podcast vérifié sans navigation distante' : 'navigation podcast locale'} : OK`)
     })
 
     await t.test('Golden Journey 2 — galerie au clavier, photos complètes et lecture responsive', async () => {
@@ -231,8 +237,8 @@ test('Golden Journeys — photographie', { timeout: remote ? 180_000 : 120_000 }
       try {
         if (remote) {
           await noScriptContext.route('**/*', route => {
-            if (['GET', 'HEAD'].includes(route.request().method())) return route.continue()
-            errors.push(`Unexpected browser write blocked: ${route.request().method()}`)
+            if (['GET', 'HEAD'].includes(route.request().method()) && !new URL(route.request().url()).pathname.startsWith('/podcast')) return route.continue()
+            errors.push(`Potentially stateful browser request blocked: ${route.request().method()} ${new URL(route.request().url()).pathname}`)
             return route.abort()
           })
         }
@@ -287,6 +293,7 @@ ${remote ? `- Image déclarée par /health : commit ${release?.sourceCommit || '
 - CSS et images comparés aux fichiers locaux ; template vérifié par les parcours, sans comparaison intégrale du HTML.
 - Seules les requêtes GET/HEAD du navigateur sont autorisées ; aucun état de connexion n’est chargé.
 - L’empreinte locale identifie les fichiers utilisés pour ce test ; elle ne prouve pas à elle seule le contenu déployé.` : '- Aucune base, aucun worker ni stockage objet. RSS simulé vide.'}
+- La destination podcast est visitée uniquement en local ; en mode distant, son lien est vérifié sans requête car GET /podcast peut déclencher un traitement.
 - Aucun envoi d’email, aucune écriture métier déclenchée par les scénarios. Le QR code et le consentement sont
   présentés comme service ; leur application externe n’est pas testée ici.
 - Rechargement : galerie refermée ; aucun cookie ni état local ajouté.
