@@ -120,6 +120,17 @@
   aspect-ratio: 3/2;
   object-fit: contain;
 }
+.photography-page .photo-intro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 22px;
+  margin-top: 24px;
+}
+.photography-page .photo-intro-actions .photo-cta,
+.photography-page .photo-intro-actions .photo-text-link {
+  margin-top: 0;
+}
 .photography-page figcaption {
   font-size: 12px;
   color: var(--quiet);
@@ -157,6 +168,12 @@
   text-transform: uppercase;
   color: var(--quiet);
   margin-top: 12px;
+}
+.photography-page .photo-forum-grid {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 32px;
+  align-items: center;
 }
 .photography-page .photo-dot-grid {
   display: grid;
@@ -402,6 +419,13 @@
     gap: 12px;
     grid-template-columns: 1.15fr 1fr;
   }
+  .photography-page .photo-forum-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .photography-page .photo-forum-speaker {
+    width: 84%;
+  }
   .photography-page .photo-dot-grid .photo-headphones {
     padding-top: 15px;
   }
@@ -502,16 +526,4 @@
   .photography-page .photo-delivery {
     padding-inline: 60px;
   }
-}
-
-.photography-page .photo-intro-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 14px 22px;
-  margin-top: 24px;
-}
-.photography-page .photo-intro-actions .photo-cta,
-.photography-page .photo-intro-actions .photo-text-link {
-  margin-top: 0;
 }

@@ -20,7 +20,9 @@
     "pretest": "npm run build:views",
     "test:e2e:install": "playwright install --with-deps chromium",
     "test:storage": "ssh -o BatchMode=yes -o StrictHostKeyChecking=yes penthouse 'sudo -n python3 -' < scripts/test-storage.py",
-    "test:e2e:resilience": "node test/e2e/resilience.test.mjs"
+    "test:e2e:resilience": "node test/e2e/resilience.test.mjs",
+    "test:e2e:photography:staging": "PHOTOGRAPHY_E2E_TARGET=staging node --test test/e2e/photography.test.mjs",
+    "test:e2e:photography:production": "PHOTOGRAPHY_E2E_TARGET=production node --test test/e2e/photography.test.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.844.0",
