@@ -118,7 +118,11 @@ Ces modes ciblent exclusivement les domaines fixes de staging et de production.
 Ils ne démarrent pas de serveur, ne lisent pas `.env`, n’envoient aucun email et
 ne déclenchent aucune écriture métier. Ils contrôlent la santé, les identifiants
 publics de livraison et les SHA-256 du CSS et des huit dérivés Forum PHP, puis
-les trois Golden Journeys. Staging doit également rester `noindex`. Les rapports
+les trois Golden Journeys. La navigation vers le podcast est réservée au mode
+local : à distance, seul le lien est vérifié, car `GET /podcast` peut mettre en
+file un traitement d’épisode. Les requêtes navigateur vers ces routes et les
+méthodes autres que GET/HEAD sont bloquées par les modes distants.
+Staging doit également rester `noindex`. Les rapports
 et captures sont conservés dans `test-results/photography-staging/` ou
 `test-results/photography-production/`. `PHOTOGRAPHY_E2E_OUTPUT` peut choisir un
 répertoire d’artefacts, et `E2E_BROWSER_CHANNEL` le navigateur installé en CI.
