@@ -6,7 +6,8 @@ const SPOTIFY_EPISODE_ID_PATTERN = /^[A-Za-z0-9]{1,64}$/
 const EDITORIAL_VIDEO_QUALITY = Object.freeze({
   '3:1': Object.freeze({ spotify: 'HD' }),
   // Apple Lookup's S3E2 MP4 was measured at 1920 × 1080 on 2026-09-11.
-  '3:2': Object.freeze({ spotify: '4K', youtube: '4K', apple: 'Full HD' })
+  '3:2': Object.freeze({ spotify: '4K', youtube: '4K', apple: 'Full HD' }),
+  '3:4': Object.freeze({ youtube: '4K' })
 })
 
 export function isAppleEpisodeUrl(value) {
