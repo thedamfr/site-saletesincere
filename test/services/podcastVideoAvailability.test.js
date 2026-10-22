@@ -72,6 +72,12 @@ describe('Spotify episode video availability', () => {
 })
 
 describe('editorial video quality', () => {
+  test('labels S3E4 as 4K on YouTube without assuming Spotify or Apple quality', () => {
+    assert.equal(getEpisodeVideoQuality(3, 4, 'youtube'), '4K')
+    assert.equal(getEpisodeVideoQuality(3, 4, 'spotify'), null)
+    assert.equal(getEpisodeVideoQuality(3, 4, 'apple'), null)
+  })
+
   test('keeps the confirmed platform-specific quality independent from RSS', () => {
     assert.equal(getEpisodeVideoQuality(3, 1, 'spotify'), 'HD')
     assert.equal(getEpisodeVideoQuality(3, 2, 'spotify'), '4K')
