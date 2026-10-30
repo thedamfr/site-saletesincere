@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { chromium } from 'playwright'
 import { runHeaderGoldenJourneys } from './lib/header-e2e.mjs'
+import { runFooterGoldenJourneys } from './lib/footer-e2e.mjs'
 
 // Never load a developer's credentials or production database configuration.
 process.env.DOTENV_CONFIG_PATH = '/dev/null'
@@ -32,6 +33,7 @@ await mkdir(output, { recursive: true })
 const outcomes = []
 const startedAt = new Date().toISOString()
 const headerResults = {}
+const footerResults = {}
 let failure
 let browserVersion
 
@@ -116,7 +118,7 @@ try {
   await page.goBack()
   await page.reload()
   await page.getByRole('heading', { name: 'Damien Cavaillès', exact: true }).waitFor()
-  await page.getByRole('link', { name: 'Podcast', exact: true }).click()
+  await page.getByRole('navigation', { name: 'Navigation principale', exact: true }).getByRole('link', { name: 'Podcast', exact: true }).click()
   await page.getByRole('link', { name: 'À propos', exact: true }).first().click()
   await page.getByRole('link', { name: 'Me contacter', exact: true }).click()
   assert.equal(new URL(page.url()).hash, '#contact')
@@ -134,6 +136,7 @@ try {
       assert.equal(await staticPage.getByRole('link', { name, exact: true }).isVisible(), true, `${name} must remain visible without JavaScript at ${width}px`)
     }
     await staticPage.locator('.author-work-photo').scrollIntoViewIfNeeded()
+    await staticPage.getByRole('contentinfo').scrollIntoViewIfNeeded()
     await staticPage.waitForFunction(() => [...document.images].every(img => img.complete && img.naturalWidth > 0))
     assert.equal(await staticPage.evaluate(() => document.documentElement.scrollWidth), width)
     await staticPage.screenshot({ path: `${output}/author-${width}.png`, fullPage: true })
@@ -154,6 +157,7 @@ try {
   outcomes.push('Golden Journey — auteur sans JavaScript, responsive, redirection canonique, robots et sitemap : OK')
   await noJs.close()
   await runHeaderGoldenJourneys(browser, { base, output, localTarget: base === local, outcomes, results: headerResults })
+  await runFooterGoldenJourneys(browser, { base, output, localTarget: base === local, outcomes, results: footerResults })
   for (const outcome of outcomes.slice(2)) console.log(outcome)
 } catch (error) {
   failure = { name: error.name, message: error.message }
@@ -169,16 +173,16 @@ try {
     status, startedAt, finishedAt: new Date().toISOString(), command: 'npm run test:e2e',
     environment: { node: process.version, browser: browserVersion, target: base === local ? 'isolated-loopback' : new URL(base).origin,
       chromiumSandbox: true, dotenv: 'disabled', database: 'unavailable fixture', worker: 'disabled' },
-    candidate, candidateUnchanged, finalCandidate, outcomes, header: headerResults, failure,
+    candidate, candidateUnchanged, finalCandidate, outcomes, header: headerResults, footer: footerResults, failure,
     limitations: ['RSS et épisode simulés ; aucun service PostgreSQL, stockage objet, OP3 ou worker sollicité.',
       'La publication Medium externe est simulée. Les polices Google restent des ressources réseau avec leur repli local.',
       'Aucun formulaire newsletter soumis ; aucune écriture métier, lecture audio ni envoi email qualifiés.',
       ...(base === local ? [] : ['La cible distante est une option explicite ; son contenu ne peut pas être assimilé au fingerprint local. Le scénario épisode simulé y est omis.'])]
   }
   const qualificationSummary = status === 'passed'
-    ? 'En-tête commun, navigation et parcours auteur vérifiés sur la révision candidate ci-dessous.'
+    ? 'Header et footer communs, navigation et parcours auteur vérifiés sur la révision candidate ci-dessous.'
     : 'Qualification incomplète : seuls les Golden Journeys listés comme terminés ont réussi ; aucun succès global n’est établi.'
   await writeFile(`${output}/results.json`, JSON.stringify(report, null, 2) + '\n')
-  await writeFile(`${output}/summary.md`, `# Qualification des Golden Journeys\n\n## Summary\n\nStatut : **${status}**. ${outcomes.length} Golden Journeys terminés. ${qualificationSummary} ${candidateUnchanged ? 'Le contenu candidat est resté identique pendant la suite.' : 'Le contenu candidat a changé pendant la suite : requalification nécessaire.'}\n\n## Synthèse\n\n- Commande : \`npm run test:e2e\`.\n- SHA de base : \`${candidate.sourceCommit}\` ; modifications locales : ${candidate.dirty ? 'oui' : 'non'}.\n- Fingerprint SHA-256 du contenu testé : \`${candidate.fingerprint}\`.\n- Environnement : Node ${process.version}, Chromium ${browserVersion || 'non démarré'}, sandbox active ; ${base === local ? 'serveur loopback isolé' : 'cible distante explicite'}.\n- Couverture du header : sept pages, 320 / 390 / 768 / 1440 px ; logo, géométrie, couleurs et typographie. Mesures terminées : ${headerResults.measurements?.length || 0} / 28.\n- Couverture prévue : navigation réelle, états actifs, clavier/focus, rechargement et navigation sans JavaScript ; absence de stockage navigateur et d’envoi newsletter. Les succès effectivement obtenus sont listés ci-dessous.\n${outcomes.map(outcome => '- ' + outcome).join('\n')}\n${failure ? '\nÉchec : ' + failure.name + '. Consulter le résultat JSON pour le détail.\n' : ''}\nLimites : ${report.limitations.join(' ')}\n\n## Annexes\n\n- [Résultats, mesures et identité candidate](results.json).\n${(headerResults?.screenshots || []).map(filename => `- [Capture ${filename}](${filename}).`).join('\n')}\n- Captures auteur : [320 px](author-320.png), [390 px](author-390.png), [1440 px](author-1440.png).\n`)
+  await writeFile(`${output}/summary.md`, `# Qualification des Golden Journeys\n\n## Summary\n\nStatut : **${status}**. ${outcomes.length} Golden Journeys terminés. ${qualificationSummary} ${candidateUnchanged ? 'Le contenu candidat est resté identique pendant la suite.' : 'Le contenu candidat a changé pendant la suite : requalification nécessaire.'}\n\n## Synthèse\n\n- Commande : \`npm run test:e2e\`.\n- SHA de base : \`${candidate.sourceCommit}\` ; modifications locales : ${candidate.dirty ? 'oui' : 'non'}.\n- Fingerprint SHA-256 du contenu testé : \`${candidate.fingerprint}\`.\n- Environnement : Node ${process.version}, Chromium ${browserVersion || 'non démarré'}, sandbox active ; ${base === local ? 'serveur loopback isolé' : 'cible distante explicite'}.\n- Couverture du header : sept pages, 320 / 390 / 768 / 1440 px ; logo, géométrie, couleurs et typographie. Mesures terminées : ${headerResults.measurements?.length || 0} / 28.\n- Couverture du footer : huit pages aux mêmes largeurs ; géométrie relative, identité, navigation, clavier et reprise sans JavaScript. Mesures terminées : ${footerResults.measurements?.length || 0} / 32.\n- Couverture prévue : navigation réelle, états actifs, clavier/focus, rechargement et navigation sans JavaScript ; absence de stockage navigateur et d’envoi newsletter. Les succès effectivement obtenus sont listés ci-dessous.\n${outcomes.map(outcome => '- ' + outcome).join('\n')}\n${failure ? '\nÉchec : ' + failure.name + '. Consulter le résultat JSON pour le détail.\n' : ''}\nLimites : ${report.limitations.join(' ')}\n\n## Annexes\n\n- [Résultats, mesures et identité candidate](results.json).\n${[...(headerResults.screenshots || []), ...(footerResults.screenshots || [])].map(filename => `- [Capture ${filename}](${filename}).`).join('\n')}\n- Captures auteur : [320 px](author-320.png), [390 px](author-390.png), [1440 px](author-1440.png).\n`)
   if (!candidateUnchanged && !failure) throw new Error('Candidate content changed during E2E qualification; run the suite again')
 }

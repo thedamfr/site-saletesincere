@@ -6,6 +6,7 @@ import Handlebars from 'handlebars'
 const handlebars = Handlebars.create()
 handlebars.registerHelper('eq', (left, right) => left === right)
 handlebars.registerPartial('header', await readFile(new URL('../../server/views/partials/header.hbs', import.meta.url), 'utf8'))
+handlebars.registerPartial('footer', await readFile(new URL('../../server/views/partials/footer.hbs', import.meta.url), 'utf8'))
 
 const render = handlebars.compile(await readFile(new URL('../../server/views/podcast.hbs', import.meta.url), 'utf8'))
 

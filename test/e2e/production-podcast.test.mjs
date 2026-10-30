@@ -304,7 +304,7 @@ test('Golden Journeys — offre de production de podcast', { timeout: remote ? 2
         const contact = noScriptPage.getByRole('link', { name: 'Réserver une heure avec Damien', exact: true })
         assert.equal(await contact.isVisible(), true)
         assert.match(await contact.getAttribute('href'), /^mailto:damien@saletesincere\.fr\?/)
-        const visibleEmail = noScriptPage.getByRole('link', { name: 'damien@saletesincere.fr', exact: true })
+        const visibleEmail = noScriptPage.locator('main').getByRole('link', { name: 'damien@saletesincere.fr', exact: true })
         assert.equal(await visibleEmail.getAttribute('href'), 'mailto:damien@saletesincere.fr')
         assert.equal(await visibleEmail.isVisible(), true)
         await noScriptPage.reload()

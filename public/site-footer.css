@@ -51,6 +51,10 @@
   text-underline-offset: 0.2em;
 }
 
+.site-footer a:hover {
+  text-underline-offset: 0.2em;
+}
+
 .site-footer .site-footer-logo {
   display: flex;
   align-items: center;

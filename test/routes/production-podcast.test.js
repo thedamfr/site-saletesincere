@@ -4,7 +4,7 @@ import { buildApp } from '../../server.js'
 
 const offerPath = '/offre-production-podcast/'
 const canonical = `https://saletesincere.fr${offerPath}`
-const footerLink = `<a href="${offerPath}">Besoin d'un producteur sur mon podcast ?</a>`
+const footerLink = /<a\b[^>]*href="\/offre-production-podcast\/"[^>]*>Besoin d'un producteur sur mon podcast \?<\/a>/
 
 async function isolatedApp() {
   const unexpectedAccess = async () => assert.fail('The offer must not access external services')
@@ -66,7 +66,7 @@ test('the offer is discoverable in public footers and the sitemap, without chang
       const page = await app.inject(url)
       assert.equal(page.statusCode, 200, url)
       const footer = page.body.match(/<footer\b[^>]*>[\s\S]*?<\/footer>/)?.[0] || ''
-      assert.ok(footer.includes(footerLink), `Missing offer footer link on ${url}`)
+      assert.match(footer, footerLink, `Missing offer footer link on ${url}`)
       const header = page.body.match(/<header\b[^>]*>[\s\S]*?<\/header>/)?.[0] || ''
       assert.ok(!header.includes(offerPath), `Unexpected header link on ${url}`)
       if (url === '/') {
