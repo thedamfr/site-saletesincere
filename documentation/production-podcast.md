@@ -25,7 +25,9 @@ offres d’accueil conservent leurs destinations et leur contenu.
 
 La page est rendue en Handlebars sans dépendance à PostgreSQL, au flux RSS,
 au stockage ou au worker. Elle fonctionne sans JavaScript et ne persiste
-aucune donnée. La variante sans slash redirige en 301 vers l’URL canonique,
+aucune donnée. Le bloc de contact utilise les marqueurs HTML `email_off`
+de Cloudflare pour préserver l’adresse et les liens email sans JavaScript.
+La variante sans slash redirige en 301 vers l’URL canonique,
 en conservant les paramètres de partage. Le sitemap et les métadonnées
 Open Graph/Twitter utilisent l’URL avec slash final.
 
@@ -82,6 +84,7 @@ la santé normale, le rollout, la surveillance et la notification de livraison.
 - [Circuit de staging et production](livraison-continue.md).
 - [Rôles publiés de Damien](../content/damien-cavailles.md).
 - [Épisode OCCT et crédits](https://podcasts.saletesincere.fr/@charbonwafer/episodes/charbon-les-petits-de-douai-qui-travaillent-avec-intel-et-amd).
+- [Marqueurs Cloudflare pour conserver les emails sans JavaScript](https://developers.cloudflare.com/waf/tools/scrape-shield/email-address-obfuscation/#prevent-cloudflare-from-obfuscating-email).
 - [Webinaire GEO](https://app.livestorm.co/p/bf678e23-b016-4c5e-994a-663b6cfa1e90).
 
 Le retour arrière consiste à révoquer le changement applicatif par le circuit
