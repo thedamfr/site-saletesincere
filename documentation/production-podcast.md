@@ -11,8 +11,10 @@ CI et production sont rattachées à la PR.
 
 ## Synthèse
 
-Le contenu reprend le brief validé : angle, préparation, coordination,
-postproduction, publication, extraits et livrables sponsors selon le forfait.
+L’accompagnement part de l’hôte, de ses invités et de son intention éditoriale.
+Il s’appuie sur le studio choisi et les prestations déjà prévues dans son forfait,
+dont le montage et les shorts. La préparation des sponsors précède l’enregistrement,
+puis viennent le suivi de postproduction, les extraits et la publication.
 Le client conserve la validation éditoriale. L’intervention ponctuelle commence
 à 500 € HT ; une saison représente un budget de 10 000 à 20 000 € HT, avec
 son périmètre défini au départ. Aucun résultat d’audience ni financement n’est
