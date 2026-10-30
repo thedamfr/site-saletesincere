@@ -43,6 +43,10 @@ Open Graph/Twitter utilisent l’URL avec slash final.
 Les références distinguent les responsabilités : entretien, réalisation et
 montage de l’épisode OCCT de Charbon & Wafer ; animation du webinaire GEO
 HIT / EuraCreative. Les photos existantes et leurs crédits sont conservés.
+L’expérience WeLoveDevs précise les repères fournis par Damien : équipe média
+de deux à cinq personnes, une dizaine de contenus par semaine et une vingtaine
+de clients ou sponsors, de l’interview en plateau avec le CTO de BNP Paribas
+au contenu snack face caméra tourné sur un salon.
 
 Les tests vérifient la découverte, l’offre, la demande de session, les liens,
 le clavier, le rechargement et les largeurs 320/390/768/1440 pixels. Ils
