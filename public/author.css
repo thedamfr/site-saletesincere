@@ -42,7 +42,8 @@
 .author-contact p { margin: 0; }
 .author-contact > div { display: flex; gap: 20px; }
 .author-contact a { display: inline-block; padding: 8px 0; }
-.author-footer { font-size: 11px; color: #626a65; padding: 0 0 23px; }
+.author-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; font-size: 12px; color: #626a65; padding: 0 0 23px; }
+.author-footer a { display: inline-flex; align-items: center; min-height: 44px; }
 @media (max-width: 620px) {
   .author-shell { width: calc(100% - 42px); }
   .author-intro { gap: 19px; grid-template-columns: minmax(0, 1fr) 104px; padding-top: 27px; }

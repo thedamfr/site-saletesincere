@@ -92,8 +92,9 @@ body.landing-page {
 
 .landing-footer-links {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 30px;
+  gap: 8px 24px;
 }
 
 .landing-footer-links a {
@@ -556,7 +557,7 @@ body.landing-page {
 
 .landing-footer {
   display: grid;
-  grid-template-columns: 210px minmax(0, 1fr) auto;
+  grid-template-columns: 130px minmax(0, 1fr) minmax(0, 440px);
   align-items: center;
   column-gap: 28px;
   row-gap: 14px;
@@ -618,7 +619,8 @@ body.landing-page {
   }
 
   .landing-footer-links {
-    justify-self: end;
+    grid-column: 1 / -1;
+    justify-self: start;
   }
 }
 
