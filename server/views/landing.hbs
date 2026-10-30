@@ -37,21 +37,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css?v=landing-mobile-overflow-1">
+  <link rel="stylesheet" href="/site-header.css?v=1">
 </head>
 <body class="landing-page">
   <a class="landing-skip-link" href="#contenu">Aller au contenu</a>
 
-  <header class="landing-header landing-shell">
-    <a class="landing-logo" href="/" aria-label="Accueil Saleté Sincère">
-      <img src="/images/logo-salete-sincere-horizontal.png" width="744" height="213" alt="Saleté Sincère">
-    </a>
-    <nav class="landing-navigation" aria-label="Navigation principale">
-      <a href="/photographie">Photographie</a>
-      <a href="#podcast">Podcast</a>
-      <a href="/damien-cavailles">À propos</a>
-      <a href="#contact">Contact</a>
-    </nav>
-  </header>
+  {{> header}}
 
   <main id="contenu" class="landing-shell">
     <section class="landing-hero" aria-labelledby="landing-title">

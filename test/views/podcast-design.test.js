@@ -3,7 +3,11 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import Handlebars from 'handlebars'
 
-const render = Handlebars.compile(await readFile(new URL('../../server/views/podcast.hbs', import.meta.url), 'utf8'))
+const handlebars = Handlebars.create()
+handlebars.registerHelper('eq', (left, right) => left === right)
+handlebars.registerPartial('header', await readFile(new URL('../../server/views/partials/header.hbs', import.meta.url), 'utf8'))
+
+const render = handlebars.compile(await readFile(new URL('../../server/views/podcast.hbs', import.meta.url), 'utf8'))
 
 test('podcast provides a main landmark, platform navigation and a home link', () => {
   const html = render({})

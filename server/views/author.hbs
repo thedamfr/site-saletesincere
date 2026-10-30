@@ -20,16 +20,17 @@
   <meta name="twitter:title" content="{{title}}">
   <meta name="twitter:description" content="{{description}}">
   <meta name="twitter:image" content="https://saletesincere.fr/images/damien-podcast.jpg">
-  <link rel="stylesheet" href="/author.css?v=1">
+  <link rel="stylesheet" href="/author.css?v=2">
   <script type="application/ld+json">{{{structuredData}}}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/site-header.css?v=1">
 </head>
 <body class="author-page">
   <a class="skip-link" href="#contenu">Aller au contenu</a>
+  {{> header currentPage="author"}}
   <div class="author-shell">
-    <header class="author-header">
-      <a href="/">Saleté Sincère</a>
-      <nav aria-label="Navigation principale"><a href="/podcast">Podcast</a><a href="#contact">Contact</a></nav>
-    </header>
     <main id="contenu">
       <section class="author-intro" aria-label="Présentation">
         <div class="author-heading"><h1>{{name}}</h1><p class="author-role">{{role}}</p></div>

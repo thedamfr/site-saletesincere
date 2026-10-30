@@ -1,0 +1,90 @@
+/* Shared header, independent of each page's typography and color palette. */
+.site-header {
+  margin: 0;
+  background: #f7f6f2;
+  color: #111214;
+  font: 400 16px/1.45 "Oswald", "Arial Narrow", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.site-header,
+.site-header * {
+  box-sizing: border-box;
+}
+
+.site-header .site-header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 32px;
+  width: min(1120px, calc(100% - 48px));
+  min-height: 78px;
+  margin-inline: auto;
+  border-bottom: 1px solid #aaa9a4;
+}
+
+.site-header .site-logo {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  width: 172px;
+  min-height: 44px;
+}
+
+.site-header .site-logo img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 0;
+}
+
+.site-header .site-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 30px;
+}
+
+.site-header a {
+  color: #111214;
+  text-decoration: none;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+
+.site-header .site-navigation a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font: inherit;
+  white-space: nowrap;
+}
+
+.site-header .site-navigation a:hover {
+  text-decoration: underline;
+}
+
+.site-header a:focus-visible {
+  outline: 3px solid #111214;
+  outline-offset: 4px;
+}
+
+@media (max-width: 680px) {
+  .site-header .site-header-inner {
+    width: calc(100% - 32px);
+    min-height: 70px;
+  }
+
+  .site-header .site-logo { width: 138px; }
+  .site-header .site-navigation { column-gap: 16px; }
+}
+
+@media (max-width: 420px) {
+  .site-header { font-size: 14.4px; }
+  .site-header .site-header-inner { column-gap: 12px; }
+  .site-header .site-logo { width: 118px; }
+  .site-header .site-navigation { column-gap: 12px; }
+}

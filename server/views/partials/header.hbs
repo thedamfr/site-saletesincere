@@ -1,14 +1,13 @@
-{{!-- Header Navigation --}}
-<header class="flex items-center justify-between px-6 py-4">
-  <a href="/" class="text-2xl font-brush font-bold text-[#F2F2EF] hover:text-[#D6B977] transition">
-    Saleté Sincère
-  </a>
-  <div class="flex items-center gap-6">
-    <a class="text-sm text-[#D6B977] underline hover:text-[#B99E5A] transition" href="/podcast">
-      🎙️ Podcast
+{{!-- Shared public navigation: keep destinations identical on every page. --}}
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="site-logo" href="/" aria-label="Accueil Saleté Sincère">
+      <img src="/images/logo-salete-sincere-horizontal.png" width="744" height="213" alt="Saleté Sincère">
     </a>
-    <a class="text-sm text-[#D6B977] underline hover:text-[#B99E5A] transition" href="/newsletter">
-      📧 Newsletter
-    </a>
+    <nav class="site-navigation" aria-label="Navigation principale">
+      <a href="/podcast"{{#if (eq currentPage 'podcast')}} aria-current="{{#if episodeData}}location{{else}}page{{/if}}"{{/if}}>Podcast</a>
+      <a href="/damien-cavailles"{{#if (eq currentPage 'author')}} aria-current="page"{{/if}}>À propos</a>
+      <a href="/#contact">Contact</a>
+    </nav>
   </div>
 </header>

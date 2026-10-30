@@ -7,7 +7,9 @@ import { chromium } from 'playwright'
 import Handlebars from 'handlebars'
 
 // Uses the browser's real CSS timeline, also scrubbed by the laboratory.
-const browser = await chromium.launch({ headless: true, channel: process.env.LOGO_BROWSER_CHANNEL || undefined })
+const browser = await chromium.launch({ headless: true, chromiumSandbox: true,
+  channel: process.env.LOGO_BROWSER_CHANNEL || undefined,
+  executablePath: process.env.E2E_BROWSER_EXECUTABLE || undefined })
 const outputDirectory = path.join(os.tmpdir(), 'salete-logo-browser-check')
 await mkdir(outputDirectory, { recursive: true })
 const svg = await readFile(new URL('../public/images/logo-noname-web.svg', import.meta.url), 'utf8')
@@ -123,12 +125,21 @@ try {
     ['/', '../server/views/landing.hbs', 'text/html'],
     ['/js/landing.js', '../public/js/landing.js', 'text/javascript'],
     ['/style.css', '../public/style.css', 'text/css'],
+    ['/site-header.css', '../public/site-header.css', 'text/css'],
     ['/laboratoire-du-geste', '../server/views/logo-lab.hbs', 'text/html'],
     ['/js/logo-lab.js', '../public/js/logo-lab.js', 'text/javascript'],
     ['/logo-lab.css', '../public/logo-lab.css', 'text/css'],
     ['/images/logo-noname-web.svg', '../public/images/logo-noname-web.svg', 'image/svg+xml']
   ].map(async ([url, file, contentType]) => [url, { body: await readFile(new URL(file, import.meta.url), 'utf8'), contentType }])) )
-  assets.get('/').body = Handlebars.compile(assets.get('/').body)({ landingEpisodes: [] })
+  Handlebars.registerHelper('eq', (left, right) => left === right)
+  Handlebars.registerPartial('header', await readFile(new URL('../server/views/partials/header.hbs', import.meta.url), 'utf8'))
+  for (const url of ['/', '/laboratoire-du-geste']) {
+    assets.get(url).body = Handlebars.compile(assets.get(url).body)({ landingEpisodes: [], title: 'Laboratoire du geste' })
+  }
+  assets.set('/images/logo-salete-sincere-horizontal.png', {
+    body: await readFile(new URL('../public/images/logo-salete-sincere-horizontal.png', import.meta.url)),
+    contentType: 'image/png'
+  })
   await page.context().route('**/*', route => {
     if (new URL(route.request().url()).origin !== 'http://logo.test') return route.abort()
     const asset = assets.get(new URL(route.request().url()).pathname)
