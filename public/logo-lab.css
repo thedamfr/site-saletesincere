@@ -194,23 +194,6 @@ a {
   text-underline-offset: 3px;
 }
 
-.lab-footer {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px 24px;
-  margin-top: 32px;
-  padding-top: 20px;
-  border-top: 1px solid #b7b6b1;
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
-
-.lab-footer p {
-  margin: 0;
-}
-
 a:focus-visible,
 button:focus-visible,
 select:focus-visible,

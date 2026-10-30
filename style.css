@@ -90,23 +90,6 @@ body.landing-page {
   margin-inline: auto;
 }
 
-.landing-footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 24px;
-}
-
-.landing-footer-links a {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  font-family: "Oswald", sans-serif;
-  font-size: 1rem;
-  text-decoration: none;
-}
-
-.landing-footer-links a:hover,
 .landing-contact-links a:hover {
   text-decoration: underline;
 }
@@ -555,40 +538,6 @@ body.landing-page {
   font-weight: 600;
 }
 
-.landing-footer {
-  display: grid;
-  grid-template-columns: 130px minmax(0, 1fr) minmax(0, 440px);
-  align-items: center;
-  column-gap: 28px;
-  row-gap: 14px;
-  border-top: 1px solid var(--landing-line);
-  padding: 28px 0 36px;
-  color: var(--landing-muted);
-  font-size: 0.72rem;
-}
-
-.landing-footer-brand img {
-  width: 130px;
-  height: auto;
-}
-
-.landing-credits {
-  margin-top: 6px !important;
-}
-
-.landing-credits a {
-  color: inherit;
-  text-underline-offset: 2px;
-}
-
-.landing-legal {
-  grid-column: 1 / -1;
-  max-width: 900px;
-  margin-inline: auto !important;
-  color: #777873;
-  text-align: center;
-}
-
 @media (max-width: 900px) {
   .landing-about {
     padding-inline: 0;
@@ -613,25 +562,11 @@ body.landing-page {
     border-left: 0;
     padding: 14px 0 0;
   }
-
-  .landing-footer {
-    grid-template-columns: 180px 1fr;
-  }
-
-  .landing-footer-links {
-    grid-column: 1 / -1;
-    justify-self: start;
-  }
 }
 
 @media (max-width: 680px) {
   .landing-shell {
     width: min(100% - 32px, 1120px);
-  }
-
-  .landing-footer-links {
-    gap: 16px;
-    flex-wrap: wrap;
   }
 
   .landing-hero {
@@ -661,8 +596,7 @@ body.landing-page {
   .landing-card-grid,
   .landing-split,
   .landing-experience,
-  .landing-contact,
-  .landing-footer {
+  .landing-contact {
     grid-template-columns: 1fr;
   }
 
@@ -726,15 +660,6 @@ body.landing-page {
   .landing-contact-links {
     flex-direction: column;
   }
-
-  .landing-footer {
-    justify-items: center;
-    text-align: center;
-  }
-
-  .landing-footer-links {
-    justify-self: center;
-  }
 }
 
 @media (max-width: 420px) {
@@ -784,7 +709,6 @@ body.landing-page {
 .podcast-platform .text-left { min-width: 0; overflow-wrap: anywhere; }
 .podcast-platform .w-10 { flex-shrink: 0; }
 .podcast-platform > div > svg { flex-shrink: 0; margin-left: 12px; color: var(--landing-ink); }
-.podcast-page .podcast-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; padding-block: 28px; border-top: 1px solid var(--landing-line); font-size: 0.75rem; color: var(--landing-muted); }
 .podcast-episode :focus-visible, .podcast-feature :focus-visible { outline-color: var(--landing-yellow); }
 @media (max-width: 900px) {
   .podcast-feature, .podcast-episode { grid-template-columns: minmax(0, 1fr); }
@@ -794,7 +718,6 @@ body.landing-page {
   .podcast-hero { grid-template-columns: 1fr; gap: 28px; margin-top: 24px; padding: 20px; }
   .podcast-cover { width: min(100%, 360px); justify-self: center; }
   .podcast-platforms { grid-template-columns: 1fr; }
-  .podcast-page .podcast-footer { flex-direction: column; text-align: center; }
 }
 
 .podcast-hero .landing-episode-list { grid-column: 1 / -1; border-left: 0; border-top: 1px solid #454647; padding: 20px 0 0; }

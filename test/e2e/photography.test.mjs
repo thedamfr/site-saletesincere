@@ -21,6 +21,7 @@ const command = `${remote ? `PHOTOGRAPHY_E2E_TARGET=${target} ` : ''}npm run tes
 const remoteAssets = [
   '/photography.css',
   '/site-header.css',
+  '/site-footer.css',
   '/images/photography/forum-php-2026-conference-480.webp',
   '/images/photography/forum-php-2026-conference-960.webp',
   '/images/photography/forum-php-2026-conference-1600.webp',
@@ -158,7 +159,7 @@ test('Golden Journeys — photographie', { timeout: remote ? 180_000 : 120_000 }
       await pageNavigation.getByRole('link', { name: 'Parlons de votre projet' }).click()
       assert.equal(new URL(page.url()).hash, '#photo-contact')
       assert.equal(await page.getByRole('link', { name: 'Écrire à Damien' }).getAttribute('href'), 'mailto:damien@saletesincere.fr')
-      await page.getByRole('link', { name: 'Accueil Saleté Sincère' }).click()
+      await page.getByRole('banner').getByRole('link', { name: 'Accueil Saleté Sincère', exact: true }).click()
       await page.waitForURL(baseURL + '/')
       assert.match(await page.locator('h1').innerText(), /On gratte la surface/i)
       await page.goto(baseURL + '/photographie')
@@ -269,7 +270,7 @@ test('Golden Journeys — photographie', { timeout: remote ? 180_000 : 120_000 }
         assert.equal(await noScriptPage.getByRole('link', { name: 'Écrire à Damien' }).isVisible(), true)
         await noScriptPage.reload()
         assert.equal(await noScriptPage.locator('details').getAttribute('open'), null)
-        await noScriptPage.getByRole('link', { name: 'Accueil Saleté Sincère' }).click()
+        await noScriptPage.getByRole('banner').getByRole('link', { name: 'Accueil Saleté Sincère', exact: true }).click()
         assert.match(await noScriptPage.locator('h1').innerText(), /On gratte la surface/i)
         outcomes.push(`Sans JavaScript${remote ? '' : ' et sans base'} : lecture, galerie, contact, rechargement et retour : OK`)
       } finally {

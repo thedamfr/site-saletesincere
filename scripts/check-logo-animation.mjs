@@ -126,6 +126,7 @@ try {
     ['/js/landing.js', '../public/js/landing.js', 'text/javascript'],
     ['/style.css', '../public/style.css', 'text/css'],
     ['/site-header.css', '../public/site-header.css', 'text/css'],
+    ['/site-footer.css', '../public/site-footer.css', 'text/css'],
     ['/laboratoire-du-geste', '../server/views/logo-lab.hbs', 'text/html'],
     ['/js/logo-lab.js', '../public/js/logo-lab.js', 'text/javascript'],
     ['/logo-lab.css', '../public/logo-lab.css', 'text/css'],
@@ -133,6 +134,7 @@ try {
   ].map(async ([url, file, contentType]) => [url, { body: await readFile(new URL(file, import.meta.url), 'utf8'), contentType }])) )
   Handlebars.registerHelper('eq', (left, right) => left === right)
   Handlebars.registerPartial('header', await readFile(new URL('../server/views/partials/header.hbs', import.meta.url), 'utf8'))
+  Handlebars.registerPartial('footer', await readFile(new URL('../server/views/partials/footer.hbs', import.meta.url), 'utf8'))
   for (const url of ['/', '/laboratoire-du-geste']) {
     assets.get(url).body = Handlebars.compile(assets.get(url).body)({ landingEpisodes: [], title: 'Laboratoire du geste' })
   }

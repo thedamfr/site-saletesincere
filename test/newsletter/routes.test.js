@@ -14,6 +14,7 @@ async function appFor(t, state) {
   const engine = handlebars.create()
   engine.registerHelper('eq', (left, right) => left === right)
   engine.registerPartial('header', readFileSync(new URL('../../server/views/partials/header.hbs', import.meta.url), 'utf8'))
+  engine.registerPartial('footer', readFileSync(new URL('../../server/views/partials/footer.hbs', import.meta.url), 'utf8'))
   await app.register(formbody)
   await app.register(view, {
     engine: { handlebars: engine },
