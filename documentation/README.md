@@ -47,6 +47,7 @@ Les documents historiques ne prouvent pas l’état de la production actuelle.
 - **Décision** : [ADR 0020](adr/adr_0020_livraison_continue_et_staging.md) — récupération d’un état public validé depuis OVH, sans token GitHub sur le serveur.
 
 ### 📌 Product Requirements
+- **Production de podcast** : [Offre et Golden Journeys](production-podcast.md) — page publique, demande de session gratuite par email et [ADR 0025](adr/adr_0025_offre_production_podcast.md).
 - **Homepage** : [`./prd_homepage.md`](./prd_homepage.md)
 - **Mode dégradé sans base de données** : [`./prd_mode_degrade_sans_bdd.md`](./prd_mode_degrade_sans_bdd.md) - Résilience HTTP, fallback podcast et reconnexion singleton de `pg-boss`
 - **Traction podcast et OP3** : [`./prd_traction_podcast_op3.md`](./prd_traction_podcast_op3.md) - Preuve sociale, cache quotidien et activation progressive

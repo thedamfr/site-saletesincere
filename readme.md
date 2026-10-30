@@ -17,6 +17,8 @@ subsiste, mais le mur vocal et ses uploads sont désactivés sur la production O
 
 ## ✨ Fonctionnalités
 
+- **Production de podcast** : Offre éditoriale sur `/offre-production-podcast/`,
+  accessible depuis les footers, avec [guide et Golden Journeys](documentation/production-podcast.md).
 - **📷 Photographie** : Offre et références événementielles sur `/photographie`,
   avec [guide et Golden Journeys](documentation/photographie.md)
 - **🎙️ Podcast** : Smartlinks multiplateformes, lecture et métadonnées RSS

@@ -12,6 +12,7 @@
     "test:e2e:photography": "node --test test/e2e/photography.test.mjs",
     "test:e2e:podcast": "node --test test/e2e/podcast.test.mjs",
     "test:e2e:podcast-video": "node --test test/e2e/podcast-video.test.mjs",
+    "test:e2e:production-podcast": "node --test test/e2e/production-podcast.test.mjs",
     "check:logo-animation": "node scripts/check-logo-animation.mjs",
     "check:landing-layout": "node scripts/check-landing-layout.mjs",
     "start": "node server.js",

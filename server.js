@@ -950,6 +950,19 @@ app.get("/", {
   });
 });
 
+// Editorial production offer: available independently of database and podcast services.
+app.get('/offre-production-podcast/', {
+  config: { rateLimit: pageLimiter }
+}, async (req, reply) => reply.view('production-podcast.hbs'));
+
+app.get('/offre-production-podcast', {
+  config: { rateLimit: pageLimiter }
+}, async (req, reply) => {
+  const queryIndex = req.raw.url.indexOf('?');
+  const query = queryIndex === -1 ? '' : req.raw.url.slice(queryIndex);
+  return reply.code(301).redirect('/offre-production-podcast/' + query);
+});
+
 // Photography portfolio: server-rendered without database, RSS or storage access.
 app.get("/photographie", {
   config: { rateLimit: pageLimiter }

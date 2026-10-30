@@ -58,6 +58,10 @@ jobs:
         env:
           E2E_OUTPUT: /tmp/site-podcast-video-e2e
           E2E_BROWSER_CHANNEL: chrome
+      - run: npm run test:e2e:production-podcast
+        env:
+          PRODUCTION_PODCAST_E2E_OUTPUT: /tmp/site-production-podcast-e2e
+          E2E_BROWSER_CHANNEL: chrome
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -66,6 +70,7 @@ jobs:
             /tmp/site-author-e2e
             /tmp/site-photography-e2e
             /tmp/site-podcast-video-e2e
+            /tmp/site-production-podcast-e2e
             test-results/podcast
           if-no-files-found: ignore
       - name: Verify migrations on disposable PostgreSQL, including repeat execution

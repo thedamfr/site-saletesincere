@@ -1,0 +1,553 @@
+/* Podcast production offer: the Saleté Sincère identity, without runtime dependencies. */
+.production-page {
+  --production-paper: #f7f6f2;
+  --production-ink: #111214;
+  --production-muted: #55564f;
+  --production-line: #c9c9c1;
+  margin: 0;
+  background: var(--production-paper);
+  color: var(--production-ink);
+  font: 400 16px/1.7 "Inter", Arial, sans-serif;
+  color-scheme: light;
+  -webkit-font-smoothing: antialiased;
+}
+
+.production-page *,
+.production-page *::before,
+.production-page *::after {
+  box-sizing: border-box;
+}
+
+.production-page h1,
+.production-page h2,
+.production-page h3,
+.production-page p,
+.production-page figure {
+  margin: 0;
+}
+
+.production-page h1,
+.production-page h2,
+.production-page h3 {
+  font-family: "Oswald", "Arial Narrow", sans-serif;
+  font-weight: 500;
+  text-wrap: balance;
+}
+
+.production-page h1 {
+  font-size: clamp(3.2rem, 6.8vw, 5.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+.production-page h2 {
+  font-size: clamp(2.2rem, 4vw, 3.5rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+
+.production-page h3 {
+  font-size: 1.7rem;
+  line-height: 1.25;
+}
+
+.production-page img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.production-page a {
+  color: inherit;
+  text-underline-offset: 0.22em;
+  text-decoration-thickness: 1px;
+}
+
+.production-page a:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 5px;
+}
+
+.production-page .production-shell {
+  width: min(1120px, calc(100% - 48px));
+  margin-inline: auto;
+}
+
+.production-page .production-skip-link {
+  position: absolute;
+  top: 8px;
+  left: 16px;
+  z-index: 10;
+  padding: 12px 18px;
+  background: var(--production-ink);
+  color: var(--production-paper);
+  transform: translateY(-180%);
+}
+
+.production-page .production-skip-link:focus {
+  transform: translateY(0);
+}
+
+.production-page .production-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.production-page .production-hero {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  align-items: center;
+  gap: 64px 56px;
+  padding-block: 72px 80px;
+}
+
+.production-page .production-hero-copy > .production-eyebrow {
+  margin-bottom: 22px;
+}
+
+.production-page .production-lead {
+  max-width: 35rem;
+  margin-block: 28px;
+  font-size: 1.08rem;
+  line-height: 1.7;
+}
+
+.production-page .production-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 52px;
+  padding: 15px 22px;
+  background: var(--production-ink);
+  color: var(--production-paper);
+  border: 1px solid var(--production-ink);
+  font-family: "Oswald", "Arial Narrow", sans-serif;
+  font-size: 1.12rem;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.production-page .production-button:hover {
+  background: #33342f;
+  text-decoration: underline;
+}
+
+.production-page .production-button:focus-visible {
+  outline-color: var(--production-ink);
+}
+
+.production-page .production-hero-note {
+  margin-top: 12px;
+  color: var(--production-muted);
+  font-size: 0.8rem;
+}
+
+.production-page .production-hero-photo {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.production-page .production-hero-photo img {
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: 48% center;
+}
+
+.production-page figcaption {
+  padding-top: 12px;
+  color: var(--production-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.production-page .production-context {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 40px;
+  grid-column: 1 / -1;
+  padding-top: 30px;
+  border-top: 1px solid var(--production-line);
+}
+
+.production-page .production-context > div > p + p {
+  margin-top: 16px;
+}
+
+.production-page .production-note {
+  color: var(--production-muted);
+  font-size: 0.88rem;
+  line-height: 1.65;
+}
+
+.production-page .production-section {
+  padding-block: 76px;
+  border-top: 1px solid var(--production-line);
+}
+
+.production-page .production-section-heading {
+  max-width: 720px;
+  margin-bottom: 38px;
+}
+
+.production-page .production-section-heading > .production-eyebrow {
+  margin-bottom: 16px;
+}
+
+.production-page .production-section-heading > p:last-child:not(.production-eyebrow) {
+  margin-top: 22px;
+  max-width: 41rem;
+}
+
+.production-page .production-services {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 56px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.production-page .production-services li {
+  display: flex;
+  gap: 22px;
+  padding-block: 26px;
+  border-top: 1px solid var(--production-line);
+}
+
+.production-page .production-service-number {
+  flex: 0 0 26px;
+  padding-top: 5px;
+  color: var(--production-muted);
+  font-family: "Oswald", "Arial Narrow", sans-serif;
+  font-size: 0.88rem;
+}
+
+.production-page .production-services h3 {
+  margin-bottom: 10px;
+}
+
+.production-page .production-services p {
+  font-size: 0.95rem;
+}
+
+.production-page .production-scope-note {
+  margin-top: 18px;
+  padding: 22px 26px;
+  background: #ebeae4;
+  font-size: 0.88rem;
+}
+
+.production-page .production-formats {
+  padding-block: 76px;
+  background: #ebeae4;
+}
+
+.production-page .production-format-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.production-page .production-format {
+  padding: 32px;
+  border-top: 3px solid var(--production-ink);
+  background: var(--production-paper);
+}
+
+.production-page .production-format > .production-eyebrow {
+  margin-bottom: 20px;
+}
+
+.production-page .production-format h3 {
+  font-size: 2rem;
+}
+
+.production-page .production-price {
+  margin-block: 16px 26px;
+  font-size: 0.88rem;
+}
+
+.production-page .production-price strong {
+  display: block;
+  margin-top: 2px;
+  font-family: "Oswald", "Arial Narrow", sans-serif;
+  font-size: clamp(1.8rem, 2.5vw, 2.2rem);
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.production-page .production-format > .production-note {
+  margin-top: 18px;
+}
+
+.production-page .production-sponsor-note {
+  max-width: 46rem;
+  margin-top: 26px;
+  font-size: 0.88rem;
+}
+
+.production-page .production-about {
+  border-top: 0;
+}
+
+.production-page .production-about-grid {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  align-items: start;
+  gap: 56px;
+}
+
+.production-page .production-about-photo img {
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.production-page .production-prose > p + p {
+  margin-top: 20px;
+}
+
+.production-page .production-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  min-height: 44px;
+  margin-top: 18px;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.production-page .production-references {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 56px;
+  margin-top: 54px;
+}
+
+.production-page .production-reference {
+  padding-top: 26px;
+  border-top: 1px solid var(--production-line);
+}
+
+.production-page .production-reference h3 {
+  max-width: 25rem;
+  margin-block: 16px;
+  font-size: 1.8rem;
+}
+
+.production-page .production-reference > p:not(.production-eyebrow) {
+  font-size: 0.9rem;
+}
+
+.production-page .production-reference-role {
+  margin-top: 18px;
+  font-weight: 600;
+}
+
+.production-page .production-session {
+  padding-block: 80px;
+  background: var(--production-ink);
+  color: var(--production-paper);
+  scroll-margin-top: 24px;
+}
+
+.production-page .production-session-grid {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 72px;
+}
+
+.production-page .production-session h2 {
+  max-width: 12ch;
+  margin-top: 22px;
+  font-size: clamp(2.8rem, 4.7vw, 4rem);
+}
+
+.production-page .production-session-detail {
+  margin-top: 28px;
+  font-family: "Oswald", "Arial Narrow", sans-serif;
+  font-size: 1.05rem;
+}
+
+.production-page .production-session-intro {
+  font-size: 1.15rem;
+}
+
+.production-page .production-session .production-note {
+  color: #c5c5bf;
+}
+
+.production-page .production-button-light {
+  margin-top: 26px;
+  background: var(--production-paper);
+  color: var(--production-ink);
+  border-color: var(--production-paper);
+}
+
+.production-page .production-button-light:hover {
+  background: #dcdcd5;
+}
+
+.production-page .production-button-light:focus-visible {
+  outline-color: var(--production-paper);
+}
+
+.production-page .production-session-contact {
+  margin-top: 20px;
+  color: #c5c5bf;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+.production-page .production-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 30px;
+  padding-block: 34px;
+  color: var(--production-muted);
+  font-size: 0.8rem;
+}
+
+.production-page .production-footer-logo {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  width: 130px;
+}
+
+.production-page .production-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+}
+
+.production-page .production-footer-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.production-page .production-credits,
+.production-page .production-legal {
+  flex-basis: 100%;
+  font-size: 0.72rem;
+}
+
+@media (max-width: 900px) {
+  .production-page .production-hero {
+    gap: 48px 32px;
+    padding-block: 52px 64px;
+  }
+
+  .production-page .production-hero-photo img {
+    aspect-ratio: 3 / 4;
+  }
+
+  .production-page .production-services,
+  .production-page .production-about-grid,
+  .production-page .production-references,
+  .production-page .production-session-grid {
+    gap: 32px;
+  }
+
+  .production-page .production-format {
+    padding: 26px;
+  }
+}
+
+@media (max-width: 680px) {
+  .production-page .production-shell {
+    width: calc(100% - 32px);
+  }
+
+  .production-page .production-hero,
+  .production-page .production-context,
+  .production-page .production-services,
+  .production-page .production-format-grid,
+  .production-page .production-about-grid,
+  .production-page .production-references,
+  .production-page .production-session-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .production-page .production-hero {
+    gap: 36px;
+    padding-block: 40px 52px;
+  }
+
+  .production-page h1 {
+    font-size: clamp(3.1rem, 10.8vw, 4.8rem);
+  }
+
+  .production-page .production-lead {
+    margin-block: 22px;
+    font-size: 1rem;
+  }
+
+  .production-page .production-hero-photo img {
+    aspect-ratio: 3 / 2;
+  }
+
+  .production-page .production-context {
+    gap: 18px;
+    padding-top: 26px;
+  }
+
+  .production-page .production-section,
+  .production-page .production-formats,
+  .production-page .production-session {
+    padding-block: 52px;
+  }
+
+  .production-page .production-section-heading {
+    margin-bottom: 28px;
+  }
+
+  .production-page .production-services {
+    gap: 0;
+  }
+
+  .production-page .production-scope-note {
+    padding: 20px;
+  }
+
+  .production-page .production-format-grid {
+    gap: 22px;
+  }
+
+  .production-page .production-format {
+    padding: 26px 22px;
+  }
+
+  .production-page .production-references {
+    margin-top: 40px;
+  }
+
+  .production-page .production-session h2 {
+    max-width: 16ch;
+    font-size: clamp(2.6rem, 8vw, 3.6rem);
+  }
+
+  .production-page .production-button {
+    max-width: 100%;
+    padding-inline: 18px;
+    gap: 18px;
+    font-size: 1.05rem;
+  }
+
+  .production-page .production-footer {
+    justify-content: flex-start;
+  }
+
+  .production-page .production-footer-links {
+    flex-basis: 100%;
+  }
+}
