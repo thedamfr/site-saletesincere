@@ -13,10 +13,11 @@ const browser = await { chromium, webkit }[engine].launch({
 try {
   Handlebars.registerHelper('eq', (left, right) => left === right)
   Handlebars.registerPartial('header', await readFile(new URL('../server/views/partials/header.hbs', import.meta.url), 'utf8'))
+  Handlebars.registerPartial('footer', await readFile(new URL('../server/views/partials/footer.hbs', import.meta.url), 'utf8'))
   const template = await readFile(new URL('../server/views/landing.hbs', import.meta.url), 'utf8')
   const html = Handlebars.compile(template)({ landingEpisodes: [] })
   const assets = new Map([['/', { body: html, contentType: 'text/html' }]])
-  const files = new Set(['/style.css', '/site-header.css', '/js/landing.js', ...[...html.matchAll(/src="(\/images\/[^"?]+)/g)].map(match => match[1])])
+  const files = new Set(['/style.css', '/site-header.css', '/site-footer.css', '/js/landing.js', ...[...html.matchAll(/src="(\/images\/[^"?]+)/g)].map(match => match[1])])
   const types = { css: 'text/css', js: 'text/javascript', svg: 'image/svg+xml', png: 'image/png', jpg: 'image/jpeg' }
   for (const file of files) {
     assets.set(file, {

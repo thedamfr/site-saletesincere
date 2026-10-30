@@ -405,6 +405,10 @@ const headerPartial = fs.readFileSync(
   "utf-8"
 );
 handlebars.registerPartial('header', headerPartial);
+handlebars.registerPartial('footer', fs.readFileSync(
+  path.join(__dirname, "server/views/partials/footer.hbs"),
+  "utf-8"
+));
 
 // Views (Handlebars)
 await app.register(fastifyView, {
