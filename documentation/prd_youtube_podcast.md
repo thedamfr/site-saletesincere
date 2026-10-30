@@ -1,8 +1,27 @@
 # PRD — Disponibilité vidéo sur les pages podcast
 
-**Version :** 1.6
-**Date :** 2026-09-11
-**Statut :** correctifs Apple et iframe YouTube implémentés localement, non déployés
+## Summary (30 secondes)
+
+Version 1.7 — 30 octobre 2026. Le CTA général présente « Le site du podcast »
+et ses transcripts complets. YouTube, Apple Podcasts et Spotify affichent
+« Vidéo selon les épisodes ». Livraison en cours, recette de production à confirmer.
+
+## Synthèse (3 minutes)
+
+Les badges génériques de `/podcast` décrivent une offre variable selon les épisodes,
+sans promettre une qualité HD/4K. Les pages épisode conservent leurs badges Apple,
+Spotify et YouTube soumis aux preuves existantes. Aucun cache, worker ou schéma
+ne change. Le CTA garde sa destination. Les Golden Journeys sont exécutés via
+`npm run test:e2e:podcast`, avec destinations externes simulées ; voir le
+[guide de qualification](podcast-plateformes.md).
+
+## Annexes
+
+### Historique
+
+La version 1.6 du 11 septembre 2026 excluait les badges de la page générale et
+portait le statut « correctifs Apple et iframe YouTube implémentés localement,
+non déployés ». La version 1.7 remplace uniquement cette règle de la page générale.
 
 ## Problème
 
@@ -16,11 +35,12 @@ une présentation discrète inspirée des métadonnées Apple Podcasts.
 
 ## Expérience attendue
 
-- `/podcast` n'affiche aucune métadonnée ou pastille de disponibilité vidéo.
+- `/podcast` affiche « Vidéo selon les épisodes » sur les cartes YouTube, Apple
+  Podcasts et Spotify, sans qualité HD/4K.
 - La chaîne YouTube reste proposée parmi les plateformes de diffusion de
   `/podcast`.
 - `/podcast/:season/:episode` affiche la même métadonnée au niveau de l’épisode.
-- Les cartes Apple, Spotify et YouTube reçoivent une micro-pastille vidéo seulement
+- Sur les pages épisode, les cartes Apple, Spotify et YouTube reçoivent une micro-pastille vidéo seulement
   lorsque la vidéo de cet épisode est vérifiée sur la plateforme concernée.
 - La carte YouTube n'existe sur une page épisode que lorsqu'un lien direct vers
   la vidéo de cet épisode a été réconcilié. Aucun lien générique de chaîne ne la
