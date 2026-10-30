@@ -5,19 +5,15 @@
   font-family: Arial, Helvetica, sans-serif;
   font-size: 15px;
   line-height: 1.65;
-  padding: 0 34px;
   overflow-wrap: anywhere;
 }
 .author-page * { box-sizing: border-box; }
-.author-shell { max-width: 790px; margin: auto; }
+.author-shell { width: min(790px, calc(100% - 68px)); margin: auto; }
 .author-page a { color: #325f67; text-decoration: underline; text-decoration-color: #325f6766; text-underline-offset: 3px; }
 .author-page a:hover { text-decoration-color: currentColor; }
 .author-page a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
 .author-page .skip-link { position: absolute; top: -100px; left: 20px; background: #fff; padding: 10px; }
 .author-page .skip-link:focus { top: 5px; z-index: 1; }
-.author-header { padding: 25px 0 20px; border-bottom: 1px solid #dcdfd9; display: flex; justify-content: space-between; gap: 20px; font-size: 12px; }
-.author-header a { color: #272d2b; text-decoration: none; }
-.author-header nav { display: flex; gap: 21px; }
 .author-intro { display: grid; grid-template-columns: minmax(0, 1fr) 164px; column-gap: 35px; padding: 37px 0 32px; align-items: start; }
 .author-heading { grid-column: 1; }
 .author-page h1 { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-size: 37px; letter-spacing: -.025em; line-height: 1.2; margin: 0 0 6px; }
@@ -48,7 +44,7 @@
 .author-contact a { display: inline-block; padding: 8px 0; }
 .author-footer { font-size: 11px; color: #626a65; padding: 0 0 23px; }
 @media (max-width: 620px) {
-  .author-page { padding: 0 21px; }
+  .author-shell { width: calc(100% - 42px); }
   .author-intro { gap: 19px; grid-template-columns: minmax(0, 1fr) 104px; padding-top: 27px; }
   .author-page h1 { font-size: 29px; }
   .author-portrait { grid-row: 1; }
@@ -56,11 +52,9 @@
   .author-editing { grid-template-columns: 1fr; gap: 22px; }
   .author-work-photo { max-width: 320px; }
   .author-contact { align-items: flex-start; flex-direction: column; gap: 4px; }
-  .author-header { gap: 12px; }
-  .author-header nav { gap: 14px; }
   .author-page .author-role { margin-bottom: 0; }
 }
 @media (pointer: coarse) {
-  .author-header a, .author-contact a, .author-download { min-height: 44px; display: inline-flex; align-items: center; }
+  .author-contact a, .author-download { min-height: 44px; display: inline-flex; align-items: center; }
   .author-prose li a { display: inline-block; padding-block: 4px; }
 }

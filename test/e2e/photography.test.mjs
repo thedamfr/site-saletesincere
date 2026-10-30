@@ -20,6 +20,7 @@ const outputDirectory = path.resolve(process.env.PHOTOGRAPHY_E2E_OUTPUT || (remo
 const command = `${remote ? `PHOTOGRAPHY_E2E_TARGET=${target} ` : ''}npm run test:e2e:photography`
 const remoteAssets = [
   '/photography.css',
+  '/site-header.css',
   '/images/photography/forum-php-2026-conference-480.webp',
   '/images/photography/forum-php-2026-conference-960.webp',
   '/images/photography/forum-php-2026-conference-1600.webp',
@@ -108,7 +109,7 @@ test('Golden Journeys — photographie', { timeout: remote ? 180_000 : 120_000 }
       await page.goto(baseURL)
       for (const width of [390, 320]) {
         await page.setViewportSize({ width, height: 844 })
-        const navigationFits = await page.getByRole('navigation').getByRole('link').evaluateAll(links => links.every(link => {
+        const navigationFits = await page.getByRole('navigation', { name: 'Navigation principale', exact: true }).getByRole('link').evaluateAll(links => links.every(link => {
           const bounds = link.getBoundingClientRect()
           return bounds.left >= 0 && bounds.right <= innerWidth
         }))
@@ -116,10 +117,16 @@ test('Golden Journeys — photographie', { timeout: remote ? 180_000 : 120_000 }
         if (width === 320) await page.screenshot({ path: path.join(outputDirectory, 'home-320.png') })
       }
       await page.setViewportSize({ width: 1440, height: 1000 })
-      await page.getByRole('navigation').getByRole('link', { name: 'Photographie' }).click()
+      await page.getByRole('navigation', { name: 'Navigation principale', exact: true }).getByRole('link', { name: 'Photographie', exact: true }).click()
       await page.waitForURL('**/photographie')
       assert.equal(new URL(page.url()).origin, baseURL)
       assert.match(await page.title(), /Photographie événementielle/)
+      const primaryNavigation = page.getByRole('navigation', { name: 'Navigation principale', exact: true })
+      const pageNavigation = page.getByRole('navigation', { name: 'Sur cette page', exact: true })
+      assert.deepEqual(await primaryNavigation.getByRole('link').allTextContents(), ['Photographie', 'Podcast', 'À propos', 'Contact'])
+      assert.equal(await primaryNavigation.getByRole('link', { name: 'Photographie', exact: true }).getAttribute('aria-current'), 'page')
+      assert.deepEqual(await pageNavigation.getByRole('link').evaluateAll(links => links.map(link => link.getAttribute('href'))),
+        ['#photo-reports', '#photo-method', '#photo-contact'])
       assert.equal(await page.getByRole('contentinfo').getByRole('link', { name: 'À propos', exact: true }).count(), 1)
       const earlyContact = page.locator('.photo-intro').getByRole('link', { name: 'Parlons de votre événement' })
       assert.equal(await earlyContact.count(), 1, 'Contact must be offered in the introduction')
@@ -138,14 +145,17 @@ test('Golden Journeys — photographie', { timeout: remote ? 180_000 : 120_000 }
       assert.equal(await opening.getAttribute('src'), '/images/photography/forum-php-2026-conference-1600.webp')
       assert.match(await opening.getAttribute('alt'), /Forum PHP 2026/)
       assert.deepEqual((await opening.getAttribute('srcset')).split(',').map(candidate => Number(candidate.trim().split(/\s+/)[1].replace('w', ''))), [480, 960, 1600])
-      await page.getByRole('navigation').getByRole('link', { name: 'Reportages', exact: true }).click()
+      await pageNavigation.getByRole('link', { name: 'Reportages', exact: true }).click()
       assert.equal(new URL(page.url()).hash, '#photo-reports')
       assert.equal(await page.locator('#photo-reports').getByRole('heading', { name: 'Forum PHP 2026', exact: true }).isVisible(), true)
       assert.equal(await page.getByRole('link', { name: 'Parlons de votre événement' }).getAttribute('href'), 'mailto:damien@saletesincere.fr')
       assert.match(await page.locator('.photo-delivery').innerText(), /20 ou 40 photos/)
       assert.match(await page.locator('.photo-delivery').innerText(), /Juste après la prise de vue/)
       assert.match(await page.locator('.photo-delivery').innerText(), /consentement/)
-      await page.getByRole('link', { name: 'Parlons de votre projet' }).click()
+      await pageNavigation.getByRole('link', { name: 'L’approche', exact: true }).click()
+      assert.equal(new URL(page.url()).hash, '#photo-method')
+      assert.equal(await page.locator('#photo-method').isVisible(), true)
+      await pageNavigation.getByRole('link', { name: 'Parlons de votre projet' }).click()
       assert.equal(new URL(page.url()).hash, '#photo-contact')
       assert.equal(await page.getByRole('link', { name: 'Écrire à Damien' }).getAttribute('href'), 'mailto:damien@saletesincere.fr')
       await page.getByRole('link', { name: 'Accueil Saleté Sincère' }).click()
@@ -245,13 +255,17 @@ test('Golden Journeys — photographie', { timeout: remote ? 180_000 : 120_000 }
         const noScriptPage = await noScriptContext.newPage()
         const response = await noScriptPage.goto(baseURL + '/photographie')
         assert.equal(response.status(), 200)
-        await noScriptPage.getByRole('navigation').getByRole('link', { name: 'Reportages', exact: true }).click()
+        assert.equal(await noScriptPage.getByRole('navigation', { name: 'Navigation principale', exact: true }).getByRole('link', { name: 'Photographie', exact: true }).getAttribute('aria-current'), 'page')
+        const pageNavigation = noScriptPage.getByRole('navigation', { name: 'Sur cette page', exact: true })
+        await pageNavigation.getByRole('link', { name: 'Reportages', exact: true }).click()
         assert.equal(new URL(noScriptPage.url()).hash, '#photo-reports')
         assert.equal(await noScriptPage.locator('#photo-reports').getByRole('heading', { name: 'Forum PHP 2026', exact: true }).isVisible(), true)
         await noScriptPage.locator('summary').click()
         assert.equal(await noScriptPage.locator('details').getAttribute('open'), '')
         assert.equal(await noScriptPage.locator('#photo-dot-extra').isVisible(), true)
-        await noScriptPage.getByRole('link', { name: 'Parlons de votre projet' }).click()
+        await pageNavigation.getByRole('link', { name: 'L’approche', exact: true }).click()
+        assert.equal(new URL(noScriptPage.url()).hash, '#photo-method')
+        await pageNavigation.getByRole('link', { name: 'Parlons de votre projet' }).click()
         assert.equal(await noScriptPage.getByRole('link', { name: 'Écrire à Damien' }).isVisible(), true)
         await noScriptPage.reload()
         assert.equal(await noScriptPage.locator('details').getAttribute('open'), null)
@@ -279,7 +293,7 @@ test('Golden Journeys — photographie', { timeout: remote ? 180_000 : 120_000 }
 
 ${outcomes.length}/3 Golden Journeys terminés. ${errors.length} erreur(s) navigateur ou ressource ${remote ? target : 'locale'}.
 Les échecs d’assertion éventuels restent visibles dans la sortie du runner npm.
-${remote ? `Contrôles HTTPS${target === 'staging' ? ', noindex' : ''}, santé, identifiants publics de l’image et neuf ressources : ${remoteChecksPassed ? 'réussis' : 'incomplets ou échoués'}.` : ''}
+${remote ? `Contrôles HTTPS${target === 'staging' ? ', noindex' : ''}, santé, identifiants publics de l’image et ${remoteAssets.length} ressources : ${remoteChecksPassed ? 'réussis' : 'incomplets ou échoués'}.` : ''}
 
 ## Synthèse
 

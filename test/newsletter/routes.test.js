@@ -5,14 +5,18 @@ import view from '@fastify/view'
 import formbody from '@fastify/formbody'
 import handlebars from 'handlebars'
 import { fileURLToPath } from 'node:url'
+import { readFileSync } from 'node:fs'
 import newsletterRoutes from '../../server/newsletter/routes.js'
 
 async function appFor(t, state) {
   let calls = 0
   const app = Fastify()
+  const engine = handlebars.create()
+  engine.registerHelper('eq', (left, right) => left === right)
+  engine.registerPartial('header', readFileSync(new URL('../../server/views/partials/header.hbs', import.meta.url), 'utf8'))
   await app.register(formbody)
   await app.register(view, {
-    engine: { handlebars },
+    engine: { handlebars: engine },
     root: fileURLToPath(new URL('../../server/views', import.meta.url)),
     viewExt: 'hbs'
   })

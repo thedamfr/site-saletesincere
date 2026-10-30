@@ -511,9 +511,6 @@
   .gap-4 {
     gap: calc(var(--spacing) * 4);
   }
-  .gap-6 {
-    gap: calc(var(--spacing) * 6);
-  }
   .space-y-1 {
     :where(& > :not(:last-child)) {
       --tw-space-y-reverse: 0;
@@ -744,9 +741,6 @@
   }
   .py-4 {
     padding-block: calc(var(--spacing) * 4);
-  }
-  .py-6 {
-    padding-block: calc(var(--spacing) * 6);
   }
   .py-8 {
     padding-block: calc(var(--spacing) * 8);
@@ -996,13 +990,6 @@
       }
     }
   }
-  .hover\:text-\[\#D6B977\] {
-    &:hover {
-      @media (hover: hover) {
-        color: #D6B977;
-      }
-    }
-  }
   .hover\:text-gray-200 {
     &:hover {
       @media (hover: hover) {
@@ -1166,11 +1153,6 @@
       padding-block: calc(var(--spacing) * 5);
     }
   }
-  .lg\:py-8 {
-    @media (width >= 64rem) {
-      padding-block: calc(var(--spacing) * 8);
-    }
-  }
   .lg\:py-20 {
     @media (width >= 64rem) {
       padding-block: calc(var(--spacing) * 20);
@@ -1185,12 +1167,6 @@
     @media (width >= 64rem) {
       font-size: var(--text-2xl);
       line-height: var(--tw-leading, var(--text-2xl--line-height));
-    }
-  }
-  .lg\:text-3xl {
-    @media (width >= 64rem) {
-      font-size: var(--text-3xl);
-      line-height: var(--tw-leading, var(--text-3xl--line-height));
     }
   }
   .lg\:text-4xl {
@@ -1303,30 +1279,11 @@ body.landing-page {
   width: min(1120px, calc(100% - 48px));
   margin-inline: auto;
 }
-.landing-header {
-  display: flex;
-  min-height: 78px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 32px;
-  border-bottom: 1px solid var(--landing-line);
-}
-.landing-logo {
-  display: block;
-  width: 172px;
-  flex: 0 0 auto;
-}
-.landing-logo img {
-  width: 100%;
-  height: auto;
-}
-.landing-navigation,
 .landing-footer-links {
   display: flex;
   align-items: center;
   gap: 30px;
 }
-.landing-navigation a,
 .landing-footer-links a {
   display: inline-flex;
   min-height: 44px;
@@ -1335,7 +1292,6 @@ body.landing-page {
   font-size: 1rem;
   text-decoration: none;
 }
-.landing-navigation a:hover,
 .landing-footer-links a:hover,
 .landing-contact-links a:hover {
   text-decoration: underline;
@@ -1781,15 +1737,6 @@ body.landing-page {
   .landing-shell {
     width: min(100% - 32px, 1120px);
   }
-  .landing-header {
-    min-height: 70px;
-    flex-wrap: wrap;
-    padding-block: 12px;
-  }
-  .landing-logo {
-    width: 138px;
-  }
-  .landing-navigation,
   .landing-footer-links {
     gap: 16px;
     flex-wrap: wrap;
@@ -1876,15 +1823,6 @@ body.landing-page {
   }
 }
 @media (max-width: 420px) {
-  .landing-header {
-    gap: 12px;
-  }
-  .landing-logo {
-    width: 118px;
-  }
-  .landing-navigation a {
-    font-size: 0.9rem;
-  }
   .landing-hero h1 {
     font-size: 2.2rem;
   }

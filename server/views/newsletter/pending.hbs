@@ -11,19 +11,15 @@
   <title>{{title}} – Saleté Sincère</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@400;500;600;700&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@400;500;600;700&family=Kalam:wght@400;700&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/custom.css">
+  <link rel="stylesheet" href="/site-header.css?v=1">
 </head>
 <body class="bg-[#0B0B0B] text-[#F2F2EF] font-sans min-h-screen">
   
   {{!-- Header --}}
-  <header class="flex items-center justify-between px-6 py-4">
-    <a href="/" class="text-2xl font-brush font-bold text-[#F2F2EF] hover:text-[#D6B977] transition">Saleté Sincère</a>
-    <div class="flex items-center gap-6">
-      <a class="text-sm text-[#D6B977] underline hover:text-[#B99E5A] transition" href="/">Retour à l'accueil</a>
-    </div>
-  </header>
+  {{> header}}
   
   {{!-- Main container --}}
   <div class="container mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">

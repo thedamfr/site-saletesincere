@@ -28,20 +28,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/photography.css?v=3">
+    <link rel="stylesheet" href="/photography.css?v=4">
+    <link rel="stylesheet" href="/site-header.css?v=1">
   </head>
   <body class="photography-page">
     <a class="photo-skip-link" href="#contenu">Aller au contenu</a>
-    <header class="photo-header photo-wrap">
-      <a class="photo-logo-link" href="/" aria-label="Accueil Saleté Sincère">
-        <img class="photo-logo" src="/images/logo-salete-sincere-horizontal.png" width="744" height="213" alt="Saleté Sincère">
-      </a>
-      <nav aria-label="Navigation principale">
-        <a href="#photo-reports">Reportages</a>
-        <a class="photo-nav-method" href="#photo-method">L’approche</a>
-        <a class="photo-nav-contact" href="#photo-contact">Parlons de votre projet ↗</a>
-      </nav>
-    </header>
+    {{> header currentPage="photography"}}
     <main id="contenu">
       <section class="photo-hero photo-wrap">
         <span class="photo-eyebrow">Photographie · Événements &amp; reportage corporate</span>
@@ -55,6 +47,11 @@
             </div>
           </div>
         </div>
+        <nav class="photo-page-navigation" aria-label="Sur cette page">
+          <a href="#photo-reports">Reportages</a>
+          <a href="#photo-method">L’approche</a>
+          <a class="photo-nav-contact" href="#photo-contact">Parlons de votre projet ↗</a>
+        </nav>
         <figure>
           <img class="photo-hero-photo" src="/images/photography/forum-php-2026-conference-1600.webp" srcset="/images/photography/forum-php-2026-conference-480.webp 480w, /images/photography/forum-php-2026-conference-960.webp 960w, /images/photography/forum-php-2026-conference-1600.webp 1600w" sizes="(min-width: 1200px) 1080px, 90vw" width="1600" height="1067" fetchpriority="high" decoding="async" alt="Vue d’ensemble du Forum PHP 2026 : le public assis face à la scène et à l’écran de projection dans une salle éclairée de bleu">
           <figcaption>
