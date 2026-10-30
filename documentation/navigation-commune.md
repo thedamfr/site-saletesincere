@@ -2,24 +2,23 @@
 
 ## Summary
 
-Toutes les vues utilisent le même header : logo Saleté Sincère, Podcast,
+Toutes les vues utilisent le même header : logo Saleté Sincère, Photographie, Podcast,
 À propos et Contact. Le composant reprend l’identité du podcast et reste
-indépendant des styles du contenu. La correction est préparée localement ;
-elle ne constitue pas une publication. Les Golden Journeys se lancent avec
+indépendant des styles du contenu. La publication suit le circuit de livraison du
+dépôt. Les Golden Journeys se lancent avec
 `npm run test:e2e` après `npm run build`.
 
 ## Synthèse
 
 Le partial [header.hbs](../server/views/partials/header.hbs) est partagé par
-l’accueil, le podcast et ses épisodes, la page auteur, le laboratoire, les
+l’accueil, la photographie, le podcast et ses épisodes, la page auteur, le laboratoire, les
 quatre états newsletter et les vues historiques du mur, du manifeste et du
 layout. Le manifeste reste une vue sans route publique : aucune route nouvelle
-n’est créée. Les pages de travaux locaux distincts de cette révision ne sont
-pas importées.
+n’est créée.
 
-Les destinations sont toujours `/`, `/podcast`, `/damien-cavailles` et
+Les destinations sont toujours `/`, `/photographie`, `/podcast`, `/damien-cavailles` et
 `/#contact`. Le lien Podcast ouvre donc la page podcast aussi depuis l’accueil.
-`aria-current` identifie la page auteur, la page podcast ou la rubrique podcast
+`aria-current` identifie les pages photographie et auteur, la page podcast ou la rubrique podcast
 sur un épisode. Le logo possède un nom accessible et les liens gardent un focus
 visible et une hauteur minimale de 44 px.
 
@@ -31,7 +30,7 @@ ses marges, sa largeur, ses polices et ses liens ; seul le header sort de son
 conteneur étroit. Oswald utilise le fournisseur Google Fonts déjà présent sur
 le site, avec une police de repli si le service est indisponible.
 
-Les tests de vues couvrent les onze templates et les états actifs. Les Golden
+Les tests de vues couvrent les douze templates et les états actifs. Les Golden
 Journeys comparent la géométrie et les styles des headers à 320, 390, 768 et
 1440 px, suivent leurs liens, vérifient le clavier, le rechargement et le rendu
 sans JavaScript. Les parcours auteur existants, dont le téléchargement exact du
@@ -43,12 +42,13 @@ Aucun envoi newsletter ni changement de droits ou de données n’est requis.
 
 ### Commandes reproductibles
 
-Avec Node.js 24 ou plus récent et les dépendances verrouillées installées :
+Avec Node.js 24.22.1 (version du dépôt) et les dépendances verrouillées installées :
 
 ```sh
 npm run build
 DOTENV_CONFIG_PATH=/dev/null NODE_ENV=production npm test
 npm run test:e2e
+npm run test:e2e:photography
 git diff --check
 ```
 

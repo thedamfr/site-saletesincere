@@ -40,6 +40,7 @@ function getNavigation(header) {
 }
 
 const expectedNavigation = [
+  { text: 'Photographie', href: '/photographie' },
   { text: 'Podcast', href: '/podcast' },
   { text: 'À propos', href: '/damien-cavailles' },
   { text: 'Contact', href: '/#contact' }
@@ -67,6 +68,13 @@ for (const [filename, render] of templates) {
     assert.equal(stylesheets.length, 1, 'The shared header stylesheet must load once on every page')
   })
 }
+
+test('the photography page identifies Photographie as the current page', () => {
+  const links = getNavigation(getHeader(templates.get('photography.hbs')({})))
+  assert.deepEqual(links.filter(link => link['aria-current']).map(link => [link.href, link['aria-current']]), [
+    ['/photographie', 'page']
+  ])
+})
 
 test('the author page identifies À propos as the current page', () => {
   const links = getNavigation(getHeader(templates.get('author.hbs')({})))

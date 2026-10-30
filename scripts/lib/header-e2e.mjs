@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict'
 import path from 'node:path'
 
-const routes = ['/', '/podcast', '/damien-cavailles', '/laboratoire-du-geste', '/newsletter', '/newsletter/confirmed']
+const routes = ['/', '/photographie', '/podcast', '/damien-cavailles', '/laboratoire-du-geste', '/newsletter', '/newsletter/confirmed']
 const widths = [320, 390, 768, 1440]
 const expectedLinks = [
+  { text: 'Photographie', href: '/photographie' },
   { text: 'Podcast', href: '/podcast' },
   { text: 'À propos', href: '/damien-cavailles' },
   { text: 'Contact', href: '/#contact' }
@@ -110,7 +111,7 @@ export async function runHeaderGoldenJourneys(browser, { base, output, localTarg
         }
       }
     }
-    outcomes.push('Golden Journey — même en-tête sur six pages publiques aux largeurs 320, 390, 768 et 1440 px : OK')
+    outcomes.push('Golden Journey — même en-tête sur sept pages publiques aux largeurs 320, 390, 768 et 1440 px : OK')
 
     await page.setViewportSize({ width: 390, height: 900 })
     for (const route of routes) {
@@ -143,7 +144,7 @@ export async function runHeaderGoldenJourneys(browser, { base, output, localTarg
     await visit(page, base, '/')
     await page.keyboard.press('Tab')
     assert.equal(await page.evaluate(() => document.activeElement.getAttribute('href')), '#contenu')
-    for (const href of ['/', '/podcast', '/damien-cavailles', '/#contact']) {
+    for (const href of ['/', '/photographie', '/podcast', '/damien-cavailles', '/#contact']) {
       await page.keyboard.press('Tab')
       const focused = await page.evaluate(() => {
         const element = document.activeElement

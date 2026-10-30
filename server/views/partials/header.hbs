@@ -5,6 +5,7 @@
       <img src="/images/logo-salete-sincere-horizontal.png" width="744" height="213" alt="Saleté Sincère">
     </a>
     <nav class="site-navigation" aria-label="Navigation principale">
+      <a href="/photographie"{{#if (eq currentPage 'photography')}} aria-current="page"{{/if}}>Photographie</a>
       <a href="/podcast"{{#if (eq currentPage 'podcast')}} aria-current="{{#if episodeData}}location{{else}}page{{/if}}"{{/if}}>Podcast</a>
       <a href="/damien-cavailles"{{#if (eq currentPage 'author')}} aria-current="page"{{/if}}>À propos</a>
       <a href="/#contact">Contact</a>

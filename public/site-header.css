@@ -65,6 +65,7 @@
 
 .site-header .site-navigation a:hover {
   text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .site-header a:focus-visible {
@@ -76,6 +77,7 @@
   .site-header .site-header-inner {
     width: calc(100% - 32px);
     min-height: 70px;
+    padding-block: 12px;
   }
 
   .site-header .site-logo { width: 138px; }
