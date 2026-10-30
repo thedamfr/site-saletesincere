@@ -14,7 +14,10 @@ CI et production sont rattachées à la PR.
 L’accompagnement part de l’hôte, de ses invités et de son intention éditoriale.
 Il s’appuie sur le studio choisi et les prestations déjà prévues dans son forfait,
 dont le montage et les shorts. La préparation des sponsors précède l’enregistrement,
-puis viennent le suivi de postproduction, les extraits et la publication.
+puis viennent le suivi de postproduction, la publication et la promotion.
+Les extraits servent à réagir à une tendance chaude et à faire découvrir le
+podcast complet. Les encarts de réserve sur le temps gagné et le périmètre
+de l’accompagnement sont retirés ; la validation s’inscrit dans le suivi du montage.
 Le client conserve la validation éditoriale. L’intervention ponctuelle commence
 à 500 € HT ; une saison représente un budget de 10 000 à 20 000 € HT, avec
 son périmètre défini au départ. Aucun résultat d’audience ni financement n’est
