@@ -93,10 +93,12 @@ export async function runFooterGoldenJourneys(browser, { base, output, localTarg
   try {
     const page = await context.newPage()
     const references = new Map()
-    for (const width of widths) {
-      await page.setViewportSize({ width, height: 900 })
-      for (const route of routes) {
-        await visit(page, base, route)
+    // Resize each loaded page instead of reloading it for every width. This
+    // keeps the combined header/footer journey within newsletter rate limits.
+    for (const route of routes) {
+      await visit(page, base, route)
+      for (const width of widths) {
+        await page.setViewportSize({ width, height: 900 })
         const actual = await readFooter(page)
         assert.equal(actual.fits, true, `Footer must fit horizontally at ${width}px on ${route}`)
         assert.equal(actual.outsideMain, true, `Footer must sit outside page content containers on ${route}`)
@@ -111,8 +113,8 @@ export async function runFooterGoldenJourneys(browser, { base, output, localTarg
         }
       }
     }
+    await page.setViewportSize({ width: 390, height: 900 })
     if (localTarget) {
-      await page.setViewportSize({ width: 390, height: 900 })
       await visit(page, base, '/podcast/3/2')
       assert.deepEqual(await readFooter(page), references.get(390), 'An episode must retain the same footer')
     }
