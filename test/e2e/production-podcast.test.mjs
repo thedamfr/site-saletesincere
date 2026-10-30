@@ -264,6 +264,15 @@ test('Golden Journeys — offre de production de podcast', { timeout: remote ? 2
       const contact = page.getByRole('link', { name: 'Réserver une heure avec Damien', exact: true })
       for (let step = 0; step < 40 && !await contact.evaluate(element => element === document.activeElement); step++) await page.keyboard.press('Tab')
       assert.equal(await contact.evaluate(element => element === document.activeElement), true)
+      await page.locator('h1').click()
+      for (const image of await page.locator('main img').all()) {
+        await image.scrollIntoViewIfNeeded()
+        await image.evaluate(element => element.decode())
+      }
+      await page.evaluate(async () => {
+        if (document.fonts) await document.fonts.ready
+        scrollTo(0, 0)
+      })
       for (const width of [320, 390, 768, 1440]) {
         await page.setViewportSize({ width, height: 1000 })
         await page.evaluate(() => scrollTo(0, 0))
