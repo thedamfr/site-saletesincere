@@ -20,7 +20,11 @@ podcast complet. Les encarts de réserve sur le temps gagné et le périmètre
 de l’accompagnement sont retirés ; la validation s’inscrit dans le suivi du montage.
 Le client conserve la validation éditoriale. L’intervention ponctuelle commence
 à 500 € HT ; une saison représente un budget de 10 000 à 20 000 € HT, avec
-son périmètre défini au départ. Aucun résultat d’audience ni financement n’est
+son périmètre défini au départ. Selon le projet et le budget, elle peut mobiliser
+un motion designer pour les habillages animés, un directeur artistique pour
+l’identité visuelle et un producteur musical pour un habillage sonore unique.
+L’ensemble peut aussi être réalisé avec des moyens plus accessibles.
+Aucun résultat d’audience ni financement n’est
 garanti. La session gratuite reste accessible sans qualification budgétaire.
 
 L’accès « Besoin d'un producteur sur mon podcast ? » figure dans les footers
