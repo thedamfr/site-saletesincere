@@ -1,10 +1,10 @@
 {
   "environment": "production",
-  "assessedCommit": "c8f354920cc1d1f3e648057943a875d6301cb78d",
-  "imageCommit": "c8f354920cc1d1f3e648057943a875d6301cb78d",
-  "fingerprint": "4b2d59163e1199c4fe25f2318d3ba2278980479acb59ddb250e1a07ff927b37b",
+  "assessedCommit": "a2c91c3edc1b3d56a2aec0310fd86c284b47ff10",
+  "imageCommit": "a2c91c3edc1b3d56a2aec0310fd86c284b47ff10",
+  "fingerprint": "1afd4aa44e86cafa76345421077986e315af3b1dc88e7c29691cf01f8026235f",
   "schema": "a50cadded4c0ce6dd0b01ca1e1d21d8434c361482b60391facfbb6732fe03d5d",
-  "runId": 41048213802,
-  "digest": "sha256:ac8f7f5e7a36c9ac0bfbae0f7c6d0463ae27f6b4f04f8afefad60aaf66778b4c",
-  "cssHash": "20b0e3377e2b7ee2d24aa9acc8250b1709e343fea2ea744a37bdf80a822b3667"
+  "runId": 41049084057,
+  "digest": "sha256:3a4880df0a89197fe353b45f6f1507097ac73ddf2e1abdad2d14e9b3402e8d59",
+  "cssHash": "41c206a53ca63134ef6b7cdfacdb8566aa8c698e99d1a4cf5ed30778a150b177"
 }
