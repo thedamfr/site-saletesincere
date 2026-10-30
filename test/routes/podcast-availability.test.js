@@ -55,7 +55,8 @@ function databaseAdapter(platformLinks = null, podcastPlatformRows = []) {
 async function createApp(platformLinks = null, {
   episode = episodeData(),
   episodes = [episode],
-  podcastPlatformRows = []
+  podcastPlatformRows = [],
+  youtubeChannelUrl = null
 } = {}) {
   const app = await buildApp({
     initializeStorage: false,
@@ -68,7 +69,7 @@ async function createApp(platformLinks = null, {
     }),
     episodeFetcher: async () => episode,
     podcastEpisodesFetcher: async () => episodes,
-    youtubeChannelUrl: null,
+    youtubeChannelUrl,
     youtubeEpisodeResolutionEnabled: true
   })
   apps.push(app)
@@ -82,6 +83,21 @@ function elementById(body, tag, id) {
 }
 
 describe('podcast format and platform availability', () => {
+  test('promotes transcripts and qualifies video on the three show cards', async () => {
+    const app = await createApp(null, { youtubeChannelUrl: 'https://www.youtube.com/@saletesincere' })
+    const response = await app.inject({ method: 'GET', url: '/podcast' })
+    const cards = response.body.match(/<a[^>]+class="podcast-platform"[\s\S]*?<\/a>/g) || []
+    assert.match(response.body, /Le site du podcast/)
+    assert.match(response.body, /Retrouve les épisodes et leur transcript complet/)
+    assert.doesNotMatch(response.body, /Site officiel et Fediverse|Vidéo HD|Vidéo 4K/)
+    assert.equal(cards.filter(card => card.includes('Vidéo selon les épisodes')).length, 3)
+    for (const name of ['YouTube', 'Apple Podcasts', 'Spotify']) {
+      assert.match(cards.find(card => card.includes(name)), /Vidéo selon les épisodes/)
+    }
+    assert.match(cards[0], /href="https:\/\/podcasts.saletesincere.fr"/)
+  })
+
+
   test('requeues missing Apple links and RSS updates even when image storage is disabled', async () => {
     const completeCache = {
       spotify_url: 'https://open.spotify.com/episode/direct', spotify_video_available: false,

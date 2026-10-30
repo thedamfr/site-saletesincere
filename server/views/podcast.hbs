@@ -392,8 +392,8 @@
                                 <img src="/images/castopod-logo.svg" alt="Castopod" class="w-full h-full">
                             </div>
                             <div class="text-left">
-                                <div class="font-semibold text-black">{{#if episodeData}}Écouter cet épisode{{else}}Site officiel et Fediverse{{/if}}</div>
-                                <div class="text-xs text-gray-500">podcasts.saletesincere.fr</div>
+                                <div class="font-semibold text-black">{{#if episodeData}}Écouter cet épisode{{else}}Le site du podcast{{/if}}</div>
+                                <div class="text-xs text-gray-500">{{#if episodeData}}podcasts.saletesincere.fr{{else}}Retrouve les épisodes et leur transcript complet{{/if}}</div>
                             </div>
                         </div>
                         <svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -412,8 +412,12 @@
                             <div class="text-left">
                                 <div class="flex flex-wrap items-center gap-2 font-semibold text-black">
                                     <span>YouTube</span>
-                                    {{#if episodeVideoAvailability.youtubeBadgeText}}
-                                    <span class="podcast-video-badge">{{episodeVideoAvailability.youtubeBadgeText}}</span>
+                                    {{#if episodeData}}
+                                        {{#if episodeVideoAvailability.youtubeBadgeText}}
+                                        <span class="podcast-video-badge">{{episodeVideoAvailability.youtubeBadgeText}}</span>
+                                        {{/if}}
+                                    {{else}}
+                                    <span class="podcast-video-badge">Vidéo selon les épisodes</span>
                                     {{/if}}
                                 </div>
                                 <div class="text-xs text-gray-500">{{#if episodeData}}Voir {{episodeData.title}}{{else}}Voir les épisodes vidéo{{/if}}</div>
@@ -437,8 +441,12 @@
                             <div class="text-left">
                                 <div class="flex flex-wrap items-center gap-2 font-semibold text-black">
                                     <span>Apple Podcasts</span>
-                                    {{#if episodeVideoAvailability.appleBadgeText}}
-                                    <span class="podcast-video-badge">{{episodeVideoAvailability.appleBadgeText}}</span>
+                                    {{#if episodeData}}
+                                        {{#if episodeVideoAvailability.appleBadgeText}}
+                                        <span class="podcast-video-badge">{{episodeVideoAvailability.appleBadgeText}}</span>
+                                        {{/if}}
+                                    {{else}}
+                                    <span class="podcast-video-badge">Vidéo selon les épisodes</span>
                                     {{/if}}
                                 </div>
                                 <div class="text-xs text-gray-500">{{#if platformLinks.apple_url}}Écouter {{episodeData.title}}{{else}}Écouter le podcast{{/if}}</div>
@@ -461,8 +469,12 @@
                             <div class="text-left">
                                 <div class="flex flex-wrap items-center gap-2 font-semibold text-black">
                                     <span>Spotify</span>
-                                    {{#if episodeVideoAvailability.spotifyBadgeText}}
-                                    <span class="podcast-video-badge">{{episodeVideoAvailability.spotifyBadgeText}}</span>
+                                    {{#if episodeData}}
+                                        {{#if episodeVideoAvailability.spotifyBadgeText}}
+                                        <span class="podcast-video-badge">{{episodeVideoAvailability.spotifyBadgeText}}</span>
+                                        {{/if}}
+                                    {{else}}
+                                    <span class="podcast-video-badge">Vidéo selon les épisodes</span>
                                     {{/if}}
                                 </div>
                                 <div class="text-xs text-gray-500">{{#if platformLinks.spotify_url}}Écouter {{episodeData.title}}{{else}}Écouter le podcast{{/if}}</div>
