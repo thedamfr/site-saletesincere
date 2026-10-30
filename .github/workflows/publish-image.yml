@@ -51,6 +51,9 @@ jobs:
         env:
           PHOTOGRAPHY_E2E_OUTPUT: /tmp/site-photography-e2e
           E2E_BROWSER_CHANNEL: chrome
+      - run: npm run test:e2e:podcast
+        env:
+          E2E_BROWSER_CHANNEL: chrome
       - run: npm run test:e2e:podcast-video
         env:
           E2E_OUTPUT: /tmp/site-podcast-video-e2e
@@ -63,6 +66,7 @@ jobs:
             /tmp/site-author-e2e
             /tmp/site-photography-e2e
             /tmp/site-podcast-video-e2e
+            test-results/podcast
           if-no-files-found: ignore
       - name: Verify migrations on disposable PostgreSQL, including repeat execution
         env:
